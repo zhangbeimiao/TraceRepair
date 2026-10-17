@@ -70,7 +70,9 @@ class InstrumentedTools:
         return result
 
     def run_regression(self) -> TestRunResult:
-        call_id = self._start("run_regression", {"suite": "tests"})
+        call_id = self._start(
+            "run_regression", {"suite": self._test_runner.regression_selector}
+        )
         result = self._test_runner.run_regression()
         summary = {
             "exit_code": result.exit_code,

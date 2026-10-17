@@ -4,15 +4,15 @@
 
 [![CI](https://github.com/zhangbeimiao/TraceRepair/actions/workflows/ci.yml/badge.svg)](https://github.com/zhangbeimiao/TraceRepair/actions/workflows/ci.yml)
 [![Pages](https://github.com/zhangbeimiao/TraceRepair/actions/workflows/pages.yml/badge.svg)](https://zhangbeimiao.github.io/TraceRepair/)
-[![Release](https://img.shields.io/github/v/release/zhangbeimiao/TraceRepair)](https://github.com/zhangbeimiao/TraceRepair/releases/tag/v0.5.0)
+[![Release](https://img.shields.io/github/v/release/zhangbeimiao/TraceRepair)](https://github.com/zhangbeimiao/TraceRepair/releases/tag/v0.6.0)
 
 **在线 Demo：<https://zhangbeimiao.github.io/TraceRepair/>**
 
 Demo 只回放冻结并脱敏的真实 Trace，不需要 API Key，也不会产生模型费用。成功案例包含经过内容哈希校验的真实补丁 Diff 和四道验证门禁；失败区回放三类历史故障；恢复区展示进程在源码读取或补丁落盘后中断，如何从持久化 Checkpoint 继续而不重复已完成工具。
 
-TraceRepair 是一个面向 Python 仓库的受控代码修复 Agent。大模型负责在不确定环境中选择搜索、读取和补丁动作；确定性控制器负责权限、状态、成本、测试和人工审核。模型不能直接运行 Shell，也不能绕过验证门禁修改仓库。
+TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Agent。大模型负责在不确定环境中选择搜索、读取和补丁动作；确定性控制器负责权限、状态、成本、测试和人工审核。模型不能直接运行 Shell，也不能绕过验证门禁修改仓库。仓库差异由 JSON 任务配置描述，不再写死 EventRelay 路径。
 
-当前项目版本为 `v0.5.0`，对应的冻结评测 Agent cohort 仍为 `0.4.0-dev1`。Checkpoint 恢复通过独立的零成本故障注入 Harness 验证，没有修改 Agent 策略或重跑锁定集。
+当前项目版本为 `v0.6.0`，对应的冻结评测 Agent cohort 仍为 `0.4.0-dev1`。Checkpoint 恢复和跨仓库适配分别通过独立的零成本 Harness 验证；这些工程测试没有冒充新的模型成功率，也没有重跑锁定集。
 
 ## 评测结果
 
@@ -104,6 +104,14 @@ python scripts\checkpoint_recovery_demo.py --crash-after patch_applied
 
 两个命令都会关闭并重新打开 SQLite、重建运行时对象，并检查最终工具序列中没有重复项。`patch_applied` 场景恢复阶段的模型调用数为 0。
 
+运行不消耗 API Token 的跨仓库演示：
+
+```powershell
+python scripts\generic_repository_demo.py
+```
+
+它会读取 `examples/tasks/mini-repo.json`，把独立 MiniMath 仓库复制到一次性工作区，确认目标测试先失败，再完成 `search → read → patch → target → regression` 并进入人工审核。
+
 终端版真实 Trace：
 
 ```powershell
@@ -119,6 +127,7 @@ $env:DASHSCOPE_API_KEY = "<your-key>"
 $env:TRACEREPAIR_BAILIAN_BASE_URL = "<your-compatible-mode-base-url>"
 python scripts\smoke_bailian.py
 python scripts\model_repair_agent.py --case 01
+python scripts\model_repair_agent.py --task examples\tasks\mini-repo.json
 ```
 
 真实模型运行也支持受控故障注入和恢复。第一次命令会打印可恢复的任务 ID：
@@ -134,7 +143,7 @@ python scripts\model_repair_agent.py --resume <task-id>
 
 - `repo_map`：返回白名单文件和顶层符号，不返回测试目录。
 - `search_code`：受长度与结果数量限制的文本搜索。
-- `read_file`：只读取 `src/eventrelay` 等白名单路径，限制行数。
+- `read_file`：只读取任务配置声明的源码白名单，限制行数。
 - `apply_patch`：只接受策略通过的 unified diff，并写入一次性工作副本。
 - `run_tests`：只允许预登记的 pytest 目标，不能接收 Shell 命令。
 - `run_regression`：仅在目标测试成功后运行固定完整测试集。
@@ -146,6 +155,7 @@ python scripts\model_repair_agent.py --resume <task-id>
 - 补丁失败、工具超时、非法 JSON 或回归失败都会安全停止。
 - Trace 不存储 API Key、源码正文、原始模型响应或完整测试输出。
 - 工作副本、SQLite、缓存、虚拟环境和临时文件全部保留在 D 盘。
+- 外部仓库先检查符号链接、文件数和总体积，再复制到一次性工作副本；不会直接修改原仓库。
 
 ## 可恢复状态与 Trace
 
@@ -171,6 +181,7 @@ python scripts\export_web_demo.py
 TraceRepair/
 ├─ src/eventrelay/              正确基线服务
 ├─ src/tracerepair/             Agent、工具、策略、状态与评测
+├─ examples/                    第二仓库与通用任务配置
 ├─ eventrelay_tests/            复制到工作副本的业务测试
 ├─ evaluation/
 │  ├─ cases.json                10 个可复现 Bug
@@ -196,7 +207,10 @@ TraceRepair/
 
 ## 当前限制
 
-- 当前评测主要针对一个小型 Python 仓库，尚不能代表大型真实仓库。
+- 冻结模型评测仍基于 EventRelay；第二仓库证明通用工程管线可复用，但尚未形成跨仓库模型统计。
+- pytest 会导入并执行仓库代码，因此当前只接受操作者拥有或信任的仓库；未知第三方代码仍需要容器沙箱。
+- 当前定位是小型仓库，默认最多 2,000 个文件与 50 MiB，可在受控上限内配置。
+- 外部仓库依赖必须预先安装在 D 盘虚拟环境中；任务配置不会执行依赖安装脚本。
 - 代码检索目前是受限文本搜索，不是语义代码索引。
 - 一次运行只允许一次补丁提案，失败后默认转人工，而不是无限自我修正。
 - Web Demo 是脱敏的离线证据查看器，不在浏览器中托管 API Key 或直接执行 Agent。
@@ -211,7 +225,10 @@ TraceRepair/
 - `docs/milestone-3-04.md`：冻结发布报告与本地 Web Demo
 - `docs/releases/v0.4.1.md`：可验证 Diff 与失败恢复演示
 - `docs/releases/v0.5.0.md`：Checkpoint 崩溃恢复
+- `docs/configured-repositories.md`：通用仓库任务配置与安全边界
+- `docs/repository-task.schema.json`：任务配置 JSON Schema
+- `docs/releases/v0.6.0.md`：可配置仓库适配层
 
 ## 磁盘与依赖
 
-项目不下载本地模型、不需要 Java、不依赖 Docker。当前包括 D 盘虚拟环境和历史工作副本在内约 260 MB，远低于 30 GB 限制。
+项目不下载本地模型、不需要 Java、不依赖 Docker。当前包括 D 盘虚拟环境和历史工作副本在内仍远低于 30 GB 限制。

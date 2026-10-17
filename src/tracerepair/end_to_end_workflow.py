@@ -51,6 +51,8 @@ class EndToEndRepairWorkflow:
         planner: ModelPlanner,
         tools: InstrumentedTools,
         *,
+        target_selector: str | None = None,
+        allowed_source_roots: tuple[str, ...] = ("src/eventrelay",),
         max_diagnosis_turns: int = 3,
         crash_after: str | None = None,
     ) -> None:
@@ -61,8 +63,14 @@ class EndToEndRepairWorkflow:
         self._planner = planner
         self._tools = tools
         self._repair = CandidateRepairWorkflow(
-            task_id, store, tools, crash_after=crash_after
+            task_id,
+            store,
+            tools,
+            target_selector=target_selector,
+            allowed_source_roots=allowed_source_roots,
+            crash_after=crash_after,
         )
+        self._allowed_source_roots = allowed_source_roots
         self._max_diagnosis_turns = max_diagnosis_turns
         self._crash_after = crash_after
 
@@ -257,6 +265,7 @@ class EndToEndRepairWorkflow:
                     self._task_id,
                     self._store,
                     Path(self._store.get_task(self._task_id).workspace),
+                    allowed_source_roots=self._allowed_source_roots,
                 )
             except RecoveryError as error:
                 return self._stop("resume", str(error), diagnosis_turns, total_tokens)

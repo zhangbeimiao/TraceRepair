@@ -1,4 +1,4 @@
-"""Bounded, read-only repository tools for a disposable case workspace."""
+"""Bounded, read-only repository tools for a disposable repository workspace."""
 
 import ast
 from dataclasses import dataclass
@@ -56,11 +56,24 @@ class ReadOnlyRepository:
     untrusted and are checked before opening any file.
     """
 
-    def __init__(self, root: Path, *, max_read_lines: int = 200, max_search_hits: int = 30) -> None:
+    def __init__(
+        self,
+        root: Path,
+        *,
+        allowed_roots: tuple[str, ...] = ("src/eventrelay", "docs"),
+        max_read_lines: int = 200,
+        max_search_hits: int = 30,
+    ) -> None:
         resolved = root.resolve()
         if not resolved.is_dir():
             raise ValueError(f"repository root does not exist: {root}")
         self._root = resolved
+        self._allowed_roots = tuple(Path(item) for item in allowed_roots)
+        if not self._allowed_roots or any(
+            path.is_absolute() or ".." in path.parts or str(path) in {"", "."}
+            for path in self._allowed_roots
+        ):
+            raise ValueError("allowed_roots must contain safe repository-relative paths")
         self._max_read_lines = max_read_lines
         self._max_search_hits = max_search_hits
 
@@ -158,8 +171,8 @@ class ReadOnlyRepository:
         return target
 
     def _is_allowed_relative(self, path: Path) -> bool:
-        return bool(path.parts) and (
-            path.parts[0] == "docs" or path.parts[:2] == ("src", "eventrelay")
+        return bool(path.parts) and any(
+            path == root or root in path.parents for root in self._allowed_roots
         )
 
     @staticmethod

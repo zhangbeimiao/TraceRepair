@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/zhangbeimiao/TraceRepair/blob/main/docs/repository-task.schema.json",
+  "title": "TraceRepair configured repository task",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "name",
+    "repository_root",
+    "issue",
+    "source_allowlist",
+    "target_test",
+    "regression_suite",
+    "diagnostic_queries"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema_version": {"const": 1},
+    "name": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,48}$"},
+    "repository_root": {"type": "string", "minLength": 1},
+    "issue": {"type": "string", "minLength": 1, "maxLength": 2000},
+    "source_allowlist": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "target_test": {"type": "string", "minLength": 1, "maxLength": 300},
+    "regression_suite": {"type": "string", "minLength": 1, "maxLength": 200},
+    "diagnostic_queries": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 2, "maxLength": 200}
+    },
+    "pythonpath": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 120},
+    "max_repository_bytes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 209715200
+    },
+    "max_repository_files": {"type": "integer", "minimum": 1, "maximum": 10000}
+  }
+}

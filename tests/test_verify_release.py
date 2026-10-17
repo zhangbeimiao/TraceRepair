@@ -10,6 +10,8 @@ def make_release_tree(root: Path) -> None:
         "evaluation/frozen/release-summary-v0.4.0-dev1.json",
         "evaluation/frozen/failure-showcase-v0.4.0.json",
         "evaluation/frozen/recovery-showcase-v0.4.1.json",
+        "docs/releases/v0.6.0.md",
+        "examples/tasks/mini-repo.json",
         "demo/dist/index.html",
         "demo/dist/data.js",
     ):

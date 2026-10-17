@@ -1,0 +1,15 @@
+{
+  "$schema": "../../docs/repository-task.schema.json",
+  "schema_version": 1,
+  "name": "mini-repo-discount",
+  "repository_root": "../mini_repo",
+  "issue": "apply_discount returns the discount amount instead of the remaining price",
+  "source_allowlist": ["src/minimath"],
+  "target_test": "tests/test_pricing.py::test_apply_discount_returns_remaining_price",
+  "regression_suite": "tests",
+  "diagnostic_queries": ["def apply_discount"],
+  "pythonpath": ["src"],
+  "timeout_seconds": 30,
+  "max_repository_bytes": 1048576,
+  "max_repository_files": 100
+}

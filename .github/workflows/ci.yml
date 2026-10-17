@@ -39,7 +39,7 @@ jobs:
           python -m pip install -e ".[dev]"
 
       - name: Compile Python sources
-        run: python -m compileall -q src evaluation tests
+        run: python -m compileall -q src evaluation scripts tests examples/mini_repo
 
       - name: Verify release safety
         run: python scripts/verify_release.py

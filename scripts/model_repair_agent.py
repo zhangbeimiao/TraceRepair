@@ -14,6 +14,7 @@ from tracerepair.instrumented_tools import InstrumentedTools
 from tracerepair.model_planner import BailianChatTransport, ModelPlanner, PlannerConfig, PlannerError
 from tracerepair.models import Task, TaskStatus
 from tracerepair.patch_apply import PatchApplier
+from tracerepair.patch_policy import PatchPolicy
 from tracerepair.read_tools import ReadOnlyRepository
 from tracerepair.recovery import (
     PATCH_APPLIED,
@@ -21,6 +22,12 @@ from tracerepair.recovery import (
     TARGET_PASSED,
     InjectedCrash,
     recovery_state,
+)
+from tracerepair.repository_task import (
+    RepositoryTaskError,
+    RepositoryTaskSpec,
+    materialize_repository,
+    runtime_spec,
 )
 from tracerepair.store import TraceStore
 from tracerepair.test_runner import RestrictedTestRunner
@@ -48,6 +55,12 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--case", choices=DEVELOPMENT_CASES + LOCKED_CASES)
+    mode.add_argument(
+        "--task",
+        type=Path,
+        metavar="TASK_JSON",
+        help="repair a trusted small Python repository described by a bounded task config",
+    )
     mode.add_argument("--resume", metavar="TASK_ID")
     parser.add_argument(
         "--evaluation-split",
@@ -66,13 +79,30 @@ def main() -> None:
         if arguments.resume:
             task_id = arguments.resume
             task = _prepare_resume(store, task_id, parser)
-            case_id = task.case_id
-            case = load_case(case_id)
             issue = task.issue
             workspace = Path(task.workspace).resolve()
-            selector = case_selector(case_id)
-            diagnostic_queries = DIAGNOSTIC_QUERIES[case_id]
             checkpoint = store.load_checkpoint(task_id)
+            configured = checkpoint.get("repository_task")
+            if isinstance(configured, dict):
+                spec = runtime_spec(configured, workspace, issue)
+                case_id = task.case_id
+                case_name = spec.name
+                selector = spec.target_test
+                diagnostic_queries = spec.diagnostic_queries
+                source_allowlist = spec.source_allowlist
+                regression_suite = spec.regression_suite
+                pythonpath = spec.pythonpath
+                timeout_seconds = spec.timeout_seconds
+            else:
+                case_id = task.case_id
+                case = load_case(case_id)
+                case_name = str(case["name"])
+                selector = case_selector(case_id)
+                diagnostic_queries = DIAGNOSTIC_QUERIES[case_id]
+                source_allowlist = ("src/eventrelay",)
+                regression_suite = "tests"
+                pythonpath = ("src",)
+                timeout_seconds = 30
             phase = recovery_state(checkpoint).get("phase")
             transport = (
                 _DeniedResumeTransport()
@@ -81,9 +111,50 @@ def main() -> None:
                 else BailianChatTransport()
             )
             resume = True
+        elif arguments.task:
+            spec = RepositoryTaskSpec.load(arguments.task)
+            issue = spec.issue
+            selector = spec.target_test
+            diagnostic_queries = spec.diagnostic_queries
+            source_allowlist = spec.source_allowlist
+            regression_suite = spec.regression_suite
+            pythonpath = spec.pythonpath
+            timeout_seconds = spec.timeout_seconds
+            run_id = uuid4().hex[:8]
+            workspace = materialize_repository(
+                spec,
+                ROOT / "workspaces" / "model-agent" / f"repo-{spec.name}-{run_id}",
+            )
+            task_id = f"model-agent-repo-{spec.name}-{run_id}"
+            case_id = f"repo-{spec.name}"
+            case_name = spec.name
+            store.create_task(Task(task_id, case_id, issue, str(workspace)))
+            checkpoint = store.load_checkpoint(task_id)
+            checkpoint["repository_task"] = spec.runtime_payload()
+            store.save_checkpoint(task_id, checkpoint)
+            store.append_event(
+                task_id,
+                "run_metadata",
+                {
+                    "agent_version": AGENT_VERSION,
+                    "model": MODEL_ID,
+                    "repository_task": spec.name,
+                    "target_selector": selector,
+                    "regression_suite": regression_suite,
+                    "source_allowlist": list(source_allowlist),
+                    "diagnostic_queries": list(diagnostic_queries),
+                    "max_model_calls": 4,
+                    "max_completion_tokens": 2_048,
+                },
+            )
+            store.transition(task_id, TaskStatus.READY, "configured repository workspace created")
+            store.transition(task_id, TaskStatus.RUNNING, "configured repository workflow started")
+            transport = BailianChatTransport()
+            resume = False
         else:
             case_id = arguments.case or "05"
             case = load_case(case_id)
+            case_name = str(case["name"])
             if case["split"] != arguments.evaluation_split:
                 parser.error(
                     f"case {case_id} belongs to the {case['split']} split, "
@@ -92,6 +163,10 @@ def main() -> None:
             issue = str(case["issue"])
             selector = case_selector(case_id)
             diagnostic_queries = DIAGNOSTIC_QUERIES[case_id]
+            source_allowlist = ("src/eventrelay",)
+            regression_suite = "tests"
+            pythonpath = ("src",)
+            timeout_seconds = 30
             run_id = uuid4().hex[:8]
             workspace = materialize_case(
                 case_id,
@@ -105,7 +180,7 @@ def main() -> None:
                 {
                     "agent_version": AGENT_VERSION,
                     "model": MODEL_ID,
-                    "case_name": str(case["name"]),
+                    "case_name": case_name,
                     "evaluation_split": str(case["split"]),
                     "target_selector": selector,
                     "diagnostic_queries": list(diagnostic_queries),
@@ -121,9 +196,15 @@ def main() -> None:
         tools = InstrumentedTools(
             task_id,
             store,
-            ReadOnlyRepository(workspace),
-            RestrictedTestRunner(workspace),
-            PatchApplier(workspace),
+            ReadOnlyRepository(workspace, allowed_roots=source_allowlist),
+            RestrictedTestRunner(
+                workspace,
+                allowed_targets=(selector,),
+                regression_selector=regression_suite,
+                pythonpath=pythonpath,
+                timeout_seconds=timeout_seconds,
+            ),
+            PatchApplier(workspace, PatchPolicy(allowed_roots=source_allowlist)),
         )
         planner = ModelPlanner(
             transport,
@@ -139,6 +220,8 @@ def main() -> None:
             store,
             planner,
             tools,
+            target_selector=selector,
+            allowed_source_roots=source_allowlist,
             crash_after=arguments.inject_crash_after,
         ).run(
             task_evidence,
@@ -147,7 +230,7 @@ def main() -> None:
         )
         budget = store.load_checkpoint(task_id).get("model_budget", {})
         print("End-to-end repair run completed.")
-        print(f"Agent version: {AGENT_VERSION}; case: {case_id} ({case['name']})")
+        print(f"Agent version: {AGENT_VERSION}; task: {case_id} ({case_name})")
         print(f"Diagnosis turns: {result.diagnosis_turns}/3")
         print(
             f"Model usage: calls={budget.get('calls', 0)}/4, "
@@ -170,6 +253,15 @@ def main() -> None:
         print(f"End-to-end repair stopped safely: {error}")
         print(f"Trace database: data/model-agent.sqlite3 (task {task_id})")
         raise SystemExit(1) from error
+    except RepositoryTaskError as error:
+        if "task_id" in locals():
+            try:
+                if store.get_task(task_id).status is TaskStatus.RUNNING:
+                    store.transition(task_id, TaskStatus.NEEDS_HUMAN, f"task config rejected: {error}")
+            except KeyError:
+                pass
+        print(f"Configured repository task rejected safely: {error}")
+        raise SystemExit(2) from error
     finally:
         store.close()
 

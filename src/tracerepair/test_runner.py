@@ -1,4 +1,4 @@
-"""A bounded pytest runner for self-owned EventRelay case workspaces only."""
+"""A bounded pytest runner for trusted, disposable Python workspaces."""
 
 import os
 import re
@@ -30,22 +30,39 @@ class RestrictedTestRunner:
     """Run only known target tests from a trusted, disposable workspace.
 
     This is command injection resistant because no user input becomes a shell
-    command or pytest option. It is not a replacement for OS/container sandboxing:
-    until that later milestone, it must only execute self-owned EventRelay cases.
+    command or pytest option. It is not a replacement for OS/container sandboxing,
+    so configured repositories must still be owned or otherwise trusted.
     """
 
-    def __init__(self, workspace: Path, *, timeout_seconds: int = 30, output_limit: int = 8_000) -> None:
+    def __init__(
+        self,
+        workspace: Path,
+        *,
+        allowed_targets: tuple[str, ...] | None = None,
+        regression_selector: str = "tests",
+        pythonpath: tuple[str, ...] = ("src",),
+        timeout_seconds: int = 30,
+        output_limit: int = 8_000,
+    ) -> None:
         resolved = workspace.resolve()
         if not resolved.is_dir():
             raise ValueError(f"workspace does not exist: {workspace}")
         if timeout_seconds < 1:
             raise ValueError("timeout_seconds must be at least 1")
         self._workspace = resolved
+        self._allowed_targets = allowed_targets
+        self._regression_selector = regression_selector
+        self._pythonpath = pythonpath
         self._timeout_seconds = timeout_seconds
         self._output_limit = output_limit
 
     def run_tests(self, selector: str) -> TestRunResult:
-        if not _TARGET_SELECTOR.fullmatch(selector):
+        allowed = (
+            selector in self._allowed_targets
+            if self._allowed_targets is not None
+            else bool(_TARGET_SELECTOR.fullmatch(selector))
+        )
+        if not allowed:
             return TestRunResult(
                 ok=False,
                 selector=selector,
@@ -74,11 +91,11 @@ class RestrictedTestRunner:
         return self._run("target", selector)
 
     def run_regression(self) -> TestRunResult:
-        test_directory = (self._workspace / "tests").resolve()
-        if not test_directory.is_dir() or not test_directory.is_relative_to(self._workspace):
+        test_directory = (self._workspace / self._regression_selector).resolve()
+        if not test_directory.exists() or not test_directory.is_relative_to(self._workspace):
             return TestRunResult(
                 ok=False,
-                selector="tests",
+                selector=self._regression_selector,
                 exit_code=None,
                 timed_out=False,
                 duration_ms=0,
@@ -87,11 +104,13 @@ class RestrictedTestRunner:
                 output_truncated=False,
                 error_code="REGRESSION_TESTS_NOT_FOUND",
             )
-        return self._run("regression", "tests")
+        return self._run("regression", self._regression_selector)
 
     def _run(self, _kind: str, selector: str) -> TestRunResult:
         environment = os.environ.copy()
-        environment["PYTHONPATH"] = str(self._workspace / "src")
+        environment["PYTHONPATH"] = os.pathsep.join(
+            str((self._workspace / entry).resolve()) for entry in self._pythonpath
+        )
         environment["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
         temporary_directory = self._workspace / ".tmp"
         temporary_directory.mkdir(exist_ok=True)
@@ -166,3 +185,7 @@ class RestrictedTestRunner:
             return text, False
         marker = "\n...[output truncated]"
         return text[: self._output_limit - len(marker)] + marker, True
+
+    @property
+    def regression_selector(self) -> str:
+        return self._regression_selector

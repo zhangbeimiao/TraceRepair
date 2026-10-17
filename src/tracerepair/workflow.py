@@ -14,6 +14,7 @@ from tracerepair.recovery import (
     mark_recovery_phase,
     recovery_state,
 )
+from tracerepair.repository_task import is_allowed_source_path
 from tracerepair.store import TraceStore
 
 
@@ -121,11 +122,15 @@ class CandidateRepairWorkflow:
         store: TraceStore,
         tools: InstrumentedTools,
         *,
+        target_selector: str | None = None,
+        allowed_source_roots: tuple[str, ...] = ("src/eventrelay",),
         crash_after: str | None = None,
     ) -> None:
         self._task_id = task_id
         self._store = store
         self._tools = tools
+        self._target_selector = target_selector
+        self._allowed_source_roots = allowed_source_roots
         self._crash_after = crash_after
 
     def submit_candidate(self, unified_diff: str) -> WorkflowStep:
@@ -184,11 +189,14 @@ class CandidateRepairWorkflow:
         return self._verify_from_checkpoint(task.case_id)
 
     def _verify_from_checkpoint(self, case_id: str) -> WorkflowStep:
-        try:
-            selector = case_selector(case_id)
-        except ValueError:
-            self._store.transition(self._task_id, TaskStatus.NEEDS_HUMAN, "unknown case selector")
-            return WorkflowStep("stop", TaskStatus.NEEDS_HUMAN, "case has no target selector")
+        if self._target_selector is not None:
+            selector = self._target_selector
+        else:
+            try:
+                selector = case_selector(case_id)
+            except ValueError:
+                self._store.transition(self._task_id, TaskStatus.NEEDS_HUMAN, "unknown case selector")
+                return WorkflowStep("stop", TaskStatus.NEEDS_HUMAN, "case has no target selector")
 
         target = self._latest_tool_result("run_tests")
         if target is None:
@@ -265,7 +273,9 @@ class CandidateRepairWorkflow:
             return "patch checkpoint does not contain file hashes"
         workspace = Path(self._store.get_task(self._task_id).workspace).resolve()
         for relative, expected in hashes.items():
-            if not isinstance(relative, str) or not relative.startswith("src/eventrelay/"):
+            if not isinstance(relative, str) or not is_allowed_source_path(
+                relative, self._allowed_source_roots
+            ):
                 return "patch checkpoint contains a denied path"
             path = (workspace / relative).resolve()
             if not path.is_relative_to(workspace) or not path.is_file():

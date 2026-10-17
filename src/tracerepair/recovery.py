@@ -9,6 +9,7 @@ from typing import Any, Mapping
 
 from tracerepair.models import TaskStatus
 from tracerepair.read_tools import FileSlice
+from tracerepair.repository_task import is_allowed_source_path
 from tracerepair.store import TraceStore
 
 
@@ -74,7 +75,11 @@ def save_source_checkpoint(
 
 
 def load_source_checkpoint(
-    task_id: str, store: TraceStore, workspace: Path
+    task_id: str,
+    store: TraceStore,
+    workspace: Path,
+    *,
+    allowed_source_roots: tuple[str, ...] = ("src/eventrelay",),
 ) -> tuple[FileSlice, int]:
     """Restore a source slice after verifying the artifact and current file contents."""
 
@@ -103,7 +108,7 @@ def load_source_checkpoint(
     end_line = payload.get("end_line")
     if (
         not isinstance(path, str)
-        or not path.startswith("src/eventrelay/")
+        or not is_allowed_source_path(path, allowed_source_roots)
         or not isinstance(content, str)
         or not isinstance(start_line, int)
         or not isinstance(end_line, int)

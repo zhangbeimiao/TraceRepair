@@ -114,8 +114,26 @@
         </div>
         <p class="recovery-proof">最终工具序列中每个工具只出现一次；补丁落盘后恢复不再调用模型，也不会重复应用 Diff。</p>
       </section>
+      <section class="section shell repository-section" id="repositories">
+        <div class="section-heading"><div><span class="section-index">06</span><h2>同一套 Agent，切换配置即可修复另一个仓库</h2></div><p>EventRelay 不再写死在工具层。仓库路径、源码白名单、目标测试和回归范围都由经过校验的任务配置提供。</p></div>
+        <div class="safety-grid">
+          <article><h3>一次性工作副本</h3><p>先检查文件数与体积，再复制受信任的小仓库；原仓库永不直接写入。</p></article>
+          <article><h3>配置即权限边界</h3><p><code>source_allowlist</code> 同时约束搜索、读取、补丁与恢复时的哈希验证。</p></article>
+          <article><h3>测试不可注入</h3><p>目标与回归选择器预先登记，使用参数列表运行 pytest，拒绝任意 Shell 与 pytest 选项。</p></article>
+          <article><h3>跨仓库闭环已验证</h3><p>独立 MiniMath 仓库从 <code>TEST_FAILED</code> 经五步工具链进入 <code>awaiting_review</code>。</p></article>
+        </div>
+        <div class="repository-proof">
+          <pre><code>{
+  "repository_root": "../mini_repo",
+  "source_allowlist": ["src/minimath"],
+  "target_test": "tests/test_pricing.py::test_apply_discount_returns_remaining_price",
+  "regression_suite": "tests"
+}</code></pre>
+          <div><span>ZERO-TOKEN CROSS-REPO PROOF</span><strong>search → read → patch → target → regression</strong><p>示例使用确定性模型响应验证工程管线，不把它计入冻结模型成功率。真实模型入口使用完全相同的配置与门禁。</p></div>
+        </div>
+      </section>
       <section class="section shell safety-section">
-        <div class="section-heading"><div><span class="section-index">06</span><h2>失败时安全停止，也是一种能力</h2></div></div>
+        <div class="section-heading"><div><span class="section-index">07</span><h2>失败时安全停止，也是一种能力</h2></div></div>
         <div class="safety-grid">
           <article><h3>工具最小权限</h3><p>不能执行任意 Shell，不能读取测试答案，只能访问白名单源码。</p></article>
           <article><h3>补丁不可信</h3><p>文件范围、变更体积和上下文唯一性全部由策略校验。</p></article>

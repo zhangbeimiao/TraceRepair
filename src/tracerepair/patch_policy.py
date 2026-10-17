@@ -14,9 +14,23 @@ class PatchValidation:
 
 
 class PatchPolicy:
-    """Accept small modifications to EventRelay source only; never apply them."""
+    """Accept small Python modifications inside configured source roots only."""
 
-    def __init__(self, *, max_files: int = 3, max_changed_lines: int = 200, max_bytes: int = 30_000) -> None:
+    def __init__(
+        self,
+        *,
+        allowed_roots: tuple[str, ...] = ("src/eventrelay",),
+        max_files: int = 3,
+        max_changed_lines: int = 200,
+        max_bytes: int = 30_000,
+    ) -> None:
+        roots = tuple(PurePosixPath(item) for item in allowed_roots)
+        if not roots or any(
+            root.is_absolute() or ".." in root.parts or str(root) in {"", "."}
+            for root in roots
+        ):
+            raise ValueError("allowed_roots must contain safe repository-relative paths")
+        self._allowed_roots = roots
         self._max_files = max_files
         self._max_changed_lines = max_changed_lines
         self._max_bytes = max_bytes
@@ -67,13 +81,11 @@ class PatchPolicy:
             errors=tuple(dict.fromkeys(errors)),
         )
 
-    @staticmethod
-    def _is_allowed_path(raw_path: str) -> bool:
+    def _is_allowed_path(self, raw_path: str) -> bool:
         path = PurePosixPath(raw_path)
         return (
             not path.is_absolute()
             and ".." not in path.parts
-            and len(path.parts) >= 3
-            and path.parts[0:2] == ("src", "eventrelay")
             and path.suffix == ".py"
+            and any(path == root or root in path.parents for root in self._allowed_roots)
         )
