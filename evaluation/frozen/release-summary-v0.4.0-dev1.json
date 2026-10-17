@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-17T09:36:26.681607+00:00",
+  "summary": {
+    "agentVersion": "0.4.0-dev1",
+    "evaluatedBugTypes": 9,
+    "runs": 13,
+    "successes": 13,
+    "successRate": 1.0,
+    "averageTokens": 224.38,
+    "averageToolCalls": 5.0,
+    "development": {
+      "case_ids": [
+        "01",
+        "03",
+        "07",
+        "10"
+      ],
+      "agent_version": "0.4.0-dev1",
+      "runs": 8,
+      "successful_runs": 8,
+      "success_rate": 1.0,
+      "average_completion_tokens": 212.62,
+      "average_tool_calls": 5.0,
+      "stop_reasons": {},
+      "minimum_runs_per_case": 2,
+      "required_success_rate": 0.8,
+      "required_case_success_rate": 0.5,
+      "cases": [
+        {
+          "case_id": "01",
+          "agent_version": "0.4.0-dev1",
+          "runs": 2,
+          "successful_runs": 2,
+          "success_rate": 1.0,
+          "average_completion_tokens": 262.0,
+          "average_tool_calls": 5.0,
+          "stop_reasons": {},
+          "minimum_runs": 2,
+          "required_success_rate": 0.5,
+          "stable": true
+        },
+        {
+          "case_id": "03",
+          "agent_version": "0.4.0-dev1",
+          "runs": 2,
+          "successful_runs": 2,
+          "success_rate": 1.0,
+          "average_completion_tokens": 179.5,
+          "average_tool_calls": 5.0,
+          "stop_reasons": {},
+          "minimum_runs": 2,
+          "required_success_rate": 0.5,
+          "stable": true
+        },
+        {
+          "case_id": "07",
+          "agent_version": "0.4.0-dev1",
+          "runs": 2,
+          "successful_runs": 2,
+          "success_rate": 1.0,
+          "average_completion_tokens": 233.0,
+          "average_tool_calls": 5.0,
+          "stop_reasons": {},
+          "minimum_runs": 2,
+          "required_success_rate": 0.5,
+          "stable": true
+        },
+        {
+          "case_id": "10",
+          "agent_version": "0.4.0-dev1",
+          "runs": 2,
+          "successful_runs": 2,
+          "success_rate": 1.0,
+          "average_completion_tokens": 176.0,
+          "average_tool_calls": 5.0,
+          "stop_reasons": {},
+          "minimum_runs": 2,
+          "required_success_rate": 0.5,
+          "stable": true
+        }
+      ],
+      "stable": true
+    },
+    "locked": {
+      "case_ids": [
+        "02",
+        "04",
+        "06",
+        "08",
+        "09"
+      ],
+      "agent_version": "0.4.0-dev1",
+      "runs": 5,
+      "successful_runs": 5,
+      "success_rate": 1.0,
+      "average_model_calls": 3.0,
+      "average_completion_tokens": 243.2,
+      "average_tool_calls": 5.0,
+      "stop_reasons": {},
+      "run_counts": {
+        "02": 1,
+        "04": 1,
+        "06": 1,
+        "08": 1,
+        "09": 1
+      },
+      "complete": true
+    }
+  },
+  "source_manifests": [
+    "evaluation/frozen/devset-v0.4.0-dev1.json",
+    "evaluation/frozen/testset-v0.4.0-dev1.json"
+  ]
+}

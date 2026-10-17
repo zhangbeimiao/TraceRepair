@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "frozen_at": "2026-10-17T09:26:17.988080+00:00",
+  "decision": {
+    "case_ids": [
+      "01",
+      "03",
+      "07",
+      "10"
+    ],
+    "agent_version": "0.4.0-dev1",
+    "runs": 8,
+    "successful_runs": 8,
+    "success_rate": 1.0,
+    "average_completion_tokens": 212.62,
+    "average_tool_calls": 5.0,
+    "stop_reasons": {},
+    "minimum_runs_per_case": 2,
+    "required_success_rate": 0.8,
+    "required_case_success_rate": 0.5,
+    "cases": [
+      {
+        "case_id": "01",
+        "agent_version": "0.4.0-dev1",
+        "runs": 2,
+        "successful_runs": 2,
+        "success_rate": 1.0,
+        "average_completion_tokens": 262.0,
+        "average_tool_calls": 5.0,
+        "stop_reasons": {},
+        "minimum_runs": 2,
+        "required_success_rate": 0.5,
+        "stable": true
+      },
+      {
+        "case_id": "03",
+        "agent_version": "0.4.0-dev1",
+        "runs": 2,
+        "successful_runs": 2,
+        "success_rate": 1.0,
+        "average_completion_tokens": 179.5,
+        "average_tool_calls": 5.0,
+        "stop_reasons": {},
+        "minimum_runs": 2,
+        "required_success_rate": 0.5,
+        "stable": true
+      },
+      {
+        "case_id": "07",
+        "agent_version": "0.4.0-dev1",
+        "runs": 2,
+        "successful_runs": 2,
+        "success_rate": 1.0,
+        "average_completion_tokens": 233.0,
+        "average_tool_calls": 5.0,
+        "stop_reasons": {},
+        "minimum_runs": 2,
+        "required_success_rate": 0.5,
+        "stable": true
+      },
+      {
+        "case_id": "10",
+        "agent_version": "0.4.0-dev1",
+        "runs": 2,
+        "successful_runs": 2,
+        "success_rate": 1.0,
+        "average_completion_tokens": 176.0,
+        "average_tool_calls": 5.0,
+        "stop_reasons": {},
+        "minimum_runs": 2,
+        "required_success_rate": 0.5,
+        "stable": true
+      }
+    ],
+    "stable": true
+  },
+  "runs": [
+    {
+      "task_id": "model-agent-01-1b58a202",
+      "case_id": "01",
+      "status": "awaiting_review",
+      "success": true,
+      "model_calls": 3,
+      "completion_tokens": 263,
+      "tool_calls": 5,
+      "deterministic_recoveries": 0,
+      "stop_reason": "candidate patch passed target and regression tests; human review required"
+    },
+    {
+      "task_id": "model-agent-03-7dea02fd",
+      "case_id": "03",
+      "status": "awaiting_review",
+      "success": true,
+      "model_calls": 3,
+      "completion_tokens": 173,
+      "tool_calls": 5,
+      "deterministic_recoveries": 0,
+      "stop_reason": "candidate patch passed target and regression tests; human review required"
+    },
+    {
+      "task_id": "model-agent-07-4efb4ecf",
+      "case_id": "07",
+      "status": "awaiting_review",
+      "success": true,
+      "model_calls": 3,
+      "completion_tokens": 219,
+      "tool_calls": 5,
+      "deterministic_recoveries": 0,
+      "stop_reason": "candidate patch passed target and regression tests; human review required"
+    },
+    {
+      "task_id": "model-agent-10-039cd3b9",
+      "case_id": "10",
+      "status": "awaiting_review",
+      "success": true,
+      "model_calls": 3,
+      "completion_tokens": 176,
+      "tool_calls": 5,
+      "deterministic_recoveries": 0,
+      "stop_reason": "candidate patch passed target and regression tests; human review required"
+    },
+    {
+      "task_id": "model-agent-01-e5c699d8",
+      "case_id": "01",
+      "status": "awaiting_review",
+      "success": true,
+      "model_calls": 3,
+      "completion_tokens": 261,
+      "tool_calls": 5,
+      "deterministic_recoveries": 0,
+      "stop_reason": "candidate patch passed target and regression tests; human review required"
+    },
+    {
+      "task_id": "model-agent-03-635d6fbd",
+      "case_id": "03",
+      "status": "awaiting_review",
+      "success": true,
+      "model_calls": 3,
+      "completion_tokens": 186,
+      "tool_calls": 5,
+      "deterministic_recoveries": 0,
+      "stop_reason": "candidate patch passed target and regression tests; human review required"
+    },
+    {
+      "task_id": "model-agent-07-9bcfd24d",
+      "case_id": "07",
+      "status": "awaiting_review",
+      "success": true,
+      "model_calls": 3,
+      "completion_tokens": 247,
+      "tool_calls": 5,
+      "deterministic_recoveries": 0,
+      "stop_reason": "candidate patch passed target and regression tests; human review required"
+    },
+    {
+      "task_id": "model-agent-10-d9f35820",
+      "case_id": "10",
+      "status": "awaiting_review",
+      "success": true,
+      "model_calls": 3,
+      "completion_tokens": 176,
+      "tool_calls": 5,
+      "deterministic_recoveries": 0,
+      "stop_reason": "candidate patch passed target and regression tests; human review required"
+    }
+  ]
+}

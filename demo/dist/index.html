@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="TraceRepair 可审计代码修复 Agent 的真实评测与执行轨迹" />
+    <title>TraceRepair | Auditable Repair Agent</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="grid-overlay" aria-hidden="true"></div>
+    <header class="nav shell">
+      <a class="brand" href="#top" aria-label="TraceRepair 首页"><span class="brand-mark">TR</span><span>TraceRepair</span></a>
+      <div class="nav-meta"><span class="live-dot"></span> frozen evidence · v0.4.0-dev1</div>
+    </header>
+    <main id="top">
+      <section class="hero shell">
+        <div class="eyebrow">BOUNDED · TRACEABLE · TEST-GATED</div>
+        <h1>让模型提出修复，<br /><span>让工程系统决定能否落地。</span></h1>
+        <p class="hero-copy">TraceRepair 是一个面向 Python 仓库的受控代码修复 Agent。模型只能搜索、阅读并提出候选 Diff；路径白名单、补丁策略、目标测试、全量回归和人工审核共同构成确定性安全边界。</p>
+        <div class="hero-actions"><a class="primary-button" href="#trace">查看真实运行轨迹</a><a class="text-button" href="#architecture">理解执行链路 ↓</a></div>
+        <div class="metrics" aria-label="冻结评测指标">
+          <article><strong id="metric-success">--</strong><span>冻结运行通过</span></article>
+          <article><strong id="metric-cases">--</strong><span>独立 Bug 类型</span></article>
+          <article><strong id="metric-tokens">--</strong><span>平均输出 Tokens</span></article>
+          <article><strong id="metric-tools">--</strong><span>平均工具调用</span></article>
+        </div>
+        <p class="evidence-note">数据来源：冻结 manifest 与 SQLite trace，页面不包含人工编造的成功记录。</p>
+      </section>
+      <section class="section shell" id="architecture">
+        <div class="section-heading"><div><span class="section-index">01</span><h2>模型负责判断，控制器负责约束</h2></div><p>Agent 的价值来自不确定环境中的工具选择；可靠性来自不可绕过的确定性门禁。</p></div>
+        <div class="pipeline" aria-label="TraceRepair 执行链路">
+          <article><span>01</span><h3>Observe</h3><p>接收 Issue 与失败测试，不泄露参考答案。</p></article>
+          <article><span>02</span><h3>Diagnose</h3><p>在三轮预算内搜索并读取白名单源码。</p></article>
+          <article><span>03</span><h3>Propose</h3><p>模型只生成候选 Diff，不直接写文件。</p></article>
+          <article><span>04</span><h3>Verify</h3><p>策略校验 → 目标测试 → 完整回归。</p></article>
+          <article><span>05</span><h3>Review</h3><p>全部通过后仍停在 awaiting_review。</p></article>
+        </div>
+      </section>
+      <section class="section evidence-section">
+        <div class="shell">
+          <div class="section-heading"><div><span class="section-index">02</span><h2>开发集与锁定集分开报告</h2></div><p>锁定案例每个只运行一次；失败不会自动重试，也不会边测边改 Prompt。</p></div>
+          <div class="evidence-grid">
+            <article class="score-card development"><div class="score-top"><span>DEVELOPMENT</span><span>4 bug types · 2 runs each</span></div><strong id="dev-score">--</strong><p>用于迭代诊断策略与补丁闭环，达到阈值后冻结。</p></article>
+            <article class="score-card locked"><div class="score-top"><span>LOCKED / ONE-SHOT</span><span>5 unseen bug types</span></div><strong id="test-score">--</strong><p>同一版本盲测；无重试、无调参，成功与失败均写入快照。</p></article>
+          </div>
+          <div class="cohort-panel"><div><h3>从失败中迭代，而不是隐藏失败</h3><p>历史 cohort 保留早期错误路由、上下文不匹配与预算耗尽。</p></div><div id="cohorts" class="cohorts" aria-label="各版本成功率"></div></div>
+        </div>
+      </section>
+      <section class="section shell" id="trace">
+        <div class="section-heading"><div><span class="section-index">03</span><h2>打开一条真实 Trace</h2></div><p>只展示安全摘要：状态、决策、工具结果与测试门禁；源码、Diff 和模型原文不进入页面。</p></div>
+        <div class="trace-layout">
+          <aside class="trace-sidebar">
+            <div class="filter-row" role="group" aria-label="运行集筛选"><button class="filter active" data-filter="all">全部</button><button class="filter" data-filter="development">开发集</button><button class="filter" data-filter="locked">锁定集</button></div>
+            <label for="trace-select">选择运行</label><select id="trace-select"></select>
+            <dl class="trace-facts"><div><dt>Case</dt><dd id="fact-case">--</dd></div><div><dt>Model calls</dt><dd id="fact-calls">--</dd></div><div><dt>Tokens</dt><dd id="fact-tokens">--</dd></div><div><dt>Tool calls</dt><dd id="fact-tools">--</dd></div></dl>
+            <div class="gate-list"><div><span id="gate-target" class="gate"></span>目标测试</div><div><span id="gate-regression" class="gate"></span>完整回归</div><div><span id="gate-review" class="gate"></span>人工审核前停止</div></div>
+          </aside>
+          <article class="terminal-card">
+            <div class="terminal-bar"><span></span><span></span><span></span><code id="task-id">task</code></div>
+            <div class="terminal-body"><div class="issue-line"><span>ISSUE</span><p id="trace-issue"></p></div><ol id="timeline" class="timeline"></ol></div>
+          </article>
+        </div>
+      </section>
+      <section class="section shell safety-section">
+        <div class="section-heading"><div><span class="section-index">04</span><h2>失败时安全停止，也是一种能力</h2></div></div>
+        <div class="safety-grid">
+          <article><h3>工具最小权限</h3><p>不能执行任意 Shell，不能读取测试答案，只能访问白名单源码。</p></article>
+          <article><h3>补丁不可信</h3><p>文件范围、变更体积和上下文唯一性全部由策略校验。</p></article>
+          <article><h3>状态可恢复</h3><p>任务、checkpoint 与工具生命周期写入 SQLite，崩溃后可审计。</p></article>
+          <article><h3>成本有上限</h3><p>最多三轮诊断加一次补丁调用，超预算立即转人工处理。</p></article>
+        </div>
+      </section>
+    </main>
+    <footer class="shell"><span>TraceRepair · engineering demo</span><span id="generated-at">snapshot</span></footer>
+    <script src="data.js"></script><script src="app.js"></script>
+  </body>
+</html>

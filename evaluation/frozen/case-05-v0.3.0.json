@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "frozen_at": "2026-10-17T09:01:03.064373+00:00",
+  "decision": {
+    "case_id": "05",
+    "agent_version": "0.3.0",
+    "runs": 5,
+    "successful_runs": 4,
+    "success_rate": 0.8,
+    "average_completion_tokens": 253.2,
+    "average_tool_calls": 7.6,
+    "stop_reasons": {
+      "candidate patch rejected: PATCH_CONTEXT_MISMATCH": 1
+    },
+    "minimum_runs": 5,
+    "required_success_rate": 0.8,
+    "stable": true
+  },
+  "runs": [
+    {
+      "task_id": "model-agent-ea6da3a9",
+      "status": "awaiting_review",
+      "success": true,
+      "model_calls": 4,
+      "completion_tokens": 249,
+      "tool_calls": 8,
+      "deterministic_recoveries": 1,
+      "stop_reason": "candidate patch passed target and regression tests; human review required"
+    },
+    {
+      "task_id": "model-agent-25eb7194",
+      "status": "awaiting_review",
+      "success": true,
+      "model_calls": 4,
+      "completion_tokens": 248,
+      "tool_calls": 8,
+      "deterministic_recoveries": 1,
+      "stop_reason": "candidate patch passed target and regression tests; human review required"
+    },
+    {
+      "task_id": "model-agent-2e9f3167",
+      "status": "awaiting_review",
+      "success": true,
+      "model_calls": 4,
+      "completion_tokens": 251,
+      "tool_calls": 8,
+      "deterministic_recoveries": 1,
+      "stop_reason": "candidate patch passed target and regression tests; human review required"
+    },
+    {
+      "task_id": "model-agent-0768469e",
+      "status": "needs_human",
+      "success": false,
+      "model_calls": 4,
+      "completion_tokens": 256,
+      "tool_calls": 6,
+      "deterministic_recoveries": 1,
+      "stop_reason": "candidate patch rejected: PATCH_CONTEXT_MISMATCH"
+    },
+    {
+      "task_id": "model-agent-a6312e42",
+      "status": "awaiting_review",
+      "success": true,
+      "model_calls": 4,
+      "completion_tokens": 262,
+      "tool_calls": 8,
+      "deterministic_recoveries": 1,
+      "stop_reason": "candidate patch passed target and regression tests; human review required"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+.venv/
+.cache/
+.tmp/
+tmp/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+__pycache__/
+*.py[cod]
+*.log
+data/
+traces/
+workspaces/
+*.sqlite3
+.env
