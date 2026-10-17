@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-17T09:36:26.681607+00:00",
+  "generated_at": "2026-10-17T15:35:55.928263+00:00",
   "summary": {
     "agentVersion": "0.4.0-dev1",
     "evaluatedBugTypes": 9,
@@ -111,7 +111,8 @@
   "source_manifests": [
     "evaluation/frozen/devset-v0.4.0-dev1.json",
     "evaluation/frozen/testset-v0.4.0-dev1.json",
-    "evaluation/frozen/failure-showcase-v0.4.0.json"
+    "evaluation/frozen/failure-showcase-v0.4.0.json",
+    "evaluation/frozen/recovery-showcase-v0.4.1.json"
   ],
   "failure_showcase": {
     "runs": 3,
@@ -119,6 +120,13 @@
       "patch_context_mismatch",
       "diagnosis_budget_exhausted",
       "invalid_patch_output"
+    ]
+  },
+  "recovery_showcase": {
+    "runs": 2,
+    "crash_points": [
+      "source_read",
+      "patch_applied"
     ]
   }
 }

@@ -4,15 +4,15 @@
 
 [![CI](https://github.com/zhangbeimiao/TraceRepair/actions/workflows/ci.yml/badge.svg)](https://github.com/zhangbeimiao/TraceRepair/actions/workflows/ci.yml)
 [![Pages](https://github.com/zhangbeimiao/TraceRepair/actions/workflows/pages.yml/badge.svg)](https://zhangbeimiao.github.io/TraceRepair/)
-[![Release](https://img.shields.io/github/v/release/zhangbeimiao/TraceRepair)](https://github.com/zhangbeimiao/TraceRepair/releases/tag/v0.4.1)
+[![Release](https://img.shields.io/github/v/release/zhangbeimiao/TraceRepair)](https://github.com/zhangbeimiao/TraceRepair/releases/tag/v0.5.0)
 
 **在线 Demo：<https://zhangbeimiao.github.io/TraceRepair/>**
 
-Demo 只回放冻结并脱敏的真实 Trace，不需要 API Key，也不会产生模型费用。成功案例包含经过内容哈希校验的真实补丁 Diff 和四道验证门禁；失败区回放三类历史故障，展示系统如何拒绝未验证补丁并安全转人工。
+Demo 只回放冻结并脱敏的真实 Trace，不需要 API Key，也不会产生模型费用。成功案例包含经过内容哈希校验的真实补丁 Diff 和四道验证门禁；失败区回放三类历史故障；恢复区展示进程在源码读取或补丁落盘后中断，如何从持久化 Checkpoint 继续而不重复已完成工具。
 
 TraceRepair 是一个面向 Python 仓库的受控代码修复 Agent。大模型负责在不确定环境中选择搜索、读取和补丁动作；确定性控制器负责权限、状态、成本、测试和人工审核。模型不能直接运行 Shell，也不能绕过验证门禁修改仓库。
 
-当前项目版本为 `v0.4.1`，对应的冻结 Agent cohort 仍为 `0.4.0-dev1`；本次版本只增强证据展示，没有修改 Agent 策略或重跑锁定集。
+当前项目版本为 `v0.5.0`，对应的冻结评测 Agent cohort 仍为 `0.4.0-dev1`。Checkpoint 恢复通过独立的零成本故障注入 Harness 验证，没有修改 Agent 策略或重跑锁定集。
 
 ## 评测结果
 
@@ -28,12 +28,13 @@ TraceRepair 是一个面向 Python 仓库的受控代码修复 Agent。大模型
 - `evaluation/frozen/testset-v0.4.0-dev1.json`
 - `evaluation/frozen/release-summary-v0.4.0-dev1.json`
 - `evaluation/frozen/failure-showcase-v0.4.0.json`
+- `evaluation/frozen/recovery-showcase-v0.4.1.json`
 
 这些数字只描述自建 EventRelay 受控基准，不能解释为对任意真实仓库都有 100% 修复率。
 
 ## 30 秒介绍
 
-用户提交 Issue 和失败测试后，Agent 在最多三轮诊断中选择受限的代码搜索与读取工具，然后生成一次候选 unified diff。Diff 必须依次通过路径与变更量策略、目标测试和完整回归测试；全部通过后任务仍只进入 `awaiting_review`，等待人工确认。所有模型决策、工具生命周期、状态迁移和 checkpoint 都持久化到 SQLite，可用于恢复、审计和离线评测。
+用户提交 Issue 和失败测试后，Agent 在最多三轮诊断中选择受限的代码搜索与读取工具，然后生成一次候选 unified diff。Diff 必须依次通过路径与变更量策略、目标测试和完整回归测试；全部通过后任务仍只进入 `awaiting_review`，等待人工确认。所有模型决策、工具生命周期、状态迁移和 checkpoint 都持久化到 SQLite。进程中断后，系统校验恢复工件或已修改文件的 SHA-256，再跳过已经成功的工具继续执行。
 
 ## 架构
 
@@ -94,6 +95,15 @@ powershell -ExecutionPolicy Bypass -File scripts\start_demo.ps1
 
 浏览器访问 `http://127.0.0.1:8765/`。Demo 使用已经冻结并脱敏的 Trace，不需要 API Key，也不会连接公网。页面中的 Diff 由故障快照与一次性修复工作副本重建，并用 Trace 中记录的 SHA-256 校验；它不是预先写死的示意代码。
 
+运行不消耗 API Token 的两阶段崩溃恢复演示：
+
+```powershell
+python scripts\checkpoint_recovery_demo.py --crash-after source_read
+python scripts\checkpoint_recovery_demo.py --crash-after patch_applied
+```
+
+两个命令都会关闭并重新打开 SQLite、重建运行时对象，并检查最终工具序列中没有重复项。`patch_applied` 场景恢复阶段的模型调用数为 0。
+
 终端版真实 Trace：
 
 ```powershell
@@ -109,6 +119,13 @@ $env:DASHSCOPE_API_KEY = "<your-key>"
 $env:TRACEREPAIR_BAILIAN_BASE_URL = "<your-compatible-mode-base-url>"
 python scripts\smoke_bailian.py
 python scripts\model_repair_agent.py --case 01
+```
+
+真实模型运行也支持受控故障注入和恢复。第一次命令会打印可恢复的任务 ID：
+
+```powershell
+python scripts\model_repair_agent.py --case 05 --inject-crash-after patch_applied
+python scripts\model_repair_agent.py --resume <task-id>
 ```
 
 当前模型为 `qwen3.8-flash`。一次端到端运行最多包含三次只读诊断调用和一次补丁调用，总 completion 上限为 2,048 Tokens。
@@ -132,7 +149,7 @@ python scripts\model_repair_agent.py --case 01
 
 ## 可恢复状态与 Trace
 
-每次运行记录任务状态、模型计划类型与 Token、工具生命周期、内容哈希、checkpoint、测试门禁和最终停止原因。`TraceStore` 使用 SQLite 保存这些信息；进程中断后可以读取上一次阶段，而不是从头重复已完成工具调用。Web Demo 只展示脱敏摘要、验证结果和基于内容哈希复核的 EventRelay 补丁，不展示绝对路径、原始模型响应或完整日志。
+每次运行记录任务状态、模型计划类型与 Token、工具生命周期、内容哈希、checkpoint、测试门禁和最终停止原因。`TraceStore` 使用 SQLite 保存结构化状态；源码切片只保存在一次性工作副本的恢复工件中，SQLite 仅记录相对路径和哈希。恢复支持 `source_read` 与 `patch_applied` 两个阶段，并拒绝被篡改的工件或工作副本。Web Demo 不展示绝对路径、原始模型响应或完整日志。
 
 ## 可靠评测设计
 
@@ -193,6 +210,7 @@ TraceRepair/
 - `docs/milestone-3-03.md`：锁定集评测与 Trace 展示
 - `docs/milestone-3-04.md`：冻结发布报告与本地 Web Demo
 - `docs/releases/v0.4.1.md`：可验证 Diff 与失败恢复演示
+- `docs/releases/v0.5.0.md`：Checkpoint 崩溃恢复
 
 ## 磁盘与依赖
 

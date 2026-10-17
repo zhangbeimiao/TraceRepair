@@ -165,4 +165,64 @@
     failureTabs.appendChild(button);
   });
   renderFailure(data.failures[0]?.taskId);
+
+  function renderRecovery(taskId) {
+    const scenario = data.recoveryScenarios.find((item) => item.task_id === taskId)
+      || data.recoveryScenarios[0];
+    if (!scenario) return;
+    setText("#recovery-point", scenario.crash_point.replaceAll("_", " "));
+    setText("#recovery-title", scenario.title);
+    setText("#recovery-task", scenario.task_id);
+    setText("#recovery-before-calls", scenario.phase_one_model_calls);
+    setText("#recovery-after-calls", scenario.resume_model_calls);
+    setText("#recovery-status", scenario.final_status);
+    setText("#recovery-guard", scenario.integrity_guard);
+
+    const skipped = $("#recovery-skipped");
+    skipped.innerHTML = "";
+    scenario.skipped_tools.forEach((tool) => {
+      const chip = document.createElement("code");
+      chip.textContent = tool;
+      skipped.appendChild(chip);
+    });
+
+    const timeline = $("#recovery-timeline");
+    timeline.innerHTML = "";
+    scenario.timeline.forEach((step, index) => {
+      const item = document.createElement("div");
+      item.className = `recovery-step ${step.state}`;
+      const marker = document.createElement("span");
+      marker.textContent = String(index + 1).padStart(2, "0");
+      const copy = document.createElement("div");
+      const label = document.createElement("strong");
+      label.textContent = step.label;
+      const detail = document.createElement("p");
+      detail.textContent = step.detail;
+      copy.append(label, detail);
+      item.append(marker, copy);
+      timeline.appendChild(item);
+    });
+    document.querySelectorAll(".recovery-tab").forEach((button) => {
+      const active = button.dataset.taskId === scenario.task_id;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-selected", active ? "true" : "false");
+    });
+  }
+
+  const recoveryTabs = $("#recovery-tabs");
+  data.recoveryScenarios.forEach((scenario, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "recovery-tab";
+    button.dataset.taskId = scenario.task_id;
+    button.setAttribute("role", "tab");
+    const number = document.createElement("span");
+    number.textContent = `SCENARIO 0${index + 1}`;
+    const label = document.createElement("strong");
+    label.textContent = scenario.title;
+    button.append(number, label);
+    button.addEventListener("click", () => renderRecovery(scenario.task_id));
+    recoveryTabs.appendChild(button);
+  });
+  renderRecovery(data.recoveryScenarios[0]?.task_id);
 })();

@@ -1,9 +1,19 @@
 """A resumable, deterministic diagnostic workflow used before any LLM is added."""
 
+import hashlib
 from dataclasses import dataclass
+from pathlib import Path
 
 from tracerepair.instrumented_tools import InstrumentedTools
 from tracerepair.models import TaskStatus
+from tracerepair.recovery import (
+    PATCH_APPLIED,
+    TARGET_PASSED,
+    RecoveryError,
+    inject_crash_if_requested,
+    mark_recovery_phase,
+    recovery_state,
+)
 from tracerepair.store import TraceStore
 
 
@@ -105,10 +115,18 @@ class CandidateRepairWorkflow:
     it may come from a human; later it may come from a model-backed planner.
     """
 
-    def __init__(self, task_id: str, store: TraceStore, tools: InstrumentedTools) -> None:
+    def __init__(
+        self,
+        task_id: str,
+        store: TraceStore,
+        tools: InstrumentedTools,
+        *,
+        crash_after: str | None = None,
+    ) -> None:
         self._task_id = task_id
         self._store = store
         self._tools = tools
+        self._crash_after = crash_after
 
     def submit_candidate(self, unified_diff: str) -> WorkflowStep:
         task = self._store.get_task(self._task_id)
@@ -130,32 +148,135 @@ class CandidateRepairWorkflow:
             )
             return WorkflowStep("apply_patch", TaskStatus.NEEDS_HUMAN, applied.error_code or "rejected")
 
+        mark_recovery_phase(self._task_id, self._store, PATCH_APPLIED)
+        inject_crash_if_requested(
+            self._task_id,
+            self._store,
+            configured_point=self._crash_after,
+            reached_point=PATCH_APPLIED,
+        )
+
+        return self._verify_from_checkpoint(task.case_id)
+
+    def resume(self) -> WorkflowStep:
+        """Continue after a durable patch checkpoint without applying it again."""
+
+        task = self._store.get_task(self._task_id)
+        if task.status is not TaskStatus.RUNNING:
+            return WorkflowStep("stop", task.status, "task is not runnable")
         try:
-            selector = case_selector(task.case_id)
+            phase = recovery_state(self._store.load_checkpoint(self._task_id)).get("phase")
+        except RecoveryError as error:
+            return self._fail_resume(str(error))
+        if phase not in {PATCH_APPLIED, TARGET_PASSED}:
+            return self._fail_resume("checkpoint is not ready for verification recovery")
+        applied = self._latest_tool_result("apply_patch")
+        if applied is None or applied.get("ok") is not True:
+            return self._fail_resume("checkpoint has no successful patch application")
+        integrity_error = self._verify_applied_files(applied)
+        if integrity_error is not None:
+            return self._fail_resume(integrity_error)
+        self._store.append_event(
+            self._task_id,
+            "recovery_step_skipped",
+            {"tool": "apply_patch", "reason": "verified completed tool result"},
+        )
+        return self._verify_from_checkpoint(task.case_id)
+
+    def _verify_from_checkpoint(self, case_id: str) -> WorkflowStep:
+        try:
+            selector = case_selector(case_id)
         except ValueError:
             self._store.transition(self._task_id, TaskStatus.NEEDS_HUMAN, "unknown case selector")
             return WorkflowStep("stop", TaskStatus.NEEDS_HUMAN, "case has no target selector")
-        result = self._tools.run_tests(selector)
-        if result.ok:
-            regression = self._tools.run_regression()
-            if not regression.ok:
+
+        target = self._latest_tool_result("run_tests")
+        if target is None:
+            result = self._tools.run_tests(selector)
+            if not result.ok:
                 self._store.transition(
                     self._task_id,
                     TaskStatus.NEEDS_HUMAN,
-                    f"candidate patch failed regression: {regression.error_code}",
+                    f"candidate patch failed target test: {result.error_code}",
                 )
-                return WorkflowStep(
-                    "run_regression", TaskStatus.NEEDS_HUMAN, regression.error_code or "failed"
-                )
+                return WorkflowStep("run_tests", TaskStatus.NEEDS_HUMAN, result.error_code or "failed")
+            mark_recovery_phase(self._task_id, self._store, TARGET_PASSED)
+        elif target.get("ok") is True:
+            self._store.append_event(
+                self._task_id,
+                "recovery_step_skipped",
+                {"tool": "run_tests", "reason": "verified completed tool result"},
+            )
+        else:
+            code = str(target.get("error_code") or "failed")
             self._store.transition(
                 self._task_id,
-                TaskStatus.AWAITING_REVIEW,
-                "candidate patch passed target and regression tests; human review required",
+                TaskStatus.NEEDS_HUMAN,
+                f"candidate patch failed target test: {code}",
             )
-            return WorkflowStep("run_regression", TaskStatus.AWAITING_REVIEW, "all tests passed")
+            return WorkflowStep("run_tests", TaskStatus.NEEDS_HUMAN, code)
+
+        regression = self._latest_tool_result("run_regression")
+        if regression is None:
+            result = self._tools.run_regression()
+            if not result.ok:
+                self._store.transition(
+                    self._task_id,
+                    TaskStatus.NEEDS_HUMAN,
+                    f"candidate patch failed regression: {result.error_code}",
+                )
+                return WorkflowStep(
+                    "run_regression", TaskStatus.NEEDS_HUMAN, result.error_code or "failed"
+                )
+        elif regression.get("ok") is True:
+            self._store.append_event(
+                self._task_id,
+                "recovery_step_skipped",
+                {"tool": "run_regression", "reason": "verified completed tool result"},
+            )
+        else:
+            code = str(regression.get("error_code") or "failed")
+            self._store.transition(
+                self._task_id,
+                TaskStatus.NEEDS_HUMAN,
+                f"candidate patch failed regression: {code}",
+            )
+            return WorkflowStep("run_regression", TaskStatus.NEEDS_HUMAN, code)
+
         self._store.transition(
             self._task_id,
-            TaskStatus.NEEDS_HUMAN,
-            f"candidate patch failed target test: {result.error_code}",
+            TaskStatus.AWAITING_REVIEW,
+            "candidate patch passed target and regression tests; human review required",
         )
-        return WorkflowStep("run_tests", TaskStatus.NEEDS_HUMAN, result.error_code or "failed")
+        return WorkflowStep("run_regression", TaskStatus.AWAITING_REVIEW, "all tests passed")
+
+    def _latest_tool_result(self, tool: str) -> dict[str, object] | None:
+        matches = [
+            event.payload
+            for event in self._store.list_events(self._task_id)
+            if event.event_type == "tool_finished" and event.payload.get("tool") == tool
+        ]
+        return matches[-1] if matches else None
+
+    def _verify_applied_files(self, payload: dict[str, object]) -> str | None:
+        summary = payload.get("summary", {})
+        hashes = summary.get("file_sha256", {}) if isinstance(summary, dict) else {}
+        if not isinstance(hashes, dict) or not hashes:
+            return "patch checkpoint does not contain file hashes"
+        workspace = Path(self._store.get_task(self._task_id).workspace).resolve()
+        for relative, expected in hashes.items():
+            if not isinstance(relative, str) or not relative.startswith("src/eventrelay/"):
+                return "patch checkpoint contains a denied path"
+            path = (workspace / relative).resolve()
+            if not path.is_relative_to(workspace) or not path.is_file():
+                return "patched file is unavailable during resume"
+            # PatchApplier hashes the logical UTF-8 text before Windows newline
+            # translation, so resume must use the same normalized representation.
+            actual = hashlib.sha256(path.read_text(encoding="utf-8").encode("utf-8")).hexdigest()
+            if actual != expected:
+                return "patched workspace failed integrity verification"
+        return None
+
+    def _fail_resume(self, detail: str) -> WorkflowStep:
+        self._store.transition(self._task_id, TaskStatus.NEEDS_HUMAN, detail)
+        return WorkflowStep("resume", TaskStatus.NEEDS_HUMAN, detail)

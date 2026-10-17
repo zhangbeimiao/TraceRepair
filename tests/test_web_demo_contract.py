@@ -19,6 +19,7 @@ def test_public_demo_contains_verified_patches_and_frozen_failures() -> None:
 
     assert len(payload["traces"]) == 13
     assert len(payload["failures"]) == 3
+    assert len(payload["recoveryScenarios"]) == 2
     assert {failure["category"] for failure in payload["failures"]} == {
         "patch_context_mismatch",
         "diagnosis_budget_exhausted",
@@ -33,6 +34,14 @@ def test_public_demo_contains_verified_patches_and_frozen_failures() -> None:
         assert failure["status"] == "needs_human"
         assert failure["control"]["patchApplied"] is False
         assert failure["control"]["testsStarted"] is False
+    for scenario in payload["recoveryScenarios"]:
+        assert scenario["final_status"] == "awaiting_review"
+        assert len(scenario["final_tools"]) == len(set(scenario["final_tools"]))
+    patch_resume = next(
+        item for item in payload["recoveryScenarios"] if item["crash_point"] == "patch_applied"
+    )
+    assert patch_resume["resume_model_calls"] == 0
+    assert patch_resume["skipped_tools"] == ["apply_patch"]
 
 
 def test_public_demo_excludes_local_paths_and_raw_model_fields() -> None:
@@ -55,6 +64,9 @@ def test_demo_page_exposes_diff_and_failure_controls() -> None:
         "failure-timeline",
         "failure-outcome",
         "failure-lesson",
+        "recovery-tabs",
+        "recovery-timeline",
+        "recovery-skipped",
     ):
         assert html.count(f'id="{element_id}"') == 1
         assert f'#{element_id}' in script

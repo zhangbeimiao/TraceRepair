@@ -94,8 +94,28 @@
           <div class="failure-outcome"><article><span>CONTROL OUTCOME</span><p id="failure-outcome">--</p></article><article><span>ENGINEERING LESSON</span><p id="failure-lesson">--</p></article></div>
         </div>
       </section>
+      <section class="section shell recovery-section" id="recovery">
+        <div class="section-heading"><div><span class="section-index">05</span><h2>崩溃不是重来，而是从可信 Checkpoint 继续</h2></div><p>两个故障点都真正关闭并重新打开 SQLite、重建运行时依赖；恢复前必须验证工件或工作副本哈希。</p></div>
+        <div id="recovery-tabs" class="recovery-tabs" role="tablist" aria-label="崩溃恢复场景"></div>
+        <div class="recovery-board">
+          <aside class="recovery-summary">
+            <span id="recovery-point" class="recovery-point">--</span>
+            <h3 id="recovery-title">--</h3>
+            <p id="recovery-task" class="recovery-task">--</p>
+            <div class="recovery-metrics">
+              <article><span>Phase 1 model calls</span><strong id="recovery-before-calls">--</strong></article>
+              <article><span>Resume model calls</span><strong id="recovery-after-calls">--</strong></article>
+              <article><span>Final status</span><strong id="recovery-status">--</strong></article>
+            </div>
+            <div class="recovery-guard"><span>INTEGRITY GUARD</span><p id="recovery-guard">--</p></div>
+            <div class="recovery-skipped"><span>SKIPPED, NOT REPEATED</span><div id="recovery-skipped"></div></div>
+          </aside>
+          <article class="recovery-flow" id="recovery-timeline" aria-label="恢复阶段时间线"></article>
+        </div>
+        <p class="recovery-proof">最终工具序列中每个工具只出现一次；补丁落盘后恢复不再调用模型，也不会重复应用 Diff。</p>
+      </section>
       <section class="section shell safety-section">
-        <div class="section-heading"><div><span class="section-index">05</span><h2>失败时安全停止，也是一种能力</h2></div></div>
+        <div class="section-heading"><div><span class="section-index">06</span><h2>失败时安全停止，也是一种能力</h2></div></div>
         <div class="safety-grid">
           <article><h3>工具最小权限</h3><p>不能执行任意 Shell，不能读取测试答案，只能访问白名单源码。</p></article>
           <article><h3>补丁不可信</h3><p>文件范围、变更体积和上下文唯一性全部由策略校验。</p></article>

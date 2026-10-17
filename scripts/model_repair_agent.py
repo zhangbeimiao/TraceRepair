@@ -15,6 +15,13 @@ from tracerepair.model_planner import BailianChatTransport, ModelPlanner, Planne
 from tracerepair.models import Task, TaskStatus
 from tracerepair.patch_apply import PatchApplier
 from tracerepair.read_tools import ReadOnlyRepository
+from tracerepair.recovery import (
+    PATCH_APPLIED,
+    SOURCE_READ,
+    TARGET_PASSED,
+    InjectedCrash,
+    recovery_state,
+)
 from tracerepair.store import TraceStore
 from tracerepair.test_runner import RestrictedTestRunner
 from tracerepair.version import AGENT_VERSION, MODEL_ID
@@ -39,68 +46,104 @@ DIAGNOSTIC_QUERIES = {
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--case", choices=DEVELOPMENT_CASES + LOCKED_CASES, default="05")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--case", choices=DEVELOPMENT_CASES + LOCKED_CASES)
+    mode.add_argument("--resume", metavar="TASK_ID")
     parser.add_argument(
         "--evaluation-split",
         choices=("development", "locked"),
         default="development",
         help="locked cases must be invoked explicitly by the blind-evaluation runner",
     )
+    parser.add_argument(
+        "--inject-crash-after",
+        choices=(SOURCE_READ, PATCH_APPLIED),
+        help="test-only fault injection immediately after a durable checkpoint",
+    )
     arguments = parser.parse_args()
-    case_id = arguments.case
-    case = load_case(case_id)
-    if case["split"] != arguments.evaluation_split:
-        parser.error(
-            f"case {case_id} belongs to the {case['split']} split, "
-            f"not {arguments.evaluation_split}"
-        )
-    issue = str(case["issue"])
-    selector = case_selector(case_id)
-    diagnostic_queries = DIAGNOSTIC_QUERIES[case_id]
-    run_id = uuid4().hex[:8]
-    workspace = materialize_case(
-        case_id,
-        ROOT / "workspaces" / "model-agent" / f"case-{case_id}-{run_id}",
-    )
     store = TraceStore(ROOT / "data" / "model-agent.sqlite3")
-    task_id = f"model-agent-{case_id}-{run_id}"
-    store.create_task(Task(task_id, case_id, issue, str(workspace)))
-    store.append_event(
-        task_id,
-        "run_metadata",
-        {
-            "agent_version": AGENT_VERSION,
-            "model": MODEL_ID,
-            "case_name": str(case["name"]),
-            "evaluation_split": str(case["split"]),
-            "target_selector": selector,
-            "diagnostic_queries": list(diagnostic_queries),
-            "max_model_calls": 4,
-            "max_completion_tokens": 2_048,
-        },
-    )
-    store.transition(task_id, TaskStatus.READY, "end-to-end workspace created")
-    store.transition(task_id, TaskStatus.RUNNING, "end-to-end model workflow started")
-    tools = InstrumentedTools(
-        task_id,
-        store,
-        ReadOnlyRepository(workspace),
-        RestrictedTestRunner(workspace),
-        PatchApplier(workspace),
-    )
-    planner = ModelPlanner(
-        BailianChatTransport(),
-        PlannerConfig(
-            max_completion_tokens=512,
-            max_calls_per_task=4,
-            max_total_completion_tokens=2_048,
-        ),
-    )
     try:
+        if arguments.resume:
+            task_id = arguments.resume
+            task = _prepare_resume(store, task_id, parser)
+            case_id = task.case_id
+            case = load_case(case_id)
+            issue = task.issue
+            workspace = Path(task.workspace).resolve()
+            selector = case_selector(case_id)
+            diagnostic_queries = DIAGNOSTIC_QUERIES[case_id]
+            checkpoint = store.load_checkpoint(task_id)
+            phase = recovery_state(checkpoint).get("phase")
+            transport = (
+                _DeniedResumeTransport()
+                if phase in {PATCH_APPLIED, TARGET_PASSED}
+                or _has_successful_tool_result(store, task_id, "apply_patch")
+                else BailianChatTransport()
+            )
+            resume = True
+        else:
+            case_id = arguments.case or "05"
+            case = load_case(case_id)
+            if case["split"] != arguments.evaluation_split:
+                parser.error(
+                    f"case {case_id} belongs to the {case['split']} split, "
+                    f"not {arguments.evaluation_split}"
+                )
+            issue = str(case["issue"])
+            selector = case_selector(case_id)
+            diagnostic_queries = DIAGNOSTIC_QUERIES[case_id]
+            run_id = uuid4().hex[:8]
+            workspace = materialize_case(
+                case_id,
+                ROOT / "workspaces" / "model-agent" / f"case-{case_id}-{run_id}",
+            )
+            task_id = f"model-agent-{case_id}-{run_id}"
+            store.create_task(Task(task_id, case_id, issue, str(workspace)))
+            store.append_event(
+                task_id,
+                "run_metadata",
+                {
+                    "agent_version": AGENT_VERSION,
+                    "model": MODEL_ID,
+                    "case_name": str(case["name"]),
+                    "evaluation_split": str(case["split"]),
+                    "target_selector": selector,
+                    "diagnostic_queries": list(diagnostic_queries),
+                    "max_model_calls": 4,
+                    "max_completion_tokens": 2_048,
+                },
+            )
+            store.transition(task_id, TaskStatus.READY, "end-to-end workspace created")
+            store.transition(task_id, TaskStatus.RUNNING, "end-to-end model workflow started")
+            transport = BailianChatTransport()
+            resume = False
+
+        tools = InstrumentedTools(
+            task_id,
+            store,
+            ReadOnlyRepository(workspace),
+            RestrictedTestRunner(workspace),
+            PatchApplier(workspace),
+        )
+        planner = ModelPlanner(
+            transport,
+            PlannerConfig(
+                max_completion_tokens=512,
+                max_calls_per_task=4,
+                max_total_completion_tokens=2_048,
+            ),
+        )
         task_evidence = f"{issue} Failing target: {selector}."
-        result = EndToEndRepairWorkflow(task_id, store, planner, tools).run(
+        result = EndToEndRepairWorkflow(
+            task_id,
+            store,
+            planner,
+            tools,
+            crash_after=arguments.inject_crash_after,
+        ).run(
             task_evidence,
             diagnostic_queries=diagnostic_queries,
+            resume=resume,
         )
         budget = store.load_checkpoint(task_id).get("model_budget", {})
         print("End-to-end repair run completed.")
@@ -113,7 +156,14 @@ def main() -> None:
         print(f"Verification action: {result.action}")
         print(f"Final task status: {result.task_status.value}")
         print(f"Detail: {result.detail}")
+        if resume:
+            print("Recovery: completed tools were verified and not executed again.")
         print(f"Trace database: data/model-agent.sqlite3 (task {task_id})")
+    except InjectedCrash as error:
+        print(f"Injected crash recorded after durable checkpoint: {error.point}")
+        print(f"Resume with: python scripts\\model_repair_agent.py --resume {task_id}")
+        print(f"Trace database: data/model-agent.sqlite3 (task {task_id})")
+        raise SystemExit(75) from error
     except PlannerError as error:
         if store.get_task(task_id).status is TaskStatus.RUNNING:
             store.transition(task_id, TaskStatus.NEEDS_HUMAN, f"planner stopped safely: {error}")
@@ -122,6 +172,44 @@ def main() -> None:
         raise SystemExit(1) from error
     finally:
         store.close()
+
+
+class _DeniedResumeTransport:
+    def complete(self, payload: dict[str, object]) -> dict[str, object]:
+        raise PlannerError("model call is not permitted during verification-only resume")
+
+
+def _prepare_resume(store: TraceStore, task_id: str, parser: argparse.ArgumentParser) -> Task:
+    if not task_id.startswith("model-agent-") or len(task_id) > 80:
+        parser.error("resume task id is outside the model-agent namespace")
+    try:
+        task = store.get_task(task_id)
+    except KeyError:
+        parser.error(f"unknown resume task: {task_id}")
+    workspace = Path(task.workspace).resolve()
+    allowed_root = (ROOT / "workspaces" / "model-agent").resolve()
+    if not workspace.is_relative_to(allowed_root) or not workspace.is_dir():
+        parser.error("resume workspace is outside the allowlisted model-agent root")
+    if task.status is TaskStatus.INTERRUPTED:
+        store.transition(task_id, TaskStatus.READY, "operator requested checkpoint resume")
+        store.transition(task_id, TaskStatus.RUNNING, "checkpoint resume started")
+    elif task.status is not TaskStatus.RUNNING:
+        parser.error(f"task status {task.status.value} cannot be resumed")
+    store.append_event(
+        task_id,
+        "resume_requested",
+        {"previous_status": task.status.value},
+    )
+    return store.get_task(task_id)
+
+
+def _has_successful_tool_result(store: TraceStore, task_id: str, tool: str) -> bool:
+    return any(
+        event.event_type == "tool_finished"
+        and event.payload.get("tool") == tool
+        and event.payload.get("ok") is True
+        for event in store.list_events(task_id)
+    )
 
 
 if __name__ == "__main__":

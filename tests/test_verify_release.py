@@ -9,6 +9,7 @@ def make_release_tree(root: Path) -> None:
         "evaluation/frozen/testset-v0.4.0-dev1.json",
         "evaluation/frozen/release-summary-v0.4.0-dev1.json",
         "evaluation/frozen/failure-showcase-v0.4.0.json",
+        "evaluation/frozen/recovery-showcase-v0.4.1.json",
         "demo/dist/index.html",
         "demo/dist/data.js",
     ):

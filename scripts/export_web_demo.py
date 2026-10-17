@@ -51,6 +51,12 @@ def main() -> None:
         failure_manifest.get("failures"), list
     ):
         raise ValueError("failure showcase manifest must contain a failures array")
+    recovery_path = ROOT / "evaluation" / "frozen" / "recovery-showcase-v0.4.1.json"
+    recovery_manifest = read_json(recovery_path)
+    if not isinstance(recovery_manifest, dict) or not isinstance(
+        recovery_manifest.get("scenarios"), list
+    ):
+        raise ValueError("recovery showcase manifest must contain a scenarios array")
 
     evaluator = TraceEvaluator(ROOT / "data" / "model-agent.sqlite3")
     try:
@@ -155,6 +161,7 @@ def main() -> None:
         str(dev["frozen_at"]),
         str(test["frozen_at"]),
         str(failure_manifest["frozen_at"]),
+        str(recovery_manifest["frozen_at"]),
     )
     payload = {
         "generatedAt": generated_at,
@@ -162,6 +169,7 @@ def main() -> None:
         "cohorts": cohorts,
         "traces": traces,
         "failures": failures,
+        "recoveryScenarios": recovery_manifest["scenarios"],
     }
 
     dist = ROOT / "demo" / "dist"
@@ -183,10 +191,18 @@ def main() -> None:
                     dev_path.relative_to(ROOT).as_posix(),
                     test_path.relative_to(ROOT).as_posix(),
                     failure_path.relative_to(ROOT).as_posix(),
+                    recovery_path.relative_to(ROOT).as_posix(),
                 ],
                 "failure_showcase": {
                     "runs": len(failures),
                     "categories": [failure["category"] for failure in failures],
+                },
+                "recovery_showcase": {
+                    "runs": len(recovery_manifest["scenarios"]),
+                    "crash_points": [
+                        scenario["crash_point"]
+                        for scenario in recovery_manifest["scenarios"]
+                    ],
                 },
             },
             ensure_ascii=False,

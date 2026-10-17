@@ -47,6 +47,7 @@ REQUIRED_FILES = {
     Path("evaluation/frozen/testset-v0.4.0-dev1.json"),
     Path("evaluation/frozen/release-summary-v0.4.0-dev1.json"),
     Path("evaluation/frozen/failure-showcase-v0.4.0.json"),
+    Path("evaluation/frozen/recovery-showcase-v0.4.1.json"),
     Path("demo/dist/index.html"),
     Path("demo/dist/data.js"),
 }

@@ -1,5 +1,5 @@
 window.TRACEREPAIR_DEMO = {
-  "generatedAt": "2026-10-17T09:36:26.681607+00:00",
+  "generatedAt": "2026-10-17T15:35:55.928263+00:00",
   "summary": {
     "agentVersion": "0.4.0-dev1",
     "evaluatedBugTypes": 9,
@@ -1691,6 +1691,120 @@ window.TRACEREPAIR_DEMO = {
         "phase -> patch_generation",
         "model -> invalid; tokens=171; policy_accepted=False",
         "state running -> needs_human; reason=planner stopped safely: model proposed an invalid patch"
+      ]
+    }
+  ],
+  "recoveryScenarios": [
+    {
+      "task_id": "recovery-demo-66022b98",
+      "title": "读取源码后进程中断",
+      "crash_point": "source_read",
+      "phase_one_tools": [
+        "search_code",
+        "read_file"
+      ],
+      "phase_one_model_calls": 2,
+      "resume_model_calls": 1,
+      "skipped_tools": [
+        "search_code",
+        "read_file"
+      ],
+      "final_tools": [
+        "search_code",
+        "read_file",
+        "apply_patch",
+        "run_tests",
+        "run_regression"
+      ],
+      "final_status": "awaiting_review",
+      "integrity_guard": "源码恢复工件和当前工作副本同时通过 SHA-256 校验后，才允许继续生成补丁。",
+      "timeline": [
+        {
+          "state": "done",
+          "label": "DIAGNOSE",
+          "detail": "search_code 与 read_file 成功，源码切片写入工作副本恢复工件。"
+        },
+        {
+          "state": "checkpoint",
+          "label": "CHECKPOINT",
+          "detail": "SQLite 记录 source_read 阶段、相对工件路径和内容哈希。"
+        },
+        {
+          "state": "crash",
+          "label": "PROCESS EXIT",
+          "detail": "故障注入将任务置为 interrupted，运行时对象全部丢失。"
+        },
+        {
+          "state": "resume",
+          "label": "RESTART",
+          "detail": "重新打开 SQLite、重建工具与规划器，并校验源码恢复工件。"
+        },
+        {
+          "state": "skip",
+          "label": "SKIP COMPLETED",
+          "detail": "search_code 和 read_file 不再执行，只进行剩余一次补丁模型调用。"
+        },
+        {
+          "state": "pass",
+          "label": "VERIFY",
+          "detail": "补丁、目标测试和完整回归通过，进入 awaiting_review。"
+        }
+      ]
+    },
+    {
+      "task_id": "recovery-demo-59c9df97",
+      "title": "补丁落盘后进程中断",
+      "crash_point": "patch_applied",
+      "phase_one_tools": [
+        "search_code",
+        "read_file",
+        "apply_patch"
+      ],
+      "phase_one_model_calls": 3,
+      "resume_model_calls": 0,
+      "skipped_tools": [
+        "apply_patch"
+      ],
+      "final_tools": [
+        "search_code",
+        "read_file",
+        "apply_patch",
+        "run_tests",
+        "run_regression"
+      ],
+      "final_status": "awaiting_review",
+      "integrity_guard": "恢复时重新计算已修改文件哈希；若内容变化，目标测试不会启动并转入 needs_human。",
+      "timeline": [
+        {
+          "state": "done",
+          "label": "PATCH APPLIED",
+          "detail": "候选 Diff 通过策略并写入一次性工作副本。"
+        },
+        {
+          "state": "checkpoint",
+          "label": "CHECKPOINT",
+          "detail": "SQLite 已保存 apply_patch 成功结果和修改文件 SHA-256。"
+        },
+        {
+          "state": "crash",
+          "label": "PROCESS EXIT",
+          "detail": "在目标测试启动前中断，任务状态持久化为 interrupted。"
+        },
+        {
+          "state": "resume",
+          "label": "RESTART",
+          "detail": "新进程读取 patch_applied checkpoint 并验证工作副本完整性。"
+        },
+        {
+          "state": "skip",
+          "label": "SKIP COMPLETED",
+          "detail": "模型调用为 0，apply_patch 不重复执行。"
+        },
+        {
+          "state": "pass",
+          "label": "VERIFY",
+          "detail": "只执行目标测试与完整回归，随后进入 awaiting_review。"
+        }
       ]
     }
   ]

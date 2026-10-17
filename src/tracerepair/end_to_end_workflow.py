@@ -3,11 +3,23 @@
 import json
 import re
 from dataclasses import dataclass
+from pathlib import Path
 
 from tracerepair.instrumented_tools import InstrumentedTools
 from tracerepair.model_planner import ModelPlanner
 from tracerepair.models import TaskStatus
 from tracerepair.read_tools import FileSlice, ReadOnlyResult
+from tracerepair.recovery import (
+    PATCH_APPLIED,
+    SOURCE_READ,
+    TARGET_PASSED,
+    RecoveryError,
+    inject_crash_if_requested,
+    load_source_checkpoint,
+    mark_recovery_phase,
+    recovery_state,
+    save_source_checkpoint,
+)
 from tracerepair.store import TraceStore
 from tracerepair.workflow import CandidateRepairWorkflow
 
@@ -40,6 +52,7 @@ class EndToEndRepairWorkflow:
         tools: InstrumentedTools,
         *,
         max_diagnosis_turns: int = 3,
+        crash_after: str | None = None,
     ) -> None:
         if not 1 <= max_diagnosis_turns <= 5:
             raise ValueError("max_diagnosis_turns must be between 1 and 5")
@@ -47,15 +60,25 @@ class EndToEndRepairWorkflow:
         self._store = store
         self._planner = planner
         self._tools = tools
-        self._repair = CandidateRepairWorkflow(task_id, store, tools)
+        self._repair = CandidateRepairWorkflow(
+            task_id, store, tools, crash_after=crash_after
+        )
         self._max_diagnosis_turns = max_diagnosis_turns
+        self._crash_after = crash_after
 
     def run(
-        self, issue: str, *, diagnostic_queries: tuple[str, ...] = ()
+        self,
+        issue: str,
+        *,
+        diagnostic_queries: tuple[str, ...] = (),
+        resume: bool = False,
     ) -> EndToEndResult:
         task = self._store.get_task(self._task_id)
         if task.status is not TaskStatus.RUNNING:
             raise ValueError("end-to-end workflow requires a running task")
+
+        if resume:
+            return self._resume(issue)
 
         self._store.append_event(self._task_id, "workflow_phase_changed", {"phase": "diagnosis"})
         evidence = (
@@ -167,6 +190,128 @@ class EndToEndRepairWorkflow:
                 total_tokens,
             )
 
+        save_source_checkpoint(
+            self._task_id,
+            self._store,
+            Path(task.workspace),
+            source,
+            diagnosis_turns=diagnosis_turns,
+        )
+        inject_crash_if_requested(
+            self._task_id,
+            self._store,
+            configured_point=self._crash_after,
+            reached_point=SOURCE_READ,
+        )
+        return self._generate_and_verify(issue, source, diagnosis_turns, total_tokens)
+
+    def _resume(self, issue: str) -> EndToEndResult:
+        checkpoint = self._store.load_checkpoint(self._task_id)
+        try:
+            state = recovery_state(checkpoint)
+        except RecoveryError as error:
+            return self._stop("resume", str(error), 0, _checkpoint_tokens(checkpoint))
+        phase = state.get("phase")
+        turns = state.get("diagnosis_turns", 0)
+        diagnosis_turns = turns if isinstance(turns, int) else 0
+        total_tokens = _checkpoint_tokens(checkpoint)
+        completed = checkpoint.get("completed_tools", [])
+        skipped_tools = [
+            str(item.get("tool"))
+            for item in completed
+            if isinstance(item, dict) and item.get("ok") is True
+        ]
+        self._store.append_event(
+            self._task_id,
+            "workflow_resumed",
+            {"phase": phase, "skipped_tools": skipped_tools},
+        )
+        apply_state = self._tool_call_state("apply_patch")
+        if apply_state == "unfinished":
+            return self._stop(
+                "resume",
+                "patch application was interrupted before a durable result",
+                diagnosis_turns,
+                total_tokens,
+            )
+        if apply_state == "failed":
+            return self._stop(
+                "resume",
+                "completed patch application was rejected",
+                diagnosis_turns,
+                total_tokens,
+            )
+        if phase == SOURCE_READ and apply_state == "success":
+            # A real process may exit after tool_finished commits but before the
+            # following phase marker. Reconcile from the durable tool result.
+            mark_recovery_phase(self._task_id, self._store, PATCH_APPLIED)
+            self._store.append_event(
+                self._task_id,
+                "recovery_checkpoint_reconciled",
+                {"from_phase": SOURCE_READ, "to_phase": PATCH_APPLIED},
+            )
+            phase = PATCH_APPLIED
+        if phase == SOURCE_READ:
+            try:
+                source, diagnosis_turns = load_source_checkpoint(
+                    self._task_id,
+                    self._store,
+                    Path(self._store.get_task(self._task_id).workspace),
+                )
+            except RecoveryError as error:
+                return self._stop("resume", str(error), diagnosis_turns, total_tokens)
+            self._store.append_event(
+                self._task_id,
+                "recovery_step_skipped",
+                {
+                    "stage": "diagnosis",
+                    "tools": skipped_tools,
+                    "reason": "restored verified source artifact",
+                },
+            )
+            return self._generate_and_verify(issue, source, diagnosis_turns, total_tokens)
+        if phase in {PATCH_APPLIED, TARGET_PASSED}:
+            repair = self._repair.resume()
+            return EndToEndResult(
+                repair.action,
+                repair.task_status,
+                repair.detail,
+                diagnosis_turns,
+                total_tokens,
+            )
+        return self._stop(
+            "resume",
+            "checkpoint does not contain a resumable phase",
+            diagnosis_turns,
+            total_tokens,
+        )
+
+    def _tool_call_state(self, tool: str) -> str | None:
+        events = self._store.list_events(self._task_id)
+        starts = {
+            str(event.payload.get("call_id"))
+            for event in events
+            if event.event_type == "tool_started" and event.payload.get("tool") == tool
+        }
+        finishes = [
+            event.payload
+            for event in events
+            if event.event_type == "tool_finished" and event.payload.get("tool") == tool
+        ]
+        finished_ids = {str(payload.get("call_id")) for payload in finishes}
+        if starts - finished_ids:
+            return "unfinished"
+        if not finishes:
+            return None
+        return "success" if finishes[-1].get("ok") is True else "failed"
+
+    def _generate_and_verify(
+        self,
+        issue: str,
+        source: FileSlice,
+        diagnosis_turns: int,
+        total_tokens: int,
+    ) -> EndToEndResult:
         self._store.append_event(
             self._task_id,
             "workflow_phase_changed",
@@ -302,6 +447,14 @@ def _bounded_int(value: object, default: int, minimum: int, maximum: int) -> int
     if not isinstance(value, int) or isinstance(value, bool):
         return default
     return min(max(value, minimum), maximum)
+
+
+def _checkpoint_tokens(checkpoint: dict[str, object]) -> int:
+    budget = checkpoint.get("model_budget", {})
+    if not isinstance(budget, dict):
+        return 0
+    value = budget.get("completion_tokens", 0)
+    return value if isinstance(value, int) and value >= 0 else 0
 
 
 def _quoted_literal(issue: str) -> str | None:
