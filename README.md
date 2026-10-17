@@ -4,15 +4,15 @@
 
 [![CI](https://github.com/zhangbeimiao/TraceRepair/actions/workflows/ci.yml/badge.svg)](https://github.com/zhangbeimiao/TraceRepair/actions/workflows/ci.yml)
 [![Pages](https://github.com/zhangbeimiao/TraceRepair/actions/workflows/pages.yml/badge.svg)](https://zhangbeimiao.github.io/TraceRepair/)
-[![Release](https://img.shields.io/github/v/release/zhangbeimiao/TraceRepair)](https://github.com/zhangbeimiao/TraceRepair/releases/tag/v0.4.0)
+[![Release](https://img.shields.io/github/v/release/zhangbeimiao/TraceRepair)](https://github.com/zhangbeimiao/TraceRepair/releases/tag/v0.4.1)
 
 **在线 Demo：<https://zhangbeimiao.github.io/TraceRepair/>**
 
-Demo 只回放冻结并脱敏的真实 Trace，不需要 API Key，也不会产生模型费用。
+Demo 只回放冻结并脱敏的真实 Trace，不需要 API Key，也不会产生模型费用。成功案例包含经过内容哈希校验的真实补丁 Diff 和四道验证门禁；失败区回放三类历史故障，展示系统如何拒绝未验证补丁并安全转人工。
 
 TraceRepair 是一个面向 Python 仓库的受控代码修复 Agent。大模型负责在不确定环境中选择搜索、读取和补丁动作；确定性控制器负责权限、状态、成本、测试和人工审核。模型不能直接运行 Shell，也不能绕过验证门禁修改仓库。
 
-当前项目版本为 `v0.4.0`，对应的冻结 Agent cohort 为 `0.4.0-dev1`。
+当前项目版本为 `v0.4.1`，对应的冻结 Agent cohort 仍为 `0.4.0-dev1`；本次版本只增强证据展示，没有修改 Agent 策略或重跑锁定集。
 
 ## 评测结果
 
@@ -27,6 +27,7 @@ TraceRepair 是一个面向 Python 仓库的受控代码修复 Agent。大模型
 - `evaluation/frozen/devset-v0.4.0-dev1.json`
 - `evaluation/frozen/testset-v0.4.0-dev1.json`
 - `evaluation/frozen/release-summary-v0.4.0-dev1.json`
+- `evaluation/frozen/failure-showcase-v0.4.0.json`
 
 这些数字只描述自建 EventRelay 受控基准，不能解释为对任意真实仓库都有 100% 修复率。
 
@@ -91,7 +92,7 @@ powershell -ExecutionPolicy Bypass -File scripts\verify.ps1
 powershell -ExecutionPolicy Bypass -File scripts\start_demo.ps1
 ```
 
-浏览器访问 `http://127.0.0.1:8765/`。Demo 使用已经冻结并脱敏的 Trace，不需要 API Key，也不会连接公网。
+浏览器访问 `http://127.0.0.1:8765/`。Demo 使用已经冻结并脱敏的 Trace，不需要 API Key，也不会连接公网。页面中的 Diff 由故障快照与一次性修复工作副本重建，并用 Trace 中记录的 SHA-256 校验；它不是预先写死的示意代码。
 
 终端版真实 Trace：
 
@@ -131,7 +132,7 @@ python scripts\model_repair_agent.py --case 01
 
 ## 可恢复状态与 Trace
 
-每次运行记录任务状态、模型计划类型与 Token、工具生命周期、内容哈希、checkpoint、测试门禁和最终停止原因。`TraceStore` 使用 SQLite 保存这些信息；进程中断后可以读取上一次阶段，而不是从头重复已完成工具调用。Web Demo 只展示记录的安全摘要。
+每次运行记录任务状态、模型计划类型与 Token、工具生命周期、内容哈希、checkpoint、测试门禁和最终停止原因。`TraceStore` 使用 SQLite 保存这些信息；进程中断后可以读取上一次阶段，而不是从头重复已完成工具调用。Web Demo 只展示脱敏摘要、验证结果和基于内容哈希复核的 EventRelay 补丁，不展示绝对路径、原始模型响应或完整日志。
 
 ## 可靠评测设计
 
@@ -191,6 +192,7 @@ TraceRepair/
 - `docs/milestone-3-02.md`：受限开发集基准
 - `docs/milestone-3-03.md`：锁定集评测与 Trace 展示
 - `docs/milestone-3-04.md`：冻结发布报告与本地 Web Demo
+- `docs/releases/v0.4.1.md`：可验证 Diff 与失败恢复演示
 
 ## 磁盘与依赖
 

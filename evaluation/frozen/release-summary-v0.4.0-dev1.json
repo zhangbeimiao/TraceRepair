@@ -110,6 +110,15 @@
   },
   "source_manifests": [
     "evaluation/frozen/devset-v0.4.0-dev1.json",
-    "evaluation/frozen/testset-v0.4.0-dev1.json"
-  ]
+    "evaluation/frozen/testset-v0.4.0-dev1.json",
+    "evaluation/frozen/failure-showcase-v0.4.0.json"
+  ],
+  "failure_showcase": {
+    "runs": 3,
+    "categories": [
+      "patch_context_mismatch",
+      "diagnosis_budget_exhausted",
+      "invalid_patch_output"
+    ]
+  }
 }

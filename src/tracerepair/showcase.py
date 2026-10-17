@@ -15,6 +15,7 @@ class ShowcaseTrace:
     agent_version: str
     model: str
     events: tuple[tuple[str, dict[str, object]], ...]
+    workspace: str = ""
 
 
 def load_showcase_trace(database: Path, task_id: str | None = None) -> ShowcaseTrace:
@@ -26,13 +27,13 @@ def load_showcase_trace(database: Path, task_id: str | None = None) -> ShowcaseT
     try:
         if task_id is None:
             task = connection.execute(
-                """SELECT task_id, case_id, issue, status FROM tasks
+                """SELECT task_id, case_id, issue, workspace, status FROM tasks
                 WHERE task_id LIKE 'model-agent-%'
                 ORDER BY updated_at DESC LIMIT 1"""
             ).fetchone()
         else:
             task = connection.execute(
-                "SELECT task_id, case_id, issue, status FROM tasks WHERE task_id = ?",
+                "SELECT task_id, case_id, issue, workspace, status FROM tasks WHERE task_id = ?",
                 (task_id,),
             ).fetchone()
         if task is None:
@@ -53,6 +54,7 @@ def load_showcase_trace(database: Path, task_id: str | None = None) -> ShowcaseT
         agent_version=str(metadata.get("agent_version", "legacy")),
         model=str(metadata.get("model", "unknown")),
         events=events,
+        workspace=str(task["workspace"]),
     )
 
 

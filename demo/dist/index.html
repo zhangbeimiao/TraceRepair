@@ -49,7 +49,7 @@
         </div>
       </section>
       <section class="section shell" id="trace">
-        <div class="section-heading"><div><span class="section-index">03</span><h2>打开一条真实 Trace</h2></div><p>只展示安全摘要：状态、决策、工具结果与测试门禁；源码、Diff 和模型原文不进入页面。</p></div>
+        <div class="section-heading"><div><span class="section-index">03</span><h2>打开一条真实 Trace</h2></div><p>展示脱敏状态、工具结果、测试门禁与经 SHA-256 校验的 EventRelay 示例 Diff；绝对路径、模型原文和完整日志不进入页面。</p></div>
         <div class="trace-layout">
           <aside class="trace-sidebar">
             <div class="filter-row" role="group" aria-label="运行集筛选"><button class="filter active" data-filter="all">全部</button><button class="filter" data-filter="development">开发集</button><button class="filter" data-filter="locked">锁定集</button></div>
@@ -62,9 +62,40 @@
             <div class="terminal-body"><div class="issue-line"><span>ISSUE</span><p id="trace-issue"></p></div><ol id="timeline" class="timeline"></ol></div>
           </article>
         </div>
+        <div class="verification-grid" id="verification-grid" aria-label="候选补丁验证门禁">
+          <article id="verify-policy"><span>01 / POLICY</span><strong>--</strong><p>--</p></article>
+          <article id="verify-apply"><span>02 / APPLY</span><strong>--</strong><p>--</p></article>
+          <article id="verify-target"><span>03 / TARGET</span><strong>--</strong><p>--</p></article>
+          <article id="verify-regression"><span>04 / REGRESSION</span><strong>--</strong><p>--</p></article>
+        </div>
+        <article class="diff-card" aria-live="polite">
+          <header><div><span>VERIFIED PATCH</span><code id="diff-file">--</code></div><div class="diff-stats"><b id="diff-added">+0</b><b id="diff-removed">-0</b></div></header>
+          <div id="diff-code" class="diff-code" aria-label="修复补丁对比"></div>
+          <footer><span id="diff-evidence">--</span><code id="diff-hash">sha256 --</code></footer>
+        </article>
+      </section>
+      <section class="section failure-section" id="failures">
+        <div class="shell">
+          <div class="section-heading"><div><span class="section-index">04</span><h2>失败没有被隐藏，而是被系统接住</h2></div><p>以下均为真实历史运行。切换案例，查看错误发生在哪一步，以及为什么未验证的修改没有进入测试或审核。</p></div>
+          <div id="failure-tabs" class="failure-tabs" role="tablist" aria-label="失败案例选择"></div>
+          <div class="failure-layout">
+            <aside class="failure-summary">
+              <span id="failure-category" class="failure-category">--</span>
+              <h3 id="failure-title">--</h3>
+              <p id="failure-issue" class="failure-issue">--</p>
+              <dl class="failure-facts"><div><dt>Task</dt><dd id="failure-task">--</dd></div><div><dt>Tokens</dt><dd id="failure-tokens">--</dd></div><div><dt>Tool calls</dt><dd id="failure-tools">--</dd></div><div><dt>Recovery</dt><dd id="failure-recoveries">--</dd></div></dl>
+              <div class="containment-grid"><div><span>Patch attempted</span><strong id="failure-attempted">--</strong></div><div><span>Patch applied</span><strong id="failure-applied">--</strong></div><div><span>Tests started</span><strong id="failure-tests">--</strong></div></div>
+            </aside>
+            <article class="terminal-card failure-terminal">
+              <div class="terminal-bar"><span></span><span></span><span></span><code>safe-stop.trace</code></div>
+              <div class="terminal-body"><div class="issue-line"><span>STOP REASON</span><p id="failure-reason"></p></div><ol id="failure-timeline" class="timeline"></ol></div>
+            </article>
+          </div>
+          <div class="failure-outcome"><article><span>CONTROL OUTCOME</span><p id="failure-outcome">--</p></article><article><span>ENGINEERING LESSON</span><p id="failure-lesson">--</p></article></div>
+        </div>
       </section>
       <section class="section shell safety-section">
-        <div class="section-heading"><div><span class="section-index">04</span><h2>失败时安全停止，也是一种能力</h2></div></div>
+        <div class="section-heading"><div><span class="section-index">05</span><h2>失败时安全停止，也是一种能力</h2></div></div>
         <div class="safety-grid">
           <article><h3>工具最小权限</h3><p>不能执行任意 Shell，不能读取测试答案，只能访问白名单源码。</p></article>
           <article><h3>补丁不可信</h3><p>文件范围、变更体积和上下文唯一性全部由策略校验。</p></article>

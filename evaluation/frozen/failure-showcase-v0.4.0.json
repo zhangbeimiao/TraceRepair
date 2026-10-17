@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "frozen_at": "2026-10-17T09:00:51.270236+00:00",
+  "source": "sanitized events from the untracked model-agent SQLite trace store",
+  "failures": [
+    {
+      "task_id": "model-agent-0768469e",
+      "title": "补丁上下文不匹配",
+      "category": "patch_context_mismatch",
+      "expected_status": "needs_human",
+      "expected_stop_reason": "candidate patch rejected: PATCH_CONTEXT_MISMATCH",
+      "control_outcome": "受限补丁应用器在写入前验证上下文，拒绝候选补丁；目标测试和回归测试均未启动。",
+      "lesson": "模型给出的 Diff 只能作为候选输入，必须由确定性上下文校验决定能否落盘。"
+    },
+    {
+      "task_id": "model-agent-8360ffff",
+      "title": "诊断预算耗尽",
+      "category": "diagnosis_budget_exhausted",
+      "expected_status": "needs_human",
+      "expected_stop_reason": "diagnosis budget ended before a source file was read",
+      "control_outcome": "控制器发现诊断轮次已经用完且证据不足，因此没有请求补丁、没有写文件，并安全转入人工处理。",
+      "lesson": "预算不仅控制成本，也阻止 Agent 在证据不足时继续猜测。"
+    },
+    {
+      "task_id": "model-agent-aab74d1d",
+      "title": "非法补丁输出",
+      "category": "invalid_patch_output",
+      "expected_status": "needs_human",
+      "expected_stop_reason": "planner stopped safely: model proposed an invalid patch",
+      "control_outcome": "模型输出没有通过结构与策略校验，控制器没有调用 apply_patch，工作副本保持不变。",
+      "lesson": "结构化输出仍是不可信输入；解析失败和策略拒绝必须走可观察的安全停止路径。"
+    }
+  ]
+}
