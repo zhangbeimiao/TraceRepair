@@ -2,6 +2,14 @@
 
 > A bounded, traceable, and test-gated code-repair agent.
 
+[![CI](https://github.com/zhangbeimiao/TraceRepair/actions/workflows/ci.yml/badge.svg)](https://github.com/zhangbeimiao/TraceRepair/actions/workflows/ci.yml)
+[![Pages](https://github.com/zhangbeimiao/TraceRepair/actions/workflows/pages.yml/badge.svg)](https://zhangbeimiao.github.io/TraceRepair/)
+[![Release](https://img.shields.io/github/v/release/zhangbeimiao/TraceRepair)](https://github.com/zhangbeimiao/TraceRepair/releases/tag/v0.4.0)
+
+**在线 Demo：<https://zhangbeimiao.github.io/TraceRepair/>**
+
+Demo 只回放冻结并脱敏的真实 Trace，不需要 API Key，也不会产生模型费用。
+
 TraceRepair 是一个面向 Python 仓库的受控代码修复 Agent。大模型负责在不确定环境中选择搜索、读取和补丁动作；确定性控制器负责权限、状态、成本、测试和人工审核。模型不能直接运行 Shell，也不能绕过验证门禁修改仓库。
 
 当前项目版本为 `v0.4.0`，对应的冻结 Agent cohort 为 `0.4.0-dev1`。
