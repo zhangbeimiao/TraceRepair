@@ -84,6 +84,45 @@ def main() -> None:
             "averageToolCalls": decision.get("average_tool_calls"),
             "scope": metadata.get("evidence_scope"),
         }
+    locked_repository_path = (
+        ROOT / "evaluation" / "frozen" / f"locked-repository-v{PROJECT_VERSION}.json"
+    )
+    locked_repository_result: dict[str, object] | None = None
+    if locked_repository_path.is_file():
+        locked_repository_manifest = read_json(locked_repository_path)
+        if not isinstance(locked_repository_manifest, dict):
+            raise ValueError("locked repository manifest must be a JSON object")
+        protocol = locked_repository_manifest.get("protocol")
+        locked_run = locked_repository_manifest.get("run")
+        if not isinstance(protocol, dict) or not isinstance(locked_run, dict):
+            raise ValueError("locked repository manifest is missing protocol or run data")
+        if (
+            protocol.get("one_shot") is not True
+            or protocol.get("retry_on_failure") is not False
+            or protocol.get("prompt_or_policy_changes_after_reveal") is not False
+            or protocol.get("repository_details_published") is not False
+        ):
+            raise ValueError("locked repository protocol no longer proves a private one-shot run")
+        if protocol.get("project_version") != PROJECT_VERSION:
+            raise ValueError("locked repository project version does not match the demo")
+        for private_key in ("repository_task", "repository_commit", "config_sha256"):
+            if private_key in protocol:
+                raise ValueError("locked repository public manifest contains private metadata")
+        locked_repository_result = {
+            "projectVersion": protocol.get("project_version"),
+            "agentVersion": protocol.get("agent_version"),
+            "model": protocol.get("model"),
+            "scope": protocol.get("evidence_scope"),
+            "success": locked_run.get("end_to_end_success"),
+            "status": locked_run.get("status"),
+            "modelCalls": locked_run.get("model_calls"),
+            "tokens": locked_run.get("completion_tokens"),
+            "toolCalls": locked_run.get("tool_calls"),
+            "targetPassed": locked_run.get("target_test_passed"),
+            "regressionPassed": locked_run.get("regression_passed"),
+            "oneShot": True,
+            "retried": False,
+        }
 
     evaluator = TraceEvaluator(ROOT / "data" / "model-agent.sqlite3")
     try:
@@ -192,6 +231,9 @@ def main() -> None:
         str(repository_manifest["frozen_at"])
         if repository_path.is_file()
         else "",
+        str(locked_repository_manifest["frozen_at"])
+        if locked_repository_path.is_file()
+        else "",
     )
     payload = {
         "generatedAt": generated_at,
@@ -201,6 +243,7 @@ def main() -> None:
         "failures": failures,
         "recoveryScenarios": recovery_manifest["scenarios"],
         "repositoryCohort": repository_cohort,
+        "lockedRepositoryResult": locked_repository_result,
     }
 
     dist = ROOT / "demo" / "dist"
@@ -228,7 +271,16 @@ def main() -> None:
                     [repository_path.relative_to(ROOT).as_posix()]
                     if repository_path.is_file()
                     else []
+                )
+                + (
+                    [locked_repository_path.relative_to(ROOT).as_posix()]
+                    if locked_repository_path.is_file()
+                    else []
                 ),
+                "repository_evidence": {
+                    "repeat_stability": repository_cohort,
+                    "locked_one_shot": locked_repository_result,
+                },
                 "failure_showcase": {
                     "runs": len(failures),
                     "categories": [failure["category"] for failure in failures],

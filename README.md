@@ -4,15 +4,15 @@
 
 [![CI](https://github.com/zhangbeimiao/TraceRepair/actions/workflows/ci.yml/badge.svg)](https://github.com/zhangbeimiao/TraceRepair/actions/workflows/ci.yml)
 [![Pages](https://github.com/zhangbeimiao/TraceRepair/actions/workflows/pages.yml/badge.svg)](https://zhangbeimiao.github.io/TraceRepair/)
-[![Release](https://img.shields.io/github/v/release/zhangbeimiao/TraceRepair)](https://github.com/zhangbeimiao/TraceRepair/releases/tag/v0.6.0)
+[![Release](https://img.shields.io/github/v/release/zhangbeimiao/TraceRepair)](https://github.com/zhangbeimiao/TraceRepair/releases/tag/v0.6.1)
 
 **在线 Demo：<https://zhangbeimiao.github.io/TraceRepair/>**
 
-Demo 只回放冻结并脱敏的真实 Trace，不需要 API Key，也不会产生模型费用。成功案例包含经过内容哈希校验的真实补丁 Diff 和四道验证门禁；失败区回放三类历史故障；恢复区展示进程在源码读取或补丁落盘后中断，如何从持久化 Checkpoint 继续而不重复已完成工具。
+Demo 只回放冻结并脱敏的真实 Trace，不需要 API Key，也不会产生模型费用。成功案例包含经过内容哈希校验的真实补丁 Diff 和四道验证门禁；失败区回放三类历史故障；恢复区展示进程在源码读取或补丁落盘后中断，如何从持久化 Checkpoint 继续而不重复已完成工具；跨仓库区分别展示公开仓库重复稳定性和未公开仓库一次性盲测结果。
 
 TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Agent。大模型负责在不确定环境中选择搜索、读取和补丁动作；确定性控制器负责权限、状态、成本、测试和人工审核。模型不能直接运行 Shell，也不能绕过验证门禁修改仓库。仓库差异由 JSON 任务配置描述，不再写死 EventRelay 路径。
 
-当前开发版本为 `v0.6.1` 候选版，最新已发布版本为 `v0.6.0`，对应的冻结评测 Agent cohort 仍为 `0.4.0-dev1`。Checkpoint 恢复和跨仓库适配分别通过独立的零成本 Harness 验证；这些工程测试没有冒充新的模型成功率，也没有重跑锁定集。`v0.6.1` 只会在跨仓库稳定性样本与一次性盲测结果冻结后发布。
+当前版本为 `v0.6.1`，对应的冻结评测 Agent cohort 仍为 `0.4.0-dev1`。除 EventRelay 基准外，版本还冻结了公开 MiniMath 仓库的 5 次重复稳定性样本，以及一个未公开小型 Python 仓库的严格一次性盲测。两类跨仓库证据分开报告，不把小样本写成任意仓库上的通用成功率。
 
 ## 评测结果
 
@@ -21,6 +21,8 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 | Development | 4 | 8 | 8/8 | 212.62 | 5.0 |
 | Locked one-shot | 5 | 5 | 5/5 | 243.20 | 5.0 |
 | Combined | 9 | 13 | 13/13 | 224.38 | 5.0 |
+| Public configured repository | 1 | 5 | 5/5 | 179.60 | 5.0 |
+| Held-out repository one-shot | 1 | 1 | 1/1 | 234.00 | 5.0 |
 
 锁定集中的 `02、04、06、08、09` 每个只运行一次；测试期间没有重试失败案例，也没有修改模型 Prompt 或控制策略。完整证据保存在：
 
@@ -29,8 +31,10 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 - `evaluation/frozen/release-summary-v0.4.0-dev1.json`
 - `evaluation/frozen/failure-showcase-v0.4.0.json`
 - `evaluation/frozen/recovery-showcase-v0.4.1.json`
+- `evaluation/frozen/repository-mini-repo-discount-v0.6.1.json`
+- `evaluation/frozen/locked-repository-v0.6.1.json`
 
-这些数字只描述自建 EventRelay 受控基准，不能解释为对任意真实仓库都有 100% 修复率。
+前 13 次运行描述自建 EventRelay 受控基准；MiniMath 的 `5/5` 只证明该公开任务的重复稳定性；最后一行是未公开仓库的一次性结果。它们都不能解释为对任意真实仓库都有 100% 修复率。
 
 ## 30 秒介绍
 
@@ -223,7 +227,7 @@ TraceRepair/
 
 ## 当前限制
 
-- 冻结模型评测仍基于 EventRelay；第二仓库证明通用工程管线可复用，但尚未形成跨仓库模型统计。
+- 除 EventRelay 外，公开配置仓库获得 `5/5` 重复稳定性，另一个未公开仓库完成 `1/1` 无重试盲测；样本仍小，因此分层报告而不宣称普适成功率。
 - pytest 会导入并执行仓库代码，因此当前只接受操作者拥有或信任的仓库；未知第三方代码仍需要容器沙箱。
 - 当前定位是小型仓库，默认最多 2,000 个文件与 50 MiB，可在受控上限内配置。
 - 外部仓库依赖必须预先安装在 D 盘虚拟环境中；任务配置不会执行依赖安装脚本。
@@ -244,6 +248,7 @@ TraceRepair/
 - `docs/configured-repositories.md`：通用仓库任务配置与安全边界
 - `docs/repository-task.schema.json`：任务配置 JSON Schema
 - `docs/releases/v0.6.0.md`：可配置仓库适配层
+- `docs/releases/v0.6.1.md`：跨仓库稳定性与一次性盲测
 
 ## 磁盘与依赖
 

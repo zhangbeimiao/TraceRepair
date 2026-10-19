@@ -1,5 +1,5 @@
 window.TRACEREPAIR_DEMO = {
-  "generatedAt": "2026-10-17T15:35:55.928263+00:00",
+  "generatedAt": "2026-10-19T10:26:25.357070+00:00",
   "summary": {
     "agentVersion": "0.4.0-dev1",
     "evaluatedBugTypes": 9,
@@ -117,10 +117,10 @@ window.TRACEREPAIR_DEMO = {
     },
     {
       "version": "0.4.0-dev1",
-      "runs": 14,
-      "successes": 14,
+      "runs": 19,
+      "successes": 19,
       "successRate": 1.0,
-      "averageTokens": 220.86
+      "averageTokens": 213.11
     },
     {
       "version": "legacy",
@@ -1808,5 +1808,29 @@ window.TRACEREPAIR_DEMO = {
       ]
     }
   ],
-  "repositoryCohort": null
+  "repositoryCohort": {
+    "projectVersion": "0.6.1",
+    "task": "mini-repo-discount",
+    "runs": 5,
+    "successes": 5,
+    "successRate": 1.0,
+    "averageTokens": 179.6,
+    "averageToolCalls": 5.0,
+    "scope": "repeat stability on a public configured repository"
+  },
+  "lockedRepositoryResult": {
+    "projectVersion": "0.6.1",
+    "agentVersion": "0.4.0-dev1",
+    "model": "qwen3.8-flash",
+    "scope": "one-shot result on a held-out trusted small Python repository",
+    "success": true,
+    "status": "awaiting_review",
+    "modelCalls": 3,
+    "tokens": 234,
+    "toolCalls": 5,
+    "targetPassed": true,
+    "regressionPassed": true,
+    "oneShot": true,
+    "retried": false
+  }
 };

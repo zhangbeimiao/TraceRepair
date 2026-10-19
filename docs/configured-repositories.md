@@ -41,6 +41,12 @@ python scripts\benchmark_repository.py
 The command starts at most four new runs, caps each run at four provider calls,
 and freezes a manifest only when at least four of five attempts succeed.
 
+The v0.6.1 public task completed 5/5 runs with 179.6 average output tokens and
+5.0 average tool calls. A separate held-out repository was then attempted once,
+passed target and regression tests, and was frozen without retry. Its public
+manifest contains only de-identified metrics; repository identifiers remain in
+ignored local audit data.
+
 The adapter resolves relative paths from the JSON file, validates repository
 size and file count, rejects C: repositories on the Windows workstation, and
 copies accepted files into a disposable workspace. The model sees only files

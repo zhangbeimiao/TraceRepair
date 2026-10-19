@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "frozen_at": "2026-10-19T10:19:14.920330+00:00",
+  "decision": {
+    "case_id": "repo-mini-repo-discount",
+    "agent_version": "0.4.0-dev1",
+    "runs": 5,
+    "successful_runs": 5,
+    "success_rate": 1.0,
+    "average_completion_tokens": 179.6,
+    "average_tool_calls": 5.0,
+    "stop_reasons": {},
+    "minimum_runs": 5,
+    "required_success_rate": 0.8,
+    "stable": true
+  },
+  "runs": [
+    {
+      "task_id": "model-agent-repo-mini-repo-discount-66540608",
+      "status": "awaiting_review",
+      "success": true,
+      "model_calls": 3,
+      "completion_tokens": 175,
+      "tool_calls": 5,
+      "deterministic_recoveries": 0,
+      "stop_reason": "candidate patch passed target and regression tests; human review required"
+    },
+    {
+      "task_id": "model-agent-repo-mini-repo-discount-c5085243",
+      "status": "awaiting_review",
+      "success": true,
+      "model_calls": 3,
+      "completion_tokens": 178,
+      "tool_calls": 5,
+      "deterministic_recoveries": 0,
+      "stop_reason": "candidate patch passed target and regression tests; human review required"
+    },
+    {
+      "task_id": "model-agent-repo-mini-repo-discount-bac26556",
+      "status": "awaiting_review",
+      "success": true,
+      "model_calls": 3,
+      "completion_tokens": 175,
+      "tool_calls": 5,
+      "deterministic_recoveries": 0,
+      "stop_reason": "candidate patch passed target and regression tests; human review required"
+    },
+    {
+      "task_id": "model-agent-repo-mini-repo-discount-760ea3e5",
+      "status": "awaiting_review",
+      "success": true,
+      "model_calls": 3,
+      "completion_tokens": 187,
+      "tool_calls": 5,
+      "deterministic_recoveries": 0,
+      "stop_reason": "candidate patch passed target and regression tests; human review required"
+    },
+    {
+      "task_id": "model-agent-repo-mini-repo-discount-468d578a",
+      "status": "awaiting_review",
+      "success": true,
+      "model_calls": 3,
+      "completion_tokens": 183,
+      "tool_calls": 5,
+      "deterministic_recoveries": 0,
+      "stop_reason": "candidate patch passed target and regression tests; human review required"
+    }
+  ],
+  "metadata": {
+    "project_version": "0.6.1",
+    "model": "qwen3.8-flash",
+    "repository_task": "mini-repo-discount",
+    "task_config": "examples/tasks/mini-repo.json",
+    "evidence_scope": "repeat stability on a public configured repository",
+    "not_a_locked_generalization_result": true
+  }
+}

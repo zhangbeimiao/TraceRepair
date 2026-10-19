@@ -25,6 +25,16 @@
         + `${repository.averageToolCalls} average tool calls. This is not a locked generalization result.`,
     );
   }
+  if (data.lockedRepositoryResult) {
+    const locked = data.lockedRepositoryResult;
+    setText("#locked-repository-evidence-label", "HELD-OUT REPOSITORY · ONE SHOT");
+    setText("#locked-repository-score", locked.success ? "1/1 passed" : "0/1 safely stopped");
+    setText(
+      "#locked-repository-detail",
+      `${locked.tokens} output tokens · ${locked.modelCalls} model calls · `
+        + `${locked.toolCalls} tool calls · target + regression passed · no retry.`,
+    );
+  }
 
   const cohorts = $("#cohorts");
   data.cohorts.forEach((cohort) => {

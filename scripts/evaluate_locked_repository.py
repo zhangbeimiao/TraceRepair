@@ -8,7 +8,6 @@ import json
 import os
 import subprocess
 import sys
-from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -90,9 +89,10 @@ def main() -> None:
         )
     run = existing[0]
     manifest = ROOT / "evaluation" / "frozen" / f"locked-repository-v{PROJECT_VERSION}.json"
-    write_locked_manifest(
-        manifest,
-        run,
+    write_locked_manifest(manifest, run)
+    write_private_audit(
+        ROOT / "data" / f"locked-repository-audit-v{PROJECT_VERSION}.json",
+        run=run,
         repository_task=spec.name,
         repository_commit=commit,
         config_sha256=config_sha256,
@@ -135,11 +135,9 @@ def write_attempt_marker(
 def write_locked_manifest(
     path: Path,
     run: RunMetrics,
-    *,
-    repository_task: str,
-    repository_commit: str,
-    config_sha256: str,
 ) -> None:
+    """Write the public, deliberately de-identified one-shot evidence."""
+
     payload = {
         "schema_version": 1,
         "frozen_at": datetime.now(UTC).isoformat(),
@@ -150,11 +148,47 @@ def write_locked_manifest(
             "project_version": PROJECT_VERSION,
             "agent_version": AGENT_VERSION,
             "model": MODEL_ID,
-            "repository_task": repository_task,
-            "repository_commit": repository_commit,
-            "config_sha256": config_sha256,
+            "evidence_scope": "one-shot result on a held-out trusted small Python repository",
+            "repository_details_published": False,
         },
-        "run": asdict(run),
+        "run": {
+            "status": run.status,
+            "model_calls": run.model_calls,
+            "completion_tokens": run.completion_tokens,
+            "tool_calls": run.tool_calls,
+            "tool_failures": run.tool_failures,
+            "model_policy_rejections": run.model_policy_rejections,
+            "deterministic_recoveries": run.deterministic_recoveries,
+            "target_test_passed": run.target_test_passed,
+            "regression_passed": run.regression_passed,
+            "end_to_end_success": run.end_to_end_success,
+            "stop_reason": run.stop_reason,
+        },
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def write_private_audit(
+    path: Path,
+    *,
+    run: RunMetrics,
+    repository_task: str,
+    repository_commit: str,
+    config_sha256: str,
+) -> None:
+    """Keep reproducibility identifiers under ignored local data, never in Git."""
+
+    payload = {
+        "schema_version": 1,
+        "recorded_at": datetime.now(UTC).isoformat(),
+        "project_version": PROJECT_VERSION,
+        "agent_version": AGENT_VERSION,
+        "model": MODEL_ID,
+        "repository_task": repository_task,
+        "repository_commit": repository_commit,
+        "config_sha256": config_sha256,
+        "task_id": run.task_id,
     }
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

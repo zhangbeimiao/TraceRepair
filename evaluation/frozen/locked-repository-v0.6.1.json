@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "frozen_at": "2026-10-19T10:26:25.357070+00:00",
+  "protocol": {
+    "one_shot": true,
+    "retry_on_failure": false,
+    "prompt_or_policy_changes_after_reveal": false,
+    "project_version": "0.6.1",
+    "agent_version": "0.4.0-dev1",
+    "model": "qwen3.8-flash",
+    "evidence_scope": "one-shot result on a held-out trusted small Python repository",
+    "repository_details_published": false
+  },
+  "run": {
+    "status": "awaiting_review",
+    "model_calls": 3,
+    "completion_tokens": 234,
+    "tool_calls": 5,
+    "tool_failures": 0,
+    "model_policy_rejections": 0,
+    "deterministic_recoveries": 0,
+    "target_test_passed": true,
+    "regression_passed": true,
+    "end_to_end_success": true,
+    "stop_reason": "candidate patch passed target and regression tests; human review required"
+  }
+}

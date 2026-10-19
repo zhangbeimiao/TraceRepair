@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-17T15:35:55.928263+00:00",
+  "generated_at": "2026-10-19T10:26:25.357070+00:00",
   "summary": {
     "agentVersion": "0.4.0-dev1",
     "evaluatedBugTypes": 9,
@@ -112,8 +112,37 @@
     "evaluation/frozen/devset-v0.4.0-dev1.json",
     "evaluation/frozen/testset-v0.4.0-dev1.json",
     "evaluation/frozen/failure-showcase-v0.4.0.json",
-    "evaluation/frozen/recovery-showcase-v0.4.1.json"
+    "evaluation/frozen/recovery-showcase-v0.4.1.json",
+    "evaluation/frozen/repository-mini-repo-discount-v0.6.1.json",
+    "evaluation/frozen/locked-repository-v0.6.1.json"
   ],
+  "repository_evidence": {
+    "repeat_stability": {
+      "projectVersion": "0.6.1",
+      "task": "mini-repo-discount",
+      "runs": 5,
+      "successes": 5,
+      "successRate": 1.0,
+      "averageTokens": 179.6,
+      "averageToolCalls": 5.0,
+      "scope": "repeat stability on a public configured repository"
+    },
+    "locked_one_shot": {
+      "projectVersion": "0.6.1",
+      "agentVersion": "0.4.0-dev1",
+      "model": "qwen3.8-flash",
+      "scope": "one-shot result on a held-out trusted small Python repository",
+      "success": true,
+      "status": "awaiting_review",
+      "modelCalls": 3,
+      "tokens": 234,
+      "toolCalls": 5,
+      "targetPassed": true,
+      "regressionPassed": true,
+      "oneShot": true,
+      "retried": false
+    }
+  },
   "failure_showcase": {
     "runs": 3,
     "categories": [

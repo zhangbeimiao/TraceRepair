@@ -20,6 +20,13 @@ def test_public_demo_contains_verified_patches_and_frozen_failures() -> None:
     assert len(payload["traces"]) == 13
     assert len(payload["failures"]) == 3
     assert len(payload["recoveryScenarios"]) == 2
+    assert payload["repositoryCohort"]["runs"] == 5
+    assert payload["repositoryCohort"]["successes"] == 5
+    assert payload["repositoryCohort"]["averageTokens"] == 179.6
+    assert payload["lockedRepositoryResult"]["success"] is True
+    assert payload["lockedRepositoryResult"]["oneShot"] is True
+    assert payload["lockedRepositoryResult"]["retried"] is False
+    assert payload["lockedRepositoryResult"]["tokens"] == 234
     assert {failure["category"] for failure in payload["failures"]} == {
         "patch_context_mismatch",
         "diagnosis_budget_exhausted",
@@ -70,6 +77,9 @@ def test_demo_page_exposes_diff_and_failure_controls() -> None:
         "repository-evidence-label",
         "repository-score",
         "repository-detail",
+        "locked-repository-evidence-label",
+        "locked-repository-score",
+        "locked-repository-detail",
     ):
         assert html.count(f'id="{element_id}"') == 1
         assert f'#{element_id}' in script
