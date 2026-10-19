@@ -75,7 +75,11 @@ def assess_stability(
 
 
 def write_freeze_manifest(
-    path: Path, decision: StabilityDecision, runs: list[RunMetrics]
+    path: Path,
+    decision: StabilityDecision,
+    runs: list[RunMetrics],
+    *,
+    metadata: dict[str, object] | None = None,
 ) -> None:
     if not decision.stable:
         raise ValueError("an unstable cohort cannot be frozen")
@@ -102,6 +106,8 @@ def write_freeze_manifest(
             for run in matching
         ],
     }
+    if metadata is not None:
+        payload["metadata"] = metadata
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 

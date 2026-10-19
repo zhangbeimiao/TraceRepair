@@ -112,6 +112,22 @@ python scripts\generic_repository_demo.py
 
 它会读取 `examples/tasks/mini-repo.json`，把独立 MiniMath 仓库复制到一次性工作区，确认目标测试先失败，再完成 `search → read → patch → target → regression` 并进入人工审核。
 
+在同一个已配置百炼环境变量的 PowerShell 中补齐 5 次真实模型稳定性样本：
+
+```powershell
+python scripts\benchmark_repository.py
+```
+
+脚本会识别已有运行，只补齐缺少的样本；至少 4/5 成功后自动冻结跨仓库稳定性 manifest。
+
+本地还准备了一个未发布源码、已固定 Git 快照的第二仓库。稳定性评测完成后，只运行一次锁定测试：
+
+```powershell
+python scripts\evaluate_locked_repository.py
+```
+
+该入口会拒绝脏工作区和第二次运行；无论首次结果成功或失败都会立即冻结，避免挑选结果。
+
 终端版真实 Trace：
 
 ```powershell

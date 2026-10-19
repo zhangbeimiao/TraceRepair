@@ -31,7 +31,7 @@ from tracerepair.repository_task import (
 )
 from tracerepair.store import TraceStore
 from tracerepair.test_runner import RestrictedTestRunner
-from tracerepair.version import AGENT_VERSION, MODEL_ID
+from tracerepair.version import AGENT_VERSION, MODEL_ID, PROJECT_VERSION
 from tracerepair.workflow import case_selector
 
 
@@ -137,6 +137,7 @@ def main() -> None:
                 "run_metadata",
                 {
                     "agent_version": AGENT_VERSION,
+                    "project_version": PROJECT_VERSION,
                     "model": MODEL_ID,
                     "repository_task": spec.name,
                     "target_selector": selector,
@@ -179,6 +180,7 @@ def main() -> None:
                 "run_metadata",
                 {
                     "agent_version": AGENT_VERSION,
+                    "project_version": PROJECT_VERSION,
                     "model": MODEL_ID,
                     "case_name": case_name,
                     "evaluation_split": str(case["split"]),

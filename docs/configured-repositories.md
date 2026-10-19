@@ -31,6 +31,16 @@ Run the same adapter with the configured Bailian model:
 python scripts\model_repair_agent.py --task examples\tasks\mini-repo.json
 ```
 
+After the first real run, fill a five-run stability cohort without duplicating
+already persisted runs:
+
+```powershell
+python scripts\benchmark_repository.py
+```
+
+The command starts at most four new runs, caps each run at four provider calls,
+and freezes a manifest only when at least four of five attempts succeed.
+
 The adapter resolves relative paths from the JSON file, validates repository
 size and file count, rejects C: repositories on the Windows workstation, and
 copies accepted files into a disposable workspace. The model sees only files

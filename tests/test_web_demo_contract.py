@@ -67,6 +67,9 @@ def test_demo_page_exposes_diff_and_failure_controls() -> None:
         "recovery-tabs",
         "recovery-timeline",
         "recovery-skipped",
+        "repository-evidence-label",
+        "repository-score",
+        "repository-detail",
     ):
         assert html.count(f'id="{element_id}"') == 1
         assert f'#{element_id}' in script

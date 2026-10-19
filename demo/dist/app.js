@@ -15,6 +15,16 @@
   setText("#dev-score", `${summary.development.successful_runs}/${summary.development.runs}`);
   setText("#test-score", `${summary.locked.successful_runs}/${summary.locked.runs}`);
   setText("#generated-at", `snapshot ${new Date(data.generatedAt).toLocaleString("zh-CN")}`);
+  if (data.repositoryCohort) {
+    const repository = data.repositoryCohort;
+    setText("#repository-evidence-label", "FROZEN REAL-MODEL STABILITY");
+    setText("#repository-score", `${repository.successes}/${repository.runs} passed`);
+    setText(
+      "#repository-detail",
+      `MiniMath repeat stability · ${repository.averageTokens} average tokens · `
+        + `${repository.averageToolCalls} average tool calls. This is not a locked generalization result.`,
+    );
+  }
 
   const cohorts = $("#cohorts");
   data.cohorts.forEach((cohort) => {

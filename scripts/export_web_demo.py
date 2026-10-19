@@ -14,7 +14,7 @@ from tracerepair.demo_evidence import (
 )
 from tracerepair.evaluation_report import TraceEvaluator
 from tracerepair.showcase import load_showcase_trace, showcase_steps
-from tracerepair.version import AGENT_VERSION
+from tracerepair.version import AGENT_VERSION, PROJECT_VERSION
 
 DEV_CASES = {"01", "03", "07", "10"}
 LOCKED_CASES = {"02", "04", "06", "08", "09"}
@@ -57,6 +57,33 @@ def main() -> None:
         recovery_manifest.get("scenarios"), list
     ):
         raise ValueError("recovery showcase manifest must contain a scenarios array")
+    repository_path = (
+        ROOT
+        / "evaluation"
+        / "frozen"
+        / f"repository-mini-repo-discount-v{PROJECT_VERSION}.json"
+    )
+    repository_cohort: dict[str, object] | None = None
+    if repository_path.is_file():
+        repository_manifest = read_json(repository_path)
+        if not isinstance(repository_manifest, dict):
+            raise ValueError("configured repository manifest must be a JSON object")
+        decision = repository_manifest.get("decision")
+        metadata = repository_manifest.get("metadata")
+        if not isinstance(decision, dict) or not isinstance(metadata, dict):
+            raise ValueError("configured repository manifest is missing decision metadata")
+        if metadata.get("not_a_locked_generalization_result") is not True:
+            raise ValueError("configured repository evidence scope must remain explicit")
+        repository_cohort = {
+            "projectVersion": metadata.get("project_version"),
+            "task": metadata.get("repository_task"),
+            "runs": decision.get("runs"),
+            "successes": decision.get("successful_runs"),
+            "successRate": decision.get("success_rate"),
+            "averageTokens": decision.get("average_completion_tokens"),
+            "averageToolCalls": decision.get("average_tool_calls"),
+            "scope": metadata.get("evidence_scope"),
+        }
 
     evaluator = TraceEvaluator(ROOT / "data" / "model-agent.sqlite3")
     try:
@@ -162,6 +189,9 @@ def main() -> None:
         str(test["frozen_at"]),
         str(failure_manifest["frozen_at"]),
         str(recovery_manifest["frozen_at"]),
+        str(repository_manifest["frozen_at"])
+        if repository_path.is_file()
+        else "",
     )
     payload = {
         "generatedAt": generated_at,
@@ -170,6 +200,7 @@ def main() -> None:
         "traces": traces,
         "failures": failures,
         "recoveryScenarios": recovery_manifest["scenarios"],
+        "repositoryCohort": repository_cohort,
     }
 
     dist = ROOT / "demo" / "dist"
@@ -192,7 +223,12 @@ def main() -> None:
                     test_path.relative_to(ROOT).as_posix(),
                     failure_path.relative_to(ROOT).as_posix(),
                     recovery_path.relative_to(ROOT).as_posix(),
-                ],
+                ]
+                + (
+                    [repository_path.relative_to(ROOT).as_posix()]
+                    if repository_path.is_file()
+                    else []
+                ),
                 "failure_showcase": {
                     "runs": len(failures),
                     "categories": [failure["category"] for failure in failures],

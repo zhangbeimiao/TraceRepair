@@ -117,10 +117,10 @@ window.TRACEREPAIR_DEMO = {
     },
     {
       "version": "0.4.0-dev1",
-      "runs": 13,
-      "successes": 13,
+      "runs": 14,
+      "successes": 14,
       "successRate": 1.0,
-      "averageTokens": 224.38
+      "averageTokens": 220.86
     },
     {
       "version": "legacy",
@@ -1807,5 +1807,6 @@ window.TRACEREPAIR_DEMO = {
         }
       ]
     }
-  ]
+  ],
+  "repositoryCohort": null
 };
