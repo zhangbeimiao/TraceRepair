@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tracerepair"
-version = "0.6.0"
+version = "0.6.1"
 description = "Bounded, traceable, and test-gated code-repair agent"
 requires-python = ">=3.11"
 dependencies = ["langgraph>=1,<2"]

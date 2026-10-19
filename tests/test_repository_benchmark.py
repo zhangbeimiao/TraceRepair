@@ -42,12 +42,12 @@ def test_repository_freeze_manifest_keeps_scope_metadata(tmp_path: Path) -> None
         decision,
         [run],
         metadata={
-            "project_version": "0.6.0",
+            "project_version": "0.6.1",
             "not_a_locked_generalization_result": True,
         },
     )
 
     payload = json.loads(path.read_text(encoding="utf-8"))
-    assert payload["metadata"]["project_version"] == "0.6.0"
+    assert payload["metadata"]["project_version"] == "0.6.1"
     assert payload["metadata"]["not_a_locked_generalization_result"] is True
     assert payload["runs"][0]["task_id"] == run.task_id
