@@ -50,6 +50,10 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 
 ## 架构
 
+完整的分层架构、状态边界与恢复路径见
+[`docs/agent-architecture.md`](docs/agent-architecture.md)；可直接练习的三分钟项目讲稿见
+[`docs/interview-pitch.md`](docs/interview-pitch.md)。
+
 ```mermaid
 flowchart LR
     A[Issue + failing test] --> B[Bounded model planner]
@@ -254,6 +258,8 @@ TraceRepair/
 - `docs/releases/v0.4.1.md`：可验证 Diff 与失败恢复演示
 - `docs/releases/v0.5.0.md`：Checkpoint 崩溃恢复
 - `docs/configured-repositories.md`：通用仓库任务配置与安全边界
+- `docs/agent-architecture.md`：当前 Agent 分层架构、状态机与恢复边界
+- `docs/interview-pitch.md`：三分钟面试讲稿、演示顺序与高频追问
 - `docs/repository-task.schema.json`：任务配置 JSON Schema
 - `docs/releases/v0.6.0.md`：可配置仓库适配层
 - `docs/releases/v0.6.1.md`：跨仓库稳定性与一次性盲测
