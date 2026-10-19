@@ -15,6 +15,7 @@ def make_release_tree(root: Path) -> None:
         "evaluation/frozen/repository-mini-repo-discount-v0.6.1.json",
         "evaluation/frozen/locked-repository-v0.6.1.json",
         "examples/tasks/mini-repo.json",
+        "scripts/showcase.py",
         "demo/dist/index.html",
         "demo/dist/data.js",
     ):

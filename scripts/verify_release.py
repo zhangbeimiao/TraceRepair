@@ -49,6 +49,7 @@ REQUIRED_FILES = {
     Path("evaluation/frozen/failure-showcase-v0.4.0.json"),
     Path("evaluation/frozen/recovery-showcase-v0.4.1.json"),
     Path("examples/tasks/mini-repo.json"),
+    Path("scripts/showcase.py"),
     Path("docs/releases/v0.6.0.md"),
     Path("docs/releases/v0.6.1.md"),
     Path("evaluation/frozen/repository-mini-repo-discount-v0.6.1.json"),

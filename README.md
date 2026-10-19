@@ -8,6 +8,14 @@
 
 **在线 Demo：<https://zhangbeimiao.github.io/TraceRepair/>**
 
+一条命令离线回放冻结证据，不需要 API Key、不访问网络，也不修改仓库：
+
+```powershell
+python scripts\showcase.py
+```
+
+可用 `--section evidence|repair|failure|recovery` 只展示一个环节，或用 `--case 10` 切换成功修复案例。
+
 Demo 只回放冻结并脱敏的真实 Trace，不需要 API Key，也不会产生模型费用。成功案例包含经过内容哈希校验的真实补丁 Diff 和四道验证门禁；失败区回放三类历史故障；恢复区展示进程在源码读取或补丁落盘后中断，如何从持久化 Checkpoint 继续而不重复已完成工具；跨仓库区分别展示公开仓库重复稳定性和未公开仓库一次性盲测结果。
 
 TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Agent。大模型负责在不确定环境中选择搜索、读取和补丁动作；确定性控制器负责权限、状态、成本、测试和人工审核。模型不能直接运行 Shell，也不能绕过验证门禁修改仓库。仓库差异由 JSON 任务配置描述，不再写死 EventRelay 路径。
