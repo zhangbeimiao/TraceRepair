@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "agent_version": "0.6.0-dev1",
+  "parent_agent_version": "0.5.0",
+  "status": "development_only_not_benchmarked",
+  "model": "qwen3.8-flash",
+  "planner": {
+    "max_completion_tokens": 512,
+    "max_calls_per_task": 4,
+    "max_total_completion_tokens": 2048
+  },
+  "workflow": {
+    "max_diagnosis_turns": 3,
+    "max_patch_attempts": 1,
+    "final_success_state": "awaiting_review"
+  },
+  "patch_location": {
+    "advertised_line_exact": true,
+    "bounded_exact_relocation_lines": 80,
+    "symbol_exact_relocation": {
+      "enabled": true,
+      "global_exact_match_must_be_unique": true,
+      "minimum_context_lines": 2,
+      "minimum_removed_lines": 1,
+      "named_python_scope_required": true,
+      "fuzzy_matching": false
+    }
+  },
+  "evaluation_rule": "historical-python-v1.0.0 remains immutable; use a new manifest and unseen locked repositories"
+}

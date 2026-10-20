@@ -97,5 +97,14 @@ def test_patch_trace_records_hashes_not_raw_diff(tmp_path: Path) -> None:
     checkpoint = store.load_checkpoint("task-patch")
     assert checkpoint["last_tool"]["tool"] == "apply_patch"
     assert checkpoint["last_tool"]["summary"]["files"] == ["src/eventrelay/config.py"]
+    assert checkpoint["last_tool"]["summary"]["relocations"] == [
+        {
+            "path": "src/eventrelay/config.py",
+            "advertised_line": 6,
+            "applied_line": 6,
+            "mode": "advertised",
+            "symbol": None,
+        }
+    ]
     assert "normalized = value" not in str(checkpoint)
     store.close()

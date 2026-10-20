@@ -46,6 +46,11 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 
 任何补丁定位策略、重定位窗口或 Prompt 的改动，都必须提升 Agent 版本并创建新的 benchmark manifest 与结果目录；**不得用新逻辑覆盖或重跑 `historical-python-v1.0.0` 的锁定结果**。
 
+开发分支当前为 Agent `0.6.0-dev1`：新增“全局精确唯一 + Python 命名符号锚点”
+补丁定位，但仍禁用模糊匹配。该版本尚未产生新的 benchmark 成功率，公开主结论仍是
+`0.5.0` 的 `2/3`。设计与评测隔离规则见
+[`docs/patch-location-v0.6.0-dev1.md`](docs/patch-location-v0.6.0-dev1.md)。
+
 ### 受控工程回归证据（次要结论）
 
 | 数据集 | Bug 类型 | 运行次数 | 成功 | 平均输出 Tokens | 平均工具调用 |
@@ -306,6 +311,7 @@ TraceRepair/
 - `docs/agent-architecture.md`：当前 Agent 分层架构、状态机与恢复边界
 - `docs/interview-pitch.md`：三分钟面试讲稿、演示顺序与高频追问
 - `docs/resume-material.md`：可信简历表述、30 秒介绍与指标边界
+- `docs/patch-location-v0.6.0-dev1.md`：下一版精确符号锚点定位与评测隔离
 - `docs/repository-task.schema.json`：任务配置 JSON Schema
 - `docs/benchmark-manifest.schema.json`：多仓库历史 Bug benchmark JSON Schema
 - `docs/BENCHMARK_PROTOCOL.md`：pass@1、数据冻结和防结果篡改协议

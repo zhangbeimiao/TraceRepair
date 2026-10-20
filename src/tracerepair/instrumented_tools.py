@@ -102,6 +102,16 @@ class InstrumentedTools:
             "files": list(result.files),
             "file_sha256": result.file_sha256,
             "validation_errors": list(result.validation.errors),
+            "relocations": [
+                {
+                    "path": item.path,
+                    "advertised_line": item.advertised_line,
+                    "applied_line": item.applied_line,
+                    "mode": item.mode,
+                    "symbol": item.symbol,
+                }
+                for item in result.relocations
+            ],
         }
         self._finish(call_id, "apply_patch", result, summary)
         return result

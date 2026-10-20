@@ -15,12 +15,13 @@ from tracerepair.demo_evidence import (
 )
 from tracerepair.evaluation_report import TraceEvaluator
 from tracerepair.showcase import load_showcase_trace, showcase_steps
-from tracerepair.version import AGENT_VERSION, PROJECT_VERSION
+from tracerepair.version import PROJECT_VERSION
 
 DEV_CASES = {"01", "03", "07", "10"}
 LOCKED_CASES = {"02", "04", "06", "08", "09"}
 CONTROLLED_AGENT_VERSION = "0.4.0-dev1"
 HISTORICAL_BENCHMARK_ID = "historical-python-v1.0.0"
+FROZEN_HISTORICAL_AGENT_VERSION = "0.5.0"
 
 
 def read_json(path: Path) -> object:
@@ -51,8 +52,8 @@ def main() -> None:
     expected_historical_sha = historical_checksum_path.read_text(encoding="utf-8").split()[0]
     if sha256_file(historical_path) != expected_historical_sha:
         raise ValueError("historical benchmark summary checksum mismatch")
-    if historical.get("agent_version") != AGENT_VERSION:
-        raise ValueError("historical benchmark agent version does not match current agent")
+    if historical.get("agent_version") != FROZEN_HISTORICAL_AGENT_VERSION:
+        raise ValueError("historical benchmark agent version changed unexpectedly")
     historical_summary = historical.get("summary")
     historical_attempts = historical.get("attempts")
     locked_failure_audit = historical.get("locked_failure_audit")
@@ -267,7 +268,7 @@ def main() -> None:
     total_tokens = sum(int(trace["tokens"]) for trace in traces)
     total_tools = sum(int(trace["toolCalls"]) for trace in traces)
     summary = {
-        "agentVersion": AGENT_VERSION,
+        "agentVersion": FROZEN_HISTORICAL_AGENT_VERSION,
         "controlledAgentVersion": CONTROLLED_AGENT_VERSION,
         "evaluatedBugTypes": len(DEV_CASES | LOCKED_CASES),
         "runs": total_runs,
@@ -310,7 +311,12 @@ def main() -> None:
         + ";\n",
         encoding="utf-8",
     )
-    release_path = ROOT / "evaluation" / "frozen" / f"release-summary-v{AGENT_VERSION}.json"
+    release_path = (
+        ROOT
+        / "evaluation"
+        / "frozen"
+        / f"release-summary-v{FROZEN_HISTORICAL_AGENT_VERSION}.json"
+    )
     release_path.write_text(
         json.dumps(
             {

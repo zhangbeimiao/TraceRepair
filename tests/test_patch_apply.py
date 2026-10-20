@@ -2,6 +2,7 @@ from pathlib import Path
 
 from evaluation.materialize import materialize_case
 from tracerepair.patch_apply import PatchApplier
+from tracerepair.patch_policy import PatchPolicy
 from tracerepair.test_runner import RestrictedTestRunner
 
 
@@ -81,3 +82,136 @@ def test_ambiguous_relocated_context_is_rejected_without_writing(tmp_path: Path)
     assert result.ok is False
     assert result.error_code == "PATCH_CONTEXT_AMBIGUOUS"
     assert target.read_text(encoding="utf-8") == before
+
+
+def _symbol_workspace(tmp_path: Path, body: str) -> tuple[Path, Path]:
+    workspace = tmp_path / "repository"
+    target = workspace / "src" / "sample" / "logic.py"
+    target.parent.mkdir(parents=True)
+    target.write_text(body, encoding="utf-8")
+    return workspace, target
+
+
+def test_unique_exact_context_can_relocate_beyond_window_inside_named_symbol(
+    tmp_path: Path,
+) -> None:
+    padding = "".join(f"# padding {index}\n" for index in range(100))
+    source = padding + """class Bucket:
+    def __init__(self, iterable, key, validator=None):
+        self._it = iter(iterable)
+        self._key = key
+        self._validator = validator or (lambda value: True)
+        self._ready = True
+"""
+    workspace, target = _symbol_workspace(tmp_path, source)
+    candidate = """--- a/src/sample/logic.py
++++ b/src/sample/logic.py
+@@ -2,4 +2,4 @@
+         self._it = iter(iterable)
+         self._key = key
+-        self._validator = validator or (lambda value: True)
++        self._validator = validator if validator is not None else (lambda value: True)
+         self._ready = True
+"""
+
+    result = PatchApplier(
+        workspace, PatchPolicy(allowed_roots=("src/sample",))
+    ).apply(candidate)
+
+    assert result.ok is True
+    assert "validator if validator is not None" in target.read_text(encoding="utf-8")
+    assert len(result.relocations) == 1
+    relocation = result.relocations[0]
+    assert relocation.mode == "symbol_exact"
+    assert relocation.symbol == "function:__init__"
+    assert relocation.advertised_line == 2
+    assert relocation.applied_line > 80
+
+
+def test_far_exact_top_level_context_is_rejected_without_writing(tmp_path: Path) -> None:
+    padding = "".join(f"# padding {index}\n" for index in range(100))
+    source = padding + "enabled = True\nanswer = 1\nmarker = 'end'\n"
+    workspace, target = _symbol_workspace(tmp_path, source)
+    before = target.read_text(encoding="utf-8")
+    candidate = """--- a/src/sample/logic.py
++++ b/src/sample/logic.py
+@@ -2,3 +2,3 @@
+ enabled = True
+-answer = 1
++answer = 2
+ marker = 'end'
+"""
+
+    result = PatchApplier(
+        workspace, PatchPolicy(allowed_roots=("src/sample",))
+    ).apply(candidate)
+
+    assert result.ok is False
+    assert result.error_code == "PATCH_CONTEXT_MISMATCH"
+    assert target.read_text(encoding="utf-8") == before
+
+
+def test_far_symbol_relocation_requires_globally_unique_context(tmp_path: Path) -> None:
+    padding = "".join(f"# padding {index}\n" for index in range(100))
+    repeated = """    def update(self):
+        before = self.value
+        self.value = 1
+        return before
+"""
+    source = padding + "class First:\n" + repeated + "\nclass Second:\n" + repeated
+    workspace, target = _symbol_workspace(tmp_path, source)
+    before = target.read_text(encoding="utf-8")
+    candidate = """--- a/src/sample/logic.py
++++ b/src/sample/logic.py
+@@ -2,3 +2,3 @@
+         before = self.value
+-        self.value = 1
++        self.value = 2
+         return before
+"""
+
+    result = PatchApplier(
+        workspace, PatchPolicy(allowed_roots=("src/sample",))
+    ).apply(candidate)
+
+    assert result.ok is False
+    assert result.error_code == "PATCH_CONTEXT_AMBIGUOUS"
+    assert target.read_text(encoding="utf-8") == before
+
+
+def test_far_symbol_relocation_requires_context_and_a_removed_line(
+    tmp_path: Path,
+) -> None:
+    padding = "".join(f"# padding {index}\n" for index in range(100))
+    source = padding + """def configure(validator=None):
+    key = "validator"
+    selected = validator or (lambda value: True)
+    return key, selected
+"""
+    candidates = (
+        """--- a/src/sample/logic.py
++++ b/src/sample/logic.py
+@@ -2,2 +2,2 @@
+-    selected = validator or (lambda value: True)
++    selected = validator if validator is not None else (lambda value: True)
+     return key, selected
+""",
+        """--- a/src/sample/logic.py
++++ b/src/sample/logic.py
+@@ -2,2 +2,3 @@
+     key = "validator"
++    explicitly_configured = validator is not None
+     selected = validator or (lambda value: True)
+""",
+    )
+
+    for index, candidate in enumerate(candidates):
+        workspace, target = _symbol_workspace(tmp_path / str(index), source)
+        before = target.read_text(encoding="utf-8")
+        result = PatchApplier(
+            workspace, PatchPolicy(allowed_roots=("src/sample",))
+        ).apply(candidate)
+
+        assert result.ok is False
+        assert result.error_code == "PATCH_CONTEXT_MISMATCH"
+        assert target.read_text(encoding="utf-8") == before

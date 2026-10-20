@@ -1,5 +1,6 @@
 """Apply policy-approved unified diffs to disposable workspaces only."""
 
+import ast
 import hashlib
 import re
 from dataclasses import dataclass
@@ -9,6 +10,7 @@ from tracerepair.patch_policy import PatchPolicy, PatchValidation
 
 _HUNK_HEADER = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
 _MAX_HUNK_RELOCATION_LINES = 80
+_MIN_SYMBOL_CONTEXT_LINES = 2
 
 
 @dataclass(frozen=True)
@@ -18,6 +20,16 @@ class PatchApplyResult:
     files: tuple[str, ...]
     file_sha256: dict[str, str]
     validation: PatchValidation
+    relocations: tuple["PatchRelocation", ...] = ()
+
+
+@dataclass(frozen=True)
+class PatchRelocation:
+    path: str
+    advertised_line: int
+    applied_line: int
+    mode: str
+    symbol: str | None
 
 
 @dataclass(frozen=True)
@@ -48,7 +60,7 @@ class PatchApplier:
             return PatchApplyResult(False, "PATCH_POLICY_DENIED", (), {}, validation)
         try:
             patches = self._parse(unified_diff)
-            replacements = self._build_replacements(patches)
+            replacements, relocations = self._build_replacements(patches)
         except ValueError as error:
             return PatchApplyResult(False, str(error), (), {}, validation)
 
@@ -60,15 +72,29 @@ class PatchApplier:
                 hashes[path] = hashlib.sha256(content.encode("utf-8")).hexdigest()
         except OSError:
             return PatchApplyResult(False, "PATCH_WRITE_FAILED", (), {}, validation)
-        return PatchApplyResult(True, None, tuple(replacements), hashes, validation)
+        return PatchApplyResult(
+            True,
+            None,
+            tuple(replacements),
+            hashes,
+            validation,
+            relocations,
+        )
 
-    def _build_replacements(self, patches: tuple[_FilePatch, ...]) -> dict[str, str]:
+    def _build_replacements(
+        self, patches: tuple[_FilePatch, ...]
+    ) -> tuple[dict[str, str], tuple[PatchRelocation, ...]]:
         replacements: dict[str, str] = {}
+        relocations: list[PatchRelocation] = []
         for patch in patches:
             target = self._safe_target(patch.path)
             original = target.read_text(encoding="utf-8")
-            replacements[patch.path] = self._apply_hunks(original, patch.hunks)
-        return replacements
+            content, patch_relocations = self._apply_hunks(
+                original, patch.hunks, patch.path
+            )
+            replacements[patch.path] = content
+            relocations.extend(patch_relocations)
+        return replacements, tuple(relocations)
 
     def _safe_target(self, relative_path: str) -> Path:
         target = (self._workspace / relative_path).resolve()
@@ -77,12 +103,26 @@ class PatchApplier:
         return target
 
     @staticmethod
-    def _apply_hunks(original: str, hunks: tuple[_Hunk, ...]) -> str:
+    def _apply_hunks(
+        original: str, hunks: tuple[_Hunk, ...], path: str
+    ) -> tuple[str, tuple[PatchRelocation, ...]]:
         source = original.splitlines()
         output: list[str] = []
+        relocations: list[PatchRelocation] = []
         source_index = 0
         for hunk in hunks:
-            target_index = PatchApplier._locate_hunk(source, hunk, source_index)
+            target_index, mode, symbol = PatchApplier._locate_hunk(
+                source, hunk, source_index
+            )
+            relocations.append(
+                PatchRelocation(
+                    path=path,
+                    advertised_line=hunk.old_start,
+                    applied_line=target_index + 1,
+                    mode=mode,
+                    symbol=symbol,
+                )
+            )
             output.extend(source[source_index:target_index])
             source_index = target_index
             for line in hunk.lines:
@@ -101,16 +141,19 @@ class PatchApplier:
                     raise ValueError("PATCH_PARSE_ERROR")
         output.extend(source[source_index:])
         suffix = "\n" if original.endswith("\n") else ""
-        return "\n".join(output) + suffix
+        return "\n".join(output) + suffix, tuple(relocations)
 
     @staticmethod
-    def _locate_hunk(source: list[str], hunk: _Hunk, minimum: int) -> int:
-        """Use the advertised line first, then relocate one exact, unique old block.
+    def _locate_hunk(
+        source: list[str], hunk: _Hunk, minimum: int
+    ) -> tuple[int, str, str | None]:
+        """Locate one exact old block without allowing fuzzy application.
 
         Model-generated diffs occasionally have slightly inaccurate hunk line
         numbers.  Relocation never weakens content validation: every context and
-        removed line must still match verbatim, the match must be unique, and it
-        must remain close to the advertised position.
+        removed line must still match verbatim.  Nearby relocation remains bounded
+        to 80 lines.  A farther relocation is accepted only when the exact block is
+        globally unique and fully contained by one named Python function or class.
         """
 
         old_lines: list[str] = []
@@ -125,12 +168,12 @@ class PatchApplier:
         expected = hunk.old_start - 1
         if not old_lines:
             if minimum <= expected <= len(source):
-                return expected
+                return expected, "advertised", None
             raise ValueError("PATCH_CONTEXT_MISMATCH")
 
         width = len(old_lines)
         if minimum <= expected and source[expected : expected + width] == old_lines:
-            return expected
+            return expected, "advertised", None
 
         first = max(minimum, expected - _MAX_HUNK_RELOCATION_LINES, 0)
         last = min(len(source) - width, expected + _MAX_HUNK_RELOCATION_LINES)
@@ -140,10 +183,59 @@ class PatchApplier:
             if source[index : index + width] == old_lines
         ]
         if len(matches) == 1:
-            return matches[0]
+            return matches[0], "bounded_exact", None
         if len(matches) > 1:
             raise ValueError("PATCH_CONTEXT_AMBIGUOUS")
+
+        global_matches = [
+            index
+            for index in range(max(minimum, 0), len(source) - width + 1)
+            if source[index : index + width] == old_lines
+        ]
+        if len(global_matches) > 1:
+            raise ValueError("PATCH_CONTEXT_AMBIGUOUS")
+        if len(global_matches) == 1:
+            removed_lines = sum(line.startswith("-") for line in hunk.lines)
+            context_lines = sum(line.startswith(" ") for line in hunk.lines)
+            target_index = global_matches[0]
+            symbol = PatchApplier._named_symbol_for_range(
+                source, target_index, width
+            )
+            if (
+                removed_lines >= 1
+                and context_lines >= _MIN_SYMBOL_CONTEXT_LINES
+                and symbol is not None
+            ):
+                return target_index, "symbol_exact", symbol
         raise ValueError("PATCH_CONTEXT_MISMATCH")
+
+    @staticmethod
+    def _named_symbol_for_range(
+        source: list[str], start_index: int, width: int
+    ) -> str | None:
+        """Return the smallest named AST scope containing an exact source block."""
+
+        try:
+            tree = ast.parse("\n".join(source) + "\n")
+        except SyntaxError:
+            return None
+        start_line = start_index + 1
+        end_line = start_index + width
+        candidates = [
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+            and node.lineno <= start_line
+            and getattr(node, "end_lineno", node.lineno) >= end_line
+        ]
+        if not candidates:
+            return None
+        node = min(
+            candidates,
+            key=lambda item: getattr(item, "end_lineno", item.lineno) - item.lineno,
+        )
+        kind = "class" if isinstance(node, ast.ClassDef) else "function"
+        return f"{kind}:{node.name}"
 
     @staticmethod
     def _parse(unified_diff: str) -> tuple[_FilePatch, ...]:
