@@ -325,7 +325,10 @@ def _http_error_detail(error: HTTPError) -> str:
     try:
         raw = error.read().decode("utf-8", errors="replace")[:600]
         parsed = json.loads(raw)
+        nested = parsed.get("error")
         candidate = parsed.get("message") or parsed.get("code")
+        if not candidate and isinstance(nested, Mapping):
+            candidate = nested.get("message") or nested.get("code")
         if isinstance(candidate, str) and candidate:
             safe = re.sub(r"sk-[A-Za-z0-9._-]+", "[redacted]", candidate)
             safe = " ".join(safe.split())[:240]

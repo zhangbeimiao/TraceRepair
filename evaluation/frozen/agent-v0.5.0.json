@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "agent_version": "0.5.0",
+  "model": "qwen3.8-flash",
+  "planner": {
+    "max_completion_tokens": 512,
+    "max_calls_per_task": 4,
+    "max_total_completion_tokens": 2048
+  },
+  "workflow": {
+    "max_diagnosis_turns": 3,
+    "max_patch_attempts": 1,
+    "repeated_action_policy": "one deterministic configured-query recovery, then stop",
+    "final_success_state": "awaiting_review"
+  },
+  "gates": [
+    "read-only diagnosis tools",
+    "source path allowlist",
+    "bounded exact-context unified diff",
+    "target pytest",
+    "configured regression pytest",
+    "mandatory human review"
+  ],
+  "oracle_preflight": {
+    "buggy_expected_pytest_exit_code": 1,
+    "fixed_target_must_pass": true,
+    "fixed_regression_must_pass": true
+  }
+}

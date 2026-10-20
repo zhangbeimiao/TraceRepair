@@ -3,6 +3,9 @@
 .tmp/
 tmp/
 .pytest_cache/
+evaluation/repositories/
+evaluation/sources/
+evaluation/archives/
 .ruff_cache/
 .coverage
 htmlcov/

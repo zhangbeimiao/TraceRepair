@@ -8,12 +8,28 @@
   const $ = (selector) => document.querySelector(selector);
   const setText = (selector, value) => { $(selector).textContent = value; };
   const summary = data.summary;
-  setText("#metric-success", `${summary.successes}/${summary.runs}`);
-  setText("#metric-cases", summary.evaluatedBugTypes);
-  setText("#metric-tokens", summary.averageTokens);
-  setText("#metric-tools", summary.averageToolCalls);
-  setText("#dev-score", `${summary.development.successful_runs}/${summary.development.runs}`);
-  setText("#test-score", `${summary.locked.successful_runs}/${summary.locked.runs}`);
+  const historical = data.historicalBenchmark;
+  const developmentAttempts = historical.attempts.filter((attempt) => attempt.split === "development");
+  const lockedAttempts = historical.attempts.filter((attempt) => attempt.split === "locked");
+  const countSuccesses = (attempts) => attempts.filter((attempt) => attempt.success).length;
+  setText("#metric-success", `${historical.successes}/${historical.runs}`);
+  setText("#metric-cases", historical.runs);
+  setText("#metric-tokens", historical.averageTokens);
+  setText("#metric-tools", historical.incorrectAcceptedPatches);
+  setText("#dev-score", `${countSuccesses(developmentAttempts)}/${developmentAttempts.length}`);
+  setText("#test-score", `${countSuccesses(lockedAttempts)}/${lockedAttempts.length}`);
+  setText(
+    "#historical-stop-reason",
+    "PATCH_CONTEXT_MISMATCH：候选 hunk 与唯一精确上下文相差 "
+      + `${historical.lockedFailureAudit.distance_lines} 行，超过 `
+      + `${historical.lockedFailureAudit.maximum_exact_relocation_lines} 行上限；未写源码、未跑测试。`,
+  );
+  setText(
+    "#historical-integrity",
+    `0 个错误补丁被接受 · report sha256 ${historical.reportSha256.slice(0, 12)}… · `
+      + `terminal ledger sha256 ${historical.terminalLedgerSha256.slice(0, 12)}…`,
+  );
+  setText("#historical-scope", historical.scopeNote);
   setText("#generated-at", `snapshot ${new Date(data.generatedAt).toLocaleString("zh-CN")}`);
   if (data.repositoryCohort) {
     const repository = data.repositoryCohort;

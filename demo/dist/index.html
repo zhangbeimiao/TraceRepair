@@ -12,7 +12,7 @@
     <div class="grid-overlay" aria-hidden="true"></div>
     <header class="nav shell">
       <a class="brand" href="#top" aria-label="TraceRepair 首页"><span class="brand-mark">TR</span><span>TraceRepair</span></a>
-      <div class="nav-meta"><span class="live-dot"></span> frozen evidence · v0.4.0-dev1</div>
+      <div class="nav-meta"><span class="live-dot"></span> frozen evidence · agent v0.5.0</div>
     </header>
     <main id="top">
       <section class="hero shell">
@@ -21,10 +21,10 @@
         <p class="hero-copy">TraceRepair 是一个面向 Python 仓库的受控代码修复 Agent。模型只能搜索、阅读并提出候选 Diff；路径白名单、补丁策略、目标测试、全量回归和人工审核共同构成确定性安全边界。</p>
         <div class="hero-actions"><a class="primary-button" href="#trace">查看真实运行轨迹</a><a class="text-button" href="#architecture">理解执行链路 ↓</a></div>
         <div class="metrics" aria-label="冻结评测指标">
-          <article><strong id="metric-success">--</strong><span>冻结运行通过</span></article>
-          <article><strong id="metric-cases">--</strong><span>独立 Bug 类型</span></article>
+          <article><strong id="metric-success">--</strong><span>真实历史 Bug pass@1</span></article>
+          <article><strong id="metric-cases">--</strong><span>真实历史 Bug 数</span></article>
           <article><strong id="metric-tokens">--</strong><span>平均输出 Tokens</span></article>
-          <article><strong id="metric-tools">--</strong><span>平均工具调用</span></article>
+          <article><strong id="metric-tools">--</strong><span>错误接受补丁</span></article>
         </div>
         <p class="evidence-note">数据来源：冻结 manifest 与 SQLite trace，页面不包含人工编造的成功记录。</p>
       </section>
@@ -40,12 +40,14 @@
       </section>
       <section class="section evidence-section">
         <div class="shell">
-          <div class="section-heading"><div><span class="section-index">02</span><h2>开发集与锁定集分开报告</h2></div><p>锁定案例每个只运行一次；失败不会自动重试，也不会边测边改 Prompt。</p></div>
+          <div class="section-heading"><div><span class="section-index">02</span><h2>真实历史 Bug：成功与安全拒绝都公开</h2></div><p>冻结 Agent v0.5.0、Prompt、配置和 pass@1 协议；失败不会重试，也不会边测边改策略。</p></div>
           <div class="evidence-grid">
-            <article class="score-card development"><div class="score-top"><span>DEVELOPMENT</span><span>4 bug types · 2 runs each</span></div><strong id="dev-score">--</strong><p>用于迭代诊断策略与补丁闭环，达到阈值后冻结。</p></article>
-            <article class="score-card locked"><div class="score-top"><span>LOCKED / ONE-SHOT</span><span>5 unseen bug types</span></div><strong id="test-score">--</strong><p>同一版本盲测；无重试、无调参，成功与失败均写入快照。</p></article>
+            <article class="score-card development"><div class="score-top"><span>DEVELOPMENT</span><span>2 real historical bugs</span></div><strong id="dev-score">--</strong><p>Humanize 与 Boltons 的修复前提交；oracle 预检确认 buggy 失败、fixed 通过。</p></article>
+            <article class="score-card locked"><div class="score-top"><span>LOCKED / ONE-SHOT</span><span>1 unseen repository</span></div><strong id="test-score">--</strong><p>More Itertools 只运行一次；补丁定位越过安全边界后拒绝写入并转人工。</p></article>
           </div>
-          <div class="cohort-panel"><div><h3>从失败中迭代，而不是隐藏失败</h3><p>历史 cohort 保留早期错误路由、上下文不匹配与预算耗尽。</p></div><div id="cohorts" class="cohorts" aria-label="各版本成功率"></div></div>
+          <div class="failure-outcome"><article><span>LOCKED FAILURE</span><p id="historical-stop-reason">--</p></article><article><span>INTEGRITY</span><p id="historical-integrity">--</p></article></div>
+          <p class="evidence-note" id="historical-scope">--</p>
+          <div class="cohort-panel"><div><h3>受控工程回归证据（不是主成功率）</h3><p>EventRelay 13/13 用于验证状态机、门禁和 Trace；历史 cohort 保留早期错误路由、上下文不匹配与预算耗尽。</p></div><div id="cohorts" class="cohorts" aria-label="各版本受控运行成功率"></div></div>
         </div>
       </section>
       <section class="section shell" id="trace">

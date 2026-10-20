@@ -20,9 +20,33 @@ Demo 只回放冻结并脱敏的真实 Trace，不需要 API Key，也不会产�
 
 TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Agent。大模型负责在不确定环境中选择搜索、读取和补丁动作；确定性控制器负责权限、状态、成本、测试和人工审核。模型不能直接运行 Shell，也不能绕过验证门禁修改仓库。仓库差异由 JSON 任务配置描述，不再写死 EventRelay 路径。
 
-当前版本为 `v0.6.1`，对应的冻结评测 Agent cohort 仍为 `0.4.0-dev1`。除 EventRelay 基准外，版本还冻结了公开 MiniMath 仓库的 5 次重复稳定性样本，以及一个未公开小型 Python 仓库的严格一次性盲测。两类跨仓库证据分开报告，不把小样本写成任意仓库上的通用成功率。
+当前冻结 Agent 为 `0.5.0`。在三个来自真实开源仓库历史提交的 Bug 上，严格 `pass@1` 结果为 **2/3**：两个开发任务通过目标测试与完整回归；一个锁定任务因 `PATCH_CONTEXT_MISMATCH` 在写入源码和启动测试前被安全拒绝并转人工。结果中 **错误接受补丁数为 0**。样本量很小，因此这里只证明受控闭环能够处理真实历史 Bug 并在定位不确定时安全停止，不宣称任意仓库修复准确率。
 
 ## 评测结果
+
+### 真实历史 Bug（主要结论）
+
+| 协议 | Agent | 真实历史 Bug | pass@1 | 安全拒绝 | 错误接受补丁 | 平均输出 Tokens |
+|---|---|---:|---:|---:|---:|---:|
+| 冻结配置、每题一次 | `0.5.0` | 3 | **2/3（66.67%）** | 1 | **0** | 268.67 |
+
+- Development：Humanize、Boltons，`2/2`。
+- Locked one-shot：More Itertools，`0/1`；候选补丁意图接近正确修复，但 hunk 位置与唯一精确上下文相差 87 行，超过 ±80 行的精确重定位上限，因此在写文件和运行测试前拒绝。
+- 每个任务先运行 oracle 预检：修复前提交必须使目标测试失败，历史修复后提交必须通过目标测试和回归测试。
+- 所有尝试（包括失败）追加到 SHA-256 哈希链；最终报告、终端账本和 Agent 配置均有独立摘要。
+
+冻结证据：
+
+- `evaluation/benchmarks/historical-python-v1.0.0.json`
+- `evaluation/frozen/agent-v0.5.0.json`
+- `evaluation/results/historical-python-v1.0.0/report.json`
+- `evaluation/results/historical-python-v1.0.0/attempts.jsonl`
+- `evaluation/frozen/historical-python-v1.0.0.json`
+- `evaluation/frozen/historical-python-v1.0.0.json.sha256`
+
+任何补丁定位策略、重定位窗口或 Prompt 的改动，都必须提升 Agent 版本并创建新的 benchmark manifest 与结果目录；**不得用新逻辑覆盖或重跑 `historical-python-v1.0.0` 的锁定结果**。
+
+### 受控工程回归证据（次要结论）
 
 | 数据集 | Bug 类型 | 运行次数 | 成功 | 平均输出 Tokens | 平均工具调用 |
 |---|---:|---:|---:|---:|---:|
@@ -42,11 +66,11 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 - `evaluation/frozen/repository-mini-repo-discount-v0.6.1.json`
 - `evaluation/frozen/locked-repository-v0.6.1.json`
 
-前 13 次运行描述自建 EventRelay 受控基准；MiniMath 的 `5/5` 只证明该公开任务的重复稳定性；最后一行是未公开仓库的一次性结果。它们都不能解释为对任意真实仓库都有 100% 修复率。
+前 13 次运行描述自建 EventRelay 受控基准；MiniMath 的 `5/5` 只证明该公开任务的重复稳定性；最后一行是早期未公开仓库的一次性结果。它们用于证明状态机、工具门禁、恢复与跨仓库配置机制，不作为真实历史 Bug 的主成功率，也不能解释为任意仓库都有 100% 修复率。
 
 ## 30 秒介绍
 
-用户提交 Issue 和失败测试后，Agent 在最多三轮诊断中选择受限的代码搜索与读取工具，然后生成一次候选 unified diff。Diff 必须依次通过路径与变更量策略、目标测试和完整回归测试；全部通过后任务仍只进入 `awaiting_review`，等待人工确认。所有模型决策、工具生命周期、状态迁移和 checkpoint 都持久化到 SQLite。进程中断后，系统校验恢复工件或已修改文件的 SHA-256，再跳过已经成功的工具继续执行。
+用户提交 Issue 和失败测试后，Agent 在最多三轮诊断中选择受限的代码搜索与读取工具，然后生成一次候选 unified diff。Diff 必须依次通过路径与变更量策略、目标测试和完整回归测试；全部通过后任务仍只进入 `awaiting_review`，等待人工确认。所有模型决策、工具生命周期、状态迁移和 checkpoint 都持久化到 SQLite。冻结的真实历史 Bug 评测为 **2/3 pass@1，另 1 次在写文件前安全拒绝，0 个错误补丁被接受**。
 
 ## 架构
 
@@ -207,6 +231,23 @@ python scripts\report_model_runs.py
 python scripts\export_web_demo.py
 ```
 
+真实历史 Bug benchmark 使用统一 manifest 串行执行多个仓库任务。每个任务严格
+`pass@1`；失败、超时和人工接管都会追加到 SHA-256 哈希链账本，不允许用成功重跑
+覆盖。先执行零费用预检，再执行所有尚未尝试的任务：
+
+```powershell
+python scripts\prepare_historical_benchmark.py --download
+python scripts\run_benchmark.py `
+  --manifest evaluation\benchmarks\historical-python-v1.0.0.json `
+  --dry-run
+```
+
+`historical-python-v1.0.0` 已完成并冻结，不应再次运行。上面的 `--dry-run` 只做清单与
+状态预检，不发起模型请求。生成的 `report.json` 汇总 pass@1、Wilson 95% 区间、人工
+接管、错误接受检查、P50/P95 时延、Token 与 completion-only 成本估算。哈希链只能在
+终端哈希发布后提供篡改检测，不等同于外部不可变存储。完整协议见
+`docs/BENCHMARK_PROTOCOL.md`。
+
 ## 项目结构
 
 ```text
@@ -217,7 +258,9 @@ TraceRepair/
 ├─ eventrelay_tests/            复制到工作副本的业务测试
 ├─ evaluation/
 │  ├─ cases.json                10 个可复现 Bug
-│  └─ frozen/                   不可变评测快照
+│  ├─ benchmarks/               真实历史 Bug 清单
+│  ├─ results/                  哈希链账本与完整评测报告
+│  └─ frozen/                   已冻结评测快照
 ├─ demo/dist/                   零依赖本地 Web Demo
 ├─ scripts/                     一键脚本与运行入口
 ├─ tests/                       TraceRepair 工程测试
@@ -239,6 +282,8 @@ TraceRepair/
 
 ## 当前限制
 
+- 真实历史 Bug 只有 3 个，结果为 `2/3 pass@1`；Wilson 95% 区间很宽，因此不能据此声称广泛泛化能力。
+- 锁定任务因补丁 hunk 与唯一精确上下文相距 87 行、超过 ±80 行上限而安全拒绝。未来若改进补丁定位，必须作为新 Agent 版本和新评测集运行，不能回填本次结果。
 - 除 EventRelay 外，公开配置仓库获得 `5/5` 重复稳定性，另一个未公开仓库完成 `1/1` 无重试盲测；样本仍小，因此分层报告而不宣称普适成功率。
 - pytest 会导入并执行仓库代码，因此当前只接受操作者拥有或信任的仓库；未知第三方代码仍需要容器沙箱。
 - 当前定位是小型仓库，默认最多 2,000 个文件与 50 MiB，可在受控上限内配置。
@@ -260,7 +305,10 @@ TraceRepair/
 - `docs/configured-repositories.md`：通用仓库任务配置与安全边界
 - `docs/agent-architecture.md`：当前 Agent 分层架构、状态机与恢复边界
 - `docs/interview-pitch.md`：三分钟面试讲稿、演示顺序与高频追问
+- `docs/resume-material.md`：可信简历表述、30 秒介绍与指标边界
 - `docs/repository-task.schema.json`：任务配置 JSON Schema
+- `docs/benchmark-manifest.schema.json`：多仓库历史 Bug benchmark JSON Schema
+- `docs/BENCHMARK_PROTOCOL.md`：pass@1、数据冻结和防结果篡改协议
 - `docs/releases/v0.6.0.md`：可配置仓库适配层
 - `docs/releases/v0.6.1.md`：跨仓库稳定性与一次性盲测
 

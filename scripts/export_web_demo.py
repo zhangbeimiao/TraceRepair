@@ -1,5 +1,6 @@
 """Export frozen metrics and sanitized traces into a dependency-free local Web demo."""
 
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -18,19 +19,72 @@ from tracerepair.version import AGENT_VERSION, PROJECT_VERSION
 
 DEV_CASES = {"01", "03", "07", "10"}
 LOCKED_CASES = {"02", "04", "06", "08", "09"}
+CONTROLLED_AGENT_VERSION = "0.4.0-dev1"
+HISTORICAL_BENCHMARK_ID = "historical-python-v1.0.0"
 
 
 def read_json(path: Path) -> object:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
 def main() -> None:
-    dev_path = ROOT / "evaluation" / "frozen" / f"devset-v{AGENT_VERSION}.json"
-    test_path = ROOT / "evaluation" / "frozen" / f"testset-v{AGENT_VERSION}.json"
+    # The EventRelay traces are retained as controlled engineering regression
+    # evidence. The headline result is the separately frozen real-history
+    # benchmark below; never silently reinterpret the older cohort as v0.5.0.
+    dev_path = ROOT / "evaluation" / "frozen" / f"devset-v{CONTROLLED_AGENT_VERSION}.json"
+    test_path = ROOT / "evaluation" / "frozen" / f"testset-v{CONTROLLED_AGENT_VERSION}.json"
     dev = read_json(dev_path)
     test = read_json(test_path)
     if not isinstance(dev, dict) or not isinstance(test, dict):
         raise ValueError("frozen evaluation manifests must be JSON objects")
+    historical_path = (
+        ROOT / "evaluation" / "frozen" / f"{HISTORICAL_BENCHMARK_ID}.json"
+    )
+    historical_checksum_path = historical_path.with_suffix(".json.sha256")
+    historical = read_json(historical_path)
+    if not isinstance(historical, dict):
+        raise ValueError("historical benchmark summary must be a JSON object")
+    expected_historical_sha = historical_checksum_path.read_text(encoding="utf-8").split()[0]
+    if sha256_file(historical_path) != expected_historical_sha:
+        raise ValueError("historical benchmark summary checksum mismatch")
+    if historical.get("agent_version") != AGENT_VERSION:
+        raise ValueError("historical benchmark agent version does not match current agent")
+    historical_summary = historical.get("summary")
+    historical_attempts = historical.get("attempts")
+    locked_failure_audit = historical.get("locked_failure_audit")
+    if not isinstance(historical_summary, dict) or not isinstance(historical_attempts, list):
+        raise ValueError("historical benchmark summary is incomplete")
+    if not isinstance(locked_failure_audit, dict):
+        raise ValueError("historical benchmark locked failure audit is missing")
+    historical_benchmark = {
+        "benchmarkId": historical.get("benchmark_id"),
+        "protocol": historical.get("protocol"),
+        "agentVersion": historical.get("agent_version"),
+        "model": historical.get("model"),
+        "runs": historical_summary.get("attempted_tasks"),
+        "successes": historical_summary.get("successes"),
+        "failures": historical_summary.get("failures"),
+        "passAt1": historical_summary.get("pass_at_1"),
+        "humanHandoffs": historical_summary.get("human_handoffs"),
+        "incorrectAcceptedPatches": historical_summary.get("incorrect_accepted_patches"),
+        "averageTokens": historical_summary.get("average_completion_tokens"),
+        "totalTokens": historical_summary.get("total_completion_tokens"),
+        "p50Seconds": historical_summary.get("p50_wall_seconds"),
+        "p95Seconds": historical_summary.get("p95_wall_seconds"),
+        "wilson95": historical_summary.get("wilson_95_percent"),
+        "attempts": historical_attempts,
+        "lockedFailureAudit": locked_failure_audit,
+        "manifestSha256": historical.get("manifest_sha256"),
+        "agentConfigSha256": historical.get("agent_config_sha256"),
+        "reportSha256": historical.get("report_sha256"),
+        "terminalLedgerSha256": historical.get("terminal_ledger_sha256"),
+        "frozenSummarySha256": expected_historical_sha,
+        "scopeNote": historical.get("scope_note"),
+    }
     catalog_payload = read_json(ROOT / "evaluation" / "cases.json")
     if not isinstance(catalog_payload, list):
         raise ValueError("case catalog must be a JSON array")
@@ -214,6 +268,7 @@ def main() -> None:
     total_tools = sum(int(trace["toolCalls"]) for trace in traces)
     summary = {
         "agentVersion": AGENT_VERSION,
+        "controlledAgentVersion": CONTROLLED_AGENT_VERSION,
         "evaluatedBugTypes": len(DEV_CASES | LOCKED_CASES),
         "runs": total_runs,
         "successes": sum(bool(trace["success"]) for trace in traces),
@@ -242,6 +297,7 @@ def main() -> None:
         "traces": traces,
         "failures": failures,
         "recoveryScenarios": recovery_manifest["scenarios"],
+        "historicalBenchmark": historical_benchmark,
         "repositoryCohort": repository_cohort,
         "lockedRepositoryResult": locked_repository_result,
     }
@@ -266,6 +322,7 @@ def main() -> None:
                     test_path.relative_to(ROOT).as_posix(),
                     failure_path.relative_to(ROOT).as_posix(),
                     recovery_path.relative_to(ROOT).as_posix(),
+                    historical_path.relative_to(ROOT).as_posix(),
                 ]
                 + (
                     [repository_path.relative_to(ROOT).as_posix()]
@@ -281,6 +338,7 @@ def main() -> None:
                     "repeat_stability": repository_cohort,
                     "locked_one_shot": locked_repository_result,
                 },
+                "historical_benchmark": historical_benchmark,
                 "failure_showcase": {
                     "runs": len(failures),
                     "categories": [failure["category"] for failure in failures],

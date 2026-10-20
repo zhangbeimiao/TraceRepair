@@ -87,3 +87,28 @@ def test_timeout_becomes_structured_result(monkeypatch, tmp_path: Path) -> None:
     assert result.timed_out is True
     assert result.error_code == "TEST_TIMEOUT"
     assert result.stdout == "partial output"
+
+
+def test_test_process_does_not_receive_provider_or_cloud_credentials(
+    monkeypatch, tmp_path: Path
+) -> None:
+    workspace = materialize_baseline(tmp_path / "baseline")
+    captured_environment = {}
+    monkeypatch.setenv("DASHSCOPE_API_KEY", "secret-dashscope")
+    monkeypatch.setenv("OPENAI_API_KEY", "secret-openai")
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "secret-aws")
+    monkeypatch.setenv("GITHUB_TOKEN", "secret-github")
+
+    def completed(*args, **kwargs):
+        captured_environment.update(kwargs["env"])
+        return subprocess.CompletedProcess(args[0], 0, "passed", "")
+
+    monkeypatch.setattr("tracerepair.test_runner.subprocess.run", completed)
+    result = RestrictedTestRunner(workspace).run_tests("tests/test_repair_targets.py")
+
+    assert result.ok is True
+    assert "DASHSCOPE_API_KEY" not in captured_environment
+    assert "OPENAI_API_KEY" not in captured_environment
+    assert "AWS_SECRET_ACCESS_KEY" not in captured_environment
+    assert "GITHUB_TOKEN" not in captured_environment
+    assert captured_environment["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] == "1"

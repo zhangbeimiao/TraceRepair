@@ -1,0 +1,154 @@
+{
+  "attempts": [
+    {
+      "attempt_started_record_sha256": "f579f748a158a6d4b7063e37ef1ddfdd0b0f1bc5ec0f27952d2b7b8aae8c5a20",
+      "benchmark_id": "historical-python-v0.7",
+      "benchmark_task_id": "humanize-negative-fraction",
+      "completion_tokens": 0,
+      "log_path": "evaluation/results/historical-python-v0.7/logs/humanize-negative-fraction.log",
+      "log_sha256": "118d159add1e4509dd3f8817ce9dd792d3567e08ac9e56de312e292bdeb7c063",
+      "manifest_sha256": "831d4e7382787c6608b8b61be2f5495be39859fed385fe34ca631c5978ade0b9",
+      "model_calls": 0,
+      "previous_record_sha256": "f579f748a158a6d4b7063e37ef1ddfdd0b0f1bc5ec0f27952d2b7b8aae8c5a20",
+      "process_returncode": 1,
+      "record_kind": "attempt_finished",
+      "record_sha256": "997e3102c57abbd9bc39b39e8a449d35b7cf3a5117f86010e1ba4c965f09447e",
+      "recorded_at": "2026-10-20T11:22:00.831641+00:00",
+      "regression_passed": false,
+      "repository_sha256": "d922fe4a5fd8aabe8063f528ee7d4f49a1ce734d54321da6c9b5cb91e21b6b79",
+      "sequence": 2,
+      "source": {
+        "buggy_commit": "976484a655df046aa6849f440a4f0cd44fc4918c",
+        "fixed_commit": "c2c410c1521a3b1eb3efef52f3b06c2e42f7b92b",
+        "issue_url": "https://github.com/python-humanize/humanize/pull/320",
+        "repository_url": "https://github.com/python-humanize/humanize"
+      },
+      "split": "development",
+      "status": "needs_human",
+      "stop_reason": "planner stopped safely: model request rejected: HTTP 400",
+      "success": false,
+      "target_test_passed": false,
+      "task_config_sha256": "e085648cc1d813a5c9404dcb7cb541a24b22509d8e2a0be4005cd5683a57f5b6",
+      "timed_out": false,
+      "tool_calls": 0,
+      "tool_failures": 0,
+      "trace_task_id": "model-agent-repo-humanize-negative-fraction-d059aa91",
+      "wall_seconds": 0.735
+    },
+    {
+      "attempt_started_record_sha256": "9fc09df07dcd8e7b8fcf3b3b1b65411211323b0179a73f7d6af78af2339b063a",
+      "benchmark_id": "historical-python-v0.7",
+      "benchmark_task_id": "boltons-empty-multireplace",
+      "completion_tokens": 0,
+      "log_path": "evaluation/results/historical-python-v0.7/logs/boltons-empty-multireplace.log",
+      "log_sha256": "c4c47be5f94cc3d6d112b062ae2af4790a472a829ade58b1ee03debc06121514",
+      "manifest_sha256": "831d4e7382787c6608b8b61be2f5495be39859fed385fe34ca631c5978ade0b9",
+      "model_calls": 0,
+      "previous_record_sha256": "9fc09df07dcd8e7b8fcf3b3b1b65411211323b0179a73f7d6af78af2339b063a",
+      "process_returncode": 1,
+      "record_kind": "attempt_finished",
+      "record_sha256": "1003a59dd65f70a09c12874e2167bbd6afeed3be1db7c94b829a1e10d16a3662",
+      "recorded_at": "2026-10-20T11:22:01.421062+00:00",
+      "regression_passed": false,
+      "repository_sha256": "8b55bc3c3b7d3a2ec81cb5aaa985fe50a106d1ad3e7f94093d25e52089e4c9c5",
+      "sequence": 4,
+      "source": {
+        "buggy_commit": "0a3084e3058fd814684b1fc98343ec2e76d13ddc",
+        "fixed_commit": "435774ef8b10c1355bf77483a837945034011754",
+        "issue_url": null,
+        "repository_url": "https://github.com/mahmoud/boltons"
+      },
+      "split": "development",
+      "status": "needs_human",
+      "stop_reason": "planner stopped safely: model request rejected: HTTP 400",
+      "success": false,
+      "target_test_passed": false,
+      "task_config_sha256": "757c251d82e67974cbc71be021433cf48335e265771bcd3d2c5aaeffd365ea59",
+      "timed_out": false,
+      "tool_calls": 0,
+      "tool_failures": 0,
+      "trace_task_id": "model-agent-repo-boltons-empty-multireplace-1b4b9bdd",
+      "wall_seconds": 0.547
+    }
+  ],
+  "benchmark": {
+    "agent_version": "0.4.0-dev1",
+    "benchmark_id": "historical-python-v0.7",
+    "completion_cny_per_million_tokens": 0.0,
+    "manifest_sha256": "831d4e7382787c6608b8b61be2f5495be39859fed385fe34ca631c5978ade0b9",
+    "model": "qwen3.8-flash",
+    "protocol": "pass@1",
+    "schema_version": 1,
+    "tasks": [
+      {
+        "repository_sha256": "d922fe4a5fd8aabe8063f528ee7d4f49a1ce734d54321da6c9b5cb91e21b6b79",
+        "source": {
+          "buggy_commit": "976484a655df046aa6849f440a4f0cd44fc4918c",
+          "fixed_commit": "c2c410c1521a3b1eb3efef52f3b06c2e42f7b92b",
+          "issue_url": "https://github.com/python-humanize/humanize/pull/320",
+          "repository_url": "https://github.com/python-humanize/humanize"
+        },
+        "split": "development",
+        "task_config": "humanize-negative-fraction.json",
+        "task_config_sha256": "e085648cc1d813a5c9404dcb7cb541a24b22509d8e2a0be4005cd5683a57f5b6",
+        "task_id": "humanize-negative-fraction"
+      },
+      {
+        "repository_sha256": "8b55bc3c3b7d3a2ec81cb5aaa985fe50a106d1ad3e7f94093d25e52089e4c9c5",
+        "source": {
+          "buggy_commit": "0a3084e3058fd814684b1fc98343ec2e76d13ddc",
+          "fixed_commit": "435774ef8b10c1355bf77483a837945034011754",
+          "issue_url": null,
+          "repository_url": "https://github.com/mahmoud/boltons"
+        },
+        "split": "development",
+        "task_config": "boltons-empty-multireplace.json",
+        "task_config_sha256": "757c251d82e67974cbc71be021433cf48335e265771bcd3d2c5aaeffd365ea59",
+        "task_id": "boltons-empty-multireplace"
+      },
+      {
+        "repository_sha256": "5e9a0e70fcf09eff6293de9459e5497b4d8bf2425388ecedbd677c76c0168bb5",
+        "source": {
+          "buggy_commit": "1ea82a711c69f590054987b5cb194157f8ce8ac4",
+          "fixed_commit": "67fcf640477c78605580f5ee703a54c73c1e7a8a",
+          "issue_url": "https://github.com/more-itertools/more-itertools/pull/1308",
+          "repository_url": "https://github.com/more-itertools/more-itertools"
+        },
+        "split": "locked",
+        "task_config": "more-itertools-falsey-validator.json",
+        "task_config_sha256": "245812df6c9523705eb3e1f53cc418ff69b1bb84dce656f294a6e51a7dfa5d52",
+        "task_id": "more-itertools-falsey-validator"
+      }
+    ]
+  },
+  "generated_at": "2026-10-20T11:22:01.437663+00:00",
+  "integrity": {
+    "claim": "tamper-evident after the terminal hash is published; not an immutable store",
+    "ledger_records_verified": 4,
+    "terminal_record_sha256": "1003a59dd65f70a09c12874e2167bbd6afeed3be1db7c94b829a1e10d16a3662"
+  },
+  "report_sha256": "8bcc45732b581fe605d95d6ec907aed64197982b889b2add0cdb6cde54377f89",
+  "schema_version": 1,
+  "summary": {
+    "attempted_tasks": 2,
+    "average_completion_tokens": 0.0,
+    "cost_scope": "unavailable: no completion-token price was frozen in the manifest",
+    "estimated_completion_cost_cny": null,
+    "expected_tasks": 3,
+    "failures": 2,
+    "human_handoffs": 2,
+    "incorrect_accepted_patches": 0,
+    "missing_task_ids": [
+      "more-itertools-falsey-validator"
+    ],
+    "p50_wall_seconds": 0.547,
+    "p95_wall_seconds": 0.735,
+    "pass_at_1": 0.0,
+    "successes": 0,
+    "total_completion_tokens": 0,
+    "wilson_95_percent": {
+      "lower": 0.0,
+      "upper": 0.6576
+    }
+  }
+}

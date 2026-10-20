@@ -1,7 +1,8 @@
 window.TRACEREPAIR_DEMO = {
   "generatedAt": "2026-10-19T10:26:25.357070+00:00",
   "summary": {
-    "agentVersion": "0.4.0-dev1",
+    "agentVersion": "0.5.0",
+    "controlledAgentVersion": "0.4.0-dev1",
     "evaluatedBugTypes": 9,
     "runs": 13,
     "successes": 13,
@@ -117,10 +118,38 @@ window.TRACEREPAIR_DEMO = {
     },
     {
       "version": "0.4.0-dev1",
-      "runs": 19,
+      "runs": 23,
       "successes": 19,
-      "successRate": 1.0,
-      "averageTokens": 213.11
+      "successRate": 0.8261,
+      "averageTokens": 185.91
+    },
+    {
+      "version": "0.4.0-dev2",
+      "runs": 2,
+      "successes": 0,
+      "successRate": 0.0,
+      "averageTokens": 301.5
+    },
+    {
+      "version": "0.4.0-dev3",
+      "runs": 2,
+      "successes": 1,
+      "successRate": 0.5,
+      "averageTokens": 265.5
+    },
+    {
+      "version": "0.4.0-dev4",
+      "runs": 2,
+      "successes": 1,
+      "successRate": 0.5,
+      "averageTokens": 215.5
+    },
+    {
+      "version": "0.5.0",
+      "runs": 3,
+      "successes": 2,
+      "successRate": 0.6667,
+      "averageTokens": 268.67
     },
     {
       "version": "legacy",
@@ -1808,6 +1837,63 @@ window.TRACEREPAIR_DEMO = {
       ]
     }
   ],
+  "historicalBenchmark": {
+    "benchmarkId": "historical-python-v1.0.0",
+    "protocol": "pass@1",
+    "agentVersion": "0.5.0",
+    "model": "qwen3.8-flash",
+    "runs": 3,
+    "successes": 2,
+    "failures": 1,
+    "passAt1": 0.6667,
+    "humanHandoffs": 1,
+    "incorrectAcceptedPatches": 0,
+    "averageTokens": 268.67,
+    "totalTokens": 806,
+    "p50Seconds": 7.719,
+    "p95Seconds": 18.234,
+    "wilson95": {
+      "lower": 0.2077,
+      "upper": 0.9385
+    },
+    "attempts": [
+      {
+        "task_id": "humanize-negative-fraction",
+        "split": "development",
+        "success": true,
+        "record_sha256": "a8acb6ada67a7c888de02fbb5758de556904f9fa158f705a37aef361121d142f"
+      },
+      {
+        "task_id": "boltons-empty-multireplace",
+        "split": "development",
+        "success": true,
+        "record_sha256": "a0d009e5170711f146b4819af31f0c99208ec92f19ca9ef770754bee0cdf83ae"
+      },
+      {
+        "task_id": "more-itertools-falsey-validator",
+        "split": "locked",
+        "success": false,
+        "status": "needs_human",
+        "stop_reason": "candidate patch rejected: PATCH_CONTEXT_MISMATCH",
+        "candidate_sha256": "e890549835c080d30be101cf12d692ee9e22c889a44cc7e8e21380b01b01b152",
+        "record_sha256": "e0310cc699e8d14ef381308de8a5eb5d43dcca5f9a3757b64f467f14ce4fd722"
+      }
+    ],
+    "lockedFailureAudit": {
+      "candidate_hunk_old_start": 1098,
+      "unique_exact_context_line": 1185,
+      "distance_lines": 87,
+      "maximum_exact_relocation_lines": 80,
+      "decision": "rejected without writing source or running tests",
+      "post_hoc_retry_performed": false
+    },
+    "manifestSha256": "d7a64ed4e32b107317bf63be995343ec1deb094a7679771378bc38ca67473e78",
+    "agentConfigSha256": "ad8b1a04c9b03246bc42ff393b6082f53f79c612a12e1eb57281ab65dee2575e",
+    "reportSha256": "041d52280dfd6ce08e7b48d14ae5e7b9d864c4ca671a963006011e9560c4dd32",
+    "terminalLedgerSha256": "e0310cc699e8d14ef381308de8a5eb5d43dcca5f9a3757b64f467f14ce4fd722",
+    "frozenSummarySha256": "1a30ad42750e223124dd29214003688890a30b7b68b2f7101c6aa8ee43c11f4b",
+    "scopeNote": "This small benchmark validates the bounded repair mechanism and one locked transfer attempt; it does not establish broad code-repair accuracy."
+  },
   "repositoryCohort": {
     "projectVersion": "0.6.1",
     "task": "mini-repo-discount",

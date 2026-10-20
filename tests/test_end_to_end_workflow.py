@@ -2,12 +2,12 @@ import json
 from pathlib import Path
 
 from evaluation.materialize import materialize_case
-from tracerepair.end_to_end_workflow import EndToEndRepairWorkflow
+from tracerepair.end_to_end_workflow import EndToEndRepairWorkflow, _unique_hit_window
 from tracerepair.instrumented_tools import InstrumentedTools
 from tracerepair.model_planner import ModelPlanner, PlannerConfig
 from tracerepair.models import Task, TaskStatus
 from tracerepair.patch_apply import PatchApplier
-from tracerepair.read_tools import ReadOnlyRepository
+from tracerepair.read_tools import ReadOnlyRepository, ReadOnlyResult, SearchHit
 from tracerepair.store import TraceStore
 from tracerepair.test_runner import RestrictedTestRunner
 
@@ -85,6 +85,21 @@ def test_search_read_patch_runs_complete_verification_gate(tmp_path: Path) -> No
     assert tools == ["search_code", "read_file", "apply_patch", "run_tests", "run_regression"]
     assert "unified_diff" not in transport.payloads[0]["messages"][0]["content"]
     assert '"kind":"tool"' not in transport.payloads[2]["messages"][0]["content"]
+    patch_prompt = transport.payloads[2]["messages"][1]["content"]
+    assert "actual repository lines" in patch_prompt
+    assert "Preserve behavior outside the reported defect" in patch_prompt
+    assert "neighboring branches and boundary values" in patch_prompt
+    candidate_events = [
+        event
+        for event in store.list_events("agent-05")
+        if event.event_type == "candidate_patch_recorded"
+    ]
+    assert len(candidate_events) == 1
+    artifact = (
+        Path(store.get_task("agent-05").workspace)
+        / candidate_events[0].payload["artifact"]
+    )
+    assert artifact.read_text(encoding="utf-8") == FIX_CASE_05.rstrip("\n")
     store.close()
 
 
@@ -98,6 +113,36 @@ def test_early_handoff_stops_without_tools_or_patch(tmp_path: Path) -> None:
     assert result.task_status is TaskStatus.NEEDS_HUMAN
     assert result.action == "handoff"
     assert store.load_checkpoint("agent-05").get("completed_tools", []) == []
+    store.close()
+
+
+def test_repeated_search_recovers_with_configured_query(tmp_path: Path) -> None:
+    responses = [
+        '{"kind":"tool","tool":"search_code","arguments":{"query":"config"},"reason":"locate"}',
+        '{"kind":"tool","tool":"search_code","arguments":{"query":"config"},"reason":"retry"}',
+        json.dumps(
+            {
+                "kind": "patch",
+                "unified_diff": FIX_CASE_05,
+                "reason": "remove truthiness shortcut",
+            }
+        ),
+    ]
+    store, transport, workflow = make_workflow(tmp_path, responses)
+
+    result = workflow.run(
+        "config value false must parse as False", diagnostic_queries=("read_bool",)
+    )
+
+    assert result.task_status is TaskStatus.AWAITING_REVIEW
+    assert result.diagnosis_turns == 2
+    assert len(transport.payloads) == 3
+    recoveries = [
+        event.payload
+        for event in store.list_events("agent-05")
+        if event.event_type == "deterministic_recovery"
+    ]
+    assert any(item["trigger"] == "repeated_action" for item in recoveries)
     store.close()
 
 
@@ -185,3 +230,24 @@ def test_exhausted_model_searches_recover_from_public_entrypoint_hint(tmp_path: 
         "path": "src/eventrelay/config.py",
     }
     store.close()
+
+
+def test_unique_search_result_reads_around_deep_symbol() -> None:
+    result = ReadOnlyResult(
+        ok=True,
+        data=[SearchHit("src/package/module.py", 1133, "class MultiReplace:")],
+    )
+
+    assert _unique_hit_window(result) == ("src/package/module.py", 1053, 1252)
+
+
+def test_unique_search_result_requires_one_path() -> None:
+    result = ReadOnlyResult(
+        ok=True,
+        data=[
+            SearchHit("src/package/a.py", 300, "def target():"),
+            SearchHit("src/package/b.py", 400, "def target():"),
+        ],
+    )
+
+    assert _unique_hit_window(result) is None

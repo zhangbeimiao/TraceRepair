@@ -1,5 +1,6 @@
 """Bounded end-to-end model workflow built on TraceRepair's existing gates."""
 
+import hashlib
 import json
 import re
 from dataclasses import dataclass
@@ -117,7 +118,16 @@ class EndToEndRepairWorkflow:
 
             action_key = f"{plan.tool}:{json.dumps(plan.arguments, sort_keys=True)}"
             if action_key in seen_actions:
-                return self._stop("diagnosis", "model repeated the same tool action", turn, total_tokens)
+                recovered = self._recover_from_queries(
+                    issue, diagnostic_queries, "repeated_action"
+                )
+                if recovered is not None:
+                    source = recovered
+                    diagnosis_turns = turn
+                    break
+                return self._stop(
+                    "diagnosis", "model repeated the same tool action", turn, total_tokens
+                )
             seen_actions.add(action_key)
 
             result = self._execute(plan.tool, plan.arguments)
@@ -329,9 +339,13 @@ class EndToEndRepairWorkflow:
         patch_evidence = (
             f"Task: {issue}.\n"
             f"Confirmed source path: {source.path}\n"
+            f"Source slice covers actual repository lines {source.start_line}-{source.end_line}. "
+            "Unified-diff hunk headers must use repository line numbers, not slice-relative offsets. "
             "Return one smallest unified diff against that exact path, or handoff if the evidence is "
             "insufficient. Never edit tests. Copy context and removed lines exactly from Source; "
-            "include at least three unchanged context lines around the edit.\n"
+            "include at least three unchanged context lines around the edit. Preserve behavior outside "
+            "the reported defect: inspect neighboring branches and boundary values implied by the "
+            "current control flow, and make every new condition as narrow as possible.\n"
             f"Source:\n{source.content}"
         )
         patch_plan = self._planner.suggest(
@@ -350,18 +364,48 @@ class EndToEndRepairWorkflow:
                 total_tokens,
             )
 
+        candidate = patch_plan.unified_diff or ""
+        try:
+            self._persist_candidate(candidate)
+        except OSError:
+            return self._stop(
+                "candidate_artifact",
+                "candidate diff could not be persisted for audit",
+                diagnosis_turns,
+                total_tokens,
+            )
+
         self._store.transition(
             self._task_id,
             TaskStatus.NEEDS_HUMAN,
             "model candidate requires controlled verification",
         )
-        repair = self._repair.submit_candidate(patch_plan.unified_diff or "")
+        repair = self._repair.submit_candidate(candidate)
         return EndToEndResult(
             repair.action,
             repair.task_status,
             repair.detail,
             diagnosis_turns,
             total_tokens,
+        )
+
+    def _persist_candidate(self, unified_diff: str) -> None:
+        encoded = unified_diff.encode("utf-8")
+        digest = hashlib.sha256(encoded).hexdigest()
+        task = self._store.get_task(self._task_id)
+        artifact_dir = Path(task.workspace) / ".tracerepair" / "candidates"
+        artifact_dir.mkdir(parents=True, exist_ok=True)
+        artifact = artifact_dir / f"{digest}.diff"
+        if artifact.exists():
+            if artifact.read_text(encoding="utf-8") != unified_diff:
+                raise OSError("candidate artifact hash collision")
+        else:
+            artifact.write_text(unified_diff, encoding="utf-8", newline="\n")
+        relative = artifact.relative_to(Path(task.workspace)).as_posix()
+        self._store.append_event(
+            self._task_id,
+            "candidate_patch_recorded",
+            {"sha256": digest, "bytes": len(encoded), "artifact": relative},
         )
 
     def _stop(
@@ -403,10 +447,11 @@ class EndToEndRepairWorkflow:
         diagnostic_queries: tuple[str, ...],
         trigger: str,
     ) -> FileSlice | None:
-        path = _unique_hit_path(result)
-        if path is None:
+        window = _unique_hit_window(result)
+        if window is None:
             return None
-        read = self._tools.read_file(path, 1, 200)
+        path, start_line, end_line = window
+        read = self._tools.read_file(path, start_line, end_line)
         if not read.ok or not isinstance(read.data, FileSlice):
             return None
         if not _source_is_relevant(issue, read.data, diagnostic_queries):
@@ -441,6 +486,9 @@ def _next_allowed_tools(tool: str, result: ReadOnlyResult) -> set[str]:
     if tool == "search_code":
         hits = result.data or []
         paths = {getattr(hit, "path", None) for hit in hits}
+        paths.discard(None)
+        if len(paths) == 1:
+            return {"search_code", "read_file"}
         if len(hits) >= 8 or len(paths) > 3:
             return {"search_code"}
         return {"search_code", "read_file"}
@@ -488,6 +536,24 @@ def _unique_hit_path(result: ReadOnlyResult) -> str | None:
     if len(paths) != 1:
         return None
     return str(next(iter(paths)))
+
+
+def _unique_hit_window(result: ReadOnlyResult) -> tuple[str, int, int] | None:
+    """Return one bounded source window centred on a unique search-result path."""
+
+    path = _unique_hit_path(result)
+    if path is None:
+        return None
+    lines = [
+        line
+        for hit in (result.data or [])
+        if getattr(hit, "path", None) == path
+        and isinstance((line := getattr(hit, "line", None)), int)
+        and line >= 1
+    ]
+    anchor = min(lines) if lines else 1
+    start_line = max(1, anchor - 80)
+    return path, start_line, start_line + 199
 
 
 def _diagnostic_queries(issue: str, configured: tuple[str, ...]) -> tuple[str, ...]:

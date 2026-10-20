@@ -31,7 +31,15 @@ from tracerepair.repository_task import (
 )
 from tracerepair.store import TraceStore
 from tracerepair.test_runner import RestrictedTestRunner
-from tracerepair.version import AGENT_VERSION, MODEL_ID, PROJECT_VERSION
+from tracerepair.version import (
+    AGENT_VERSION,
+    MAX_COMPLETION_TOKENS,
+    MAX_DIAGNOSIS_TURNS,
+    MAX_MODEL_CALLS,
+    MAX_TOTAL_COMPLETION_TOKENS,
+    MODEL_ID,
+    PROJECT_VERSION,
+)
 from tracerepair.workflow import case_selector
 
 
@@ -211,9 +219,9 @@ def main() -> None:
         planner = ModelPlanner(
             transport,
             PlannerConfig(
-                max_completion_tokens=512,
-                max_calls_per_task=4,
-                max_total_completion_tokens=2_048,
+                max_completion_tokens=MAX_COMPLETION_TOKENS,
+                max_calls_per_task=MAX_MODEL_CALLS,
+                max_total_completion_tokens=MAX_TOTAL_COMPLETION_TOKENS,
             ),
         )
         task_evidence = f"{issue} Failing target: {selector}."
@@ -224,6 +232,7 @@ def main() -> None:
             tools,
             target_selector=selector,
             allowed_source_roots=source_allowlist,
+            max_diagnosis_turns=MAX_DIAGNOSIS_TURNS,
             crash_after=arguments.inject_crash_after,
         ).run(
             task_evidence,
@@ -233,10 +242,10 @@ def main() -> None:
         budget = store.load_checkpoint(task_id).get("model_budget", {})
         print("End-to-end repair run completed.")
         print(f"Agent version: {AGENT_VERSION}; task: {case_id} ({case_name})")
-        print(f"Diagnosis turns: {result.diagnosis_turns}/3")
+        print(f"Diagnosis turns: {result.diagnosis_turns}/{MAX_DIAGNOSIS_TURNS}")
         print(
-            f"Model usage: calls={budget.get('calls', 0)}/4, "
-            f"output_tokens={result.completion_tokens}/2048"
+            f"Model usage: calls={budget.get('calls', 0)}/{MAX_MODEL_CALLS}, "
+            f"output_tokens={result.completion_tokens}/{MAX_TOTAL_COMPLETION_TOKENS}"
         )
         print(f"Verification action: {result.action}")
         print(f"Final task status: {result.task_status.value}")

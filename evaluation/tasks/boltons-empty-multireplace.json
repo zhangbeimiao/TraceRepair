@@ -1,0 +1,15 @@
+{
+  "$schema": "../../docs/repository-task.schema.json",
+  "schema_version": 1,
+  "name": "boltons-empty-multireplace",
+  "repository_root": "../repositories/boltons-empty-multireplace",
+  "issue": "MultiReplace with an empty substitution mapping raises KeyError instead of behaving as a no-op",
+  "source_allowlist": ["boltons"],
+  "target_test": "tests/test_strutils.py::test_multi_replace_empty_mapping",
+  "regression_suite": "tests/test_strutils.py",
+  "diagnostic_queries": ["class MultiReplace", "def multi_replace"],
+  "pythonpath": ["."],
+  "timeout_seconds": 60,
+  "max_repository_bytes": 10485760,
+  "max_repository_files": 500
+}

@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -23,7 +24,34 @@ def main() -> None:
         with urlopen(request, timeout=20) as response:  # noqa: S310 - user-configured Model Studio URL
             body = json.loads(response.read().decode("utf-8"))
     except HTTPError as error:
-        print(f"Model list request rejected: HTTP {error.code}")
+        detail = f"Model list request rejected: HTTP {error.code}"
+        raw = ""
+        diagnostic_found = False
+        try:
+            raw = error.read().decode("utf-8", errors="replace")[:600]
+            parsed = json.loads(raw)
+            nested = parsed.get("error")
+            candidate = parsed.get("message") or parsed.get("code")
+            if not candidate and isinstance(nested, dict):
+                candidate = nested.get("message") or nested.get("code")
+            if isinstance(candidate, str) and candidate:
+                safe = re.sub(r"sk-[A-Za-z0-9._-]+", "[redacted]", candidate)
+                detail += f" ({' '.join(safe.split())[:240]})"
+                diagnostic_found = True
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError, AttributeError):
+            pass
+        print(detail)
+        print(f"Response reason: {error.reason}")
+        print(f"Response content type: {error.headers.get('Content-Type', 'unknown')}")
+        request_id = error.headers.get("x-request-id") or error.headers.get("x-acs-request-id")
+        if request_id:
+            print(f"Response request id: {request_id}")
+        if raw and not diagnostic_found:
+            safe_raw = raw.replace(api_key, "[redacted]")
+            safe_raw = re.sub(r"sk-[A-Za-z0-9._-]+", "[redacted]", safe_raw)
+            print(f"Sanitized response body: {' '.join(safe_raw.split())[:300]}")
+        elif not raw:
+            print("Response body: empty")
         raise SystemExit(1) from error
     except URLError as error:
         print(f"Model list request failed: {type(error.reason).__name__}")

@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/zhangbeimiao/TraceRepair/blob/main/docs/benchmark-manifest.schema.json",
+  "title": "TraceRepair historical pass@1 benchmark",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "benchmark_id",
+    "agent_version",
+    "model",
+    "protocol",
+    "tasks"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema_version": {"const": 1},
+    "benchmark_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9.-]{2,63}$"
+    },
+    "agent_version": {"type": "string", "minLength": 1, "maxLength": 64},
+    "model": {"type": "string", "minLength": 1, "maxLength": 100},
+    "protocol": {"const": "pass@1"},
+    "completion_cny_per_million_tokens": {
+      "type": "number",
+      "minimum": 0
+    },
+    "tasks": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "split", "task_config", "source"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+          },
+          "split": {"enum": ["development", "locked"]},
+          "task_config": {"type": "string", "minLength": 1, "maxLength": 500},
+          "source": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["repository_url", "buggy_commit", "fixed_commit"],
+            "properties": {
+              "repository_url": {
+                "type": "string",
+                "pattern": "^https://github\\.com/"
+              },
+              "buggy_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+              "fixed_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+              "issue_url": {
+                "type": "string",
+                "pattern": "^https://github\\.com/"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

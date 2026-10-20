@@ -11,6 +11,25 @@ from pathlib import Path
 _TARGET_SELECTOR = re.compile(
     r"^tests/test_repair_targets\.py(?:::test_case_(?:0[1-9]|10)_[A-Za-z0-9_]+)?$"
 )
+_SENSITIVE_ENVIRONMENT_NAMES = {
+    "ANTHROPIC_API_KEY",
+    "DASHSCOPE_API_KEY",
+    "GITHUB_TOKEN",
+    "GH_TOKEN",
+    "OPENAI_API_KEY",
+    "SSH_AUTH_SOCK",
+}
+_SENSITIVE_ENVIRONMENT_PREFIXES = (
+    "ALIYUN_",
+    "ANTHROPIC_",
+    "AWS_",
+    "AZURE_",
+    "DASHSCOPE_",
+    "GH_",
+    "GITHUB_",
+    "GOOGLE_",
+    "OPENAI_",
+)
 
 
 @dataclass(frozen=True)
@@ -107,7 +126,12 @@ class RestrictedTestRunner:
         return self._run("regression", self._regression_selector)
 
     def _run(self, _kind: str, selector: str) -> TestRunResult:
-        environment = os.environ.copy()
+        environment = {
+            key: value
+            for key, value in os.environ.items()
+            if key.upper() not in _SENSITIVE_ENVIRONMENT_NAMES
+            and not key.upper().startswith(_SENSITIVE_ENVIRONMENT_PREFIXES)
+        }
         environment["PYTHONPATH"] = os.pathsep.join(
             str((self._workspace / entry).resolve()) for entry in self._pythonpath
         )

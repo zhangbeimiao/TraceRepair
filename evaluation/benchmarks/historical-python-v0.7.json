@@ -1,0 +1,42 @@
+{
+  "$schema": "../../docs/benchmark-manifest.schema.json",
+  "schema_version": 1,
+  "benchmark_id": "historical-python-v0.7",
+  "agent_version": "0.4.0-dev1",
+  "model": "qwen3.8-flash",
+  "protocol": "pass@1",
+  "tasks": [
+    {
+      "id": "humanize-negative-fraction",
+      "split": "development",
+      "task_config": "../tasks/humanize-negative-fraction.json",
+      "source": {
+        "repository_url": "https://github.com/python-humanize/humanize",
+        "buggy_commit": "976484a655df046aa6849f440a4f0cd44fc4918c",
+        "fixed_commit": "c2c410c1521a3b1eb3efef52f3b06c2e42f7b92b",
+        "issue_url": "https://github.com/python-humanize/humanize/pull/320"
+      }
+    },
+    {
+      "id": "boltons-empty-multireplace",
+      "split": "development",
+      "task_config": "../tasks/boltons-empty-multireplace.json",
+      "source": {
+        "repository_url": "https://github.com/mahmoud/boltons",
+        "buggy_commit": "0a3084e3058fd814684b1fc98343ec2e76d13ddc",
+        "fixed_commit": "435774ef8b10c1355bf77483a837945034011754"
+      }
+    },
+    {
+      "id": "more-itertools-falsey-validator",
+      "split": "locked",
+      "task_config": "../tasks/more-itertools-falsey-validator.json",
+      "source": {
+        "repository_url": "https://github.com/more-itertools/more-itertools",
+        "buggy_commit": "1ea82a711c69f590054987b5cb194157f8ce8ac4",
+        "fixed_commit": "67fcf640477c78605580f5ee703a54c73c1e7a8a",
+        "issue_url": "https://github.com/more-itertools/more-itertools/pull/1308"
+      }
+    }
+  ]
+}

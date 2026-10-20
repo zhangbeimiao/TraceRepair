@@ -17,6 +17,20 @@ def _payload() -> dict[str, object]:
 def test_public_demo_contains_verified_patches_and_frozen_failures() -> None:
     payload = _payload()
 
+    historical = payload["historicalBenchmark"]
+    assert historical["benchmarkId"] == "historical-python-v1.0.0"
+    assert historical["agentVersion"] == "0.5.0"
+    assert historical["runs"] == 3
+    assert historical["successes"] == 2
+    assert historical["failures"] == 1
+    assert historical["passAt1"] == 0.6667
+    assert historical["humanHandoffs"] == 1
+    assert historical["incorrectAcceptedPatches"] == 0
+    assert historical["lockedFailureAudit"]["decision"] == (
+        "rejected without writing source or running tests"
+    )
+    assert historical["lockedFailureAudit"]["post_hoc_retry_performed"] is False
+    assert len(historical["frozenSummarySha256"]) == 64
     assert len(payload["traces"]) == 13
     assert len(payload["failures"]) == 3
     assert len(payload["recoveryScenarios"]) == 2
@@ -80,6 +94,9 @@ def test_demo_page_exposes_diff_and_failure_controls() -> None:
         "locked-repository-evidence-label",
         "locked-repository-score",
         "locked-repository-detail",
+        "historical-stop-reason",
+        "historical-integrity",
+        "historical-scope",
     ):
         assert html.count(f'id="{element_id}"') == 1
         assert f'#{element_id}' in script
@@ -87,3 +104,4 @@ def test_demo_page_exposes_diff_and_failure_controls() -> None:
     for gate in ("policy", "apply", "target", "regression"):
         assert f'id="verify-{gate}"' in html
     assert "#verify-${name}" in script
+    assert "historicalBenchmark" in script

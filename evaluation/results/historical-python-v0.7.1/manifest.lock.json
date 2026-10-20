@@ -1,0 +1,53 @@
+{
+  "benchmark": {
+    "agent_version": "0.4.0-dev1",
+    "benchmark_id": "historical-python-v0.7.1",
+    "completion_cny_per_million_tokens": 0.0,
+    "manifest_sha256": "ccbf1e457b924681cb39afc4aa44be10ff4d044e140098ca34dcfbff30d46db9",
+    "model": "qwen3.8-flash",
+    "protocol": "pass@1",
+    "schema_version": 1,
+    "tasks": [
+      {
+        "repository_sha256": "d922fe4a5fd8aabe8063f528ee7d4f49a1ce734d54321da6c9b5cb91e21b6b79",
+        "source": {
+          "buggy_commit": "976484a655df046aa6849f440a4f0cd44fc4918c",
+          "fixed_commit": "c2c410c1521a3b1eb3efef52f3b06c2e42f7b92b",
+          "issue_url": "https://github.com/python-humanize/humanize/pull/320",
+          "repository_url": "https://github.com/python-humanize/humanize"
+        },
+        "split": "development",
+        "task_config": "humanize-negative-fraction.json",
+        "task_config_sha256": "e085648cc1d813a5c9404dcb7cb541a24b22509d8e2a0be4005cd5683a57f5b6",
+        "task_id": "humanize-negative-fraction"
+      },
+      {
+        "repository_sha256": "8b55bc3c3b7d3a2ec81cb5aaa985fe50a106d1ad3e7f94093d25e52089e4c9c5",
+        "source": {
+          "buggy_commit": "0a3084e3058fd814684b1fc98343ec2e76d13ddc",
+          "fixed_commit": "435774ef8b10c1355bf77483a837945034011754",
+          "issue_url": null,
+          "repository_url": "https://github.com/mahmoud/boltons"
+        },
+        "split": "development",
+        "task_config": "boltons-empty-multireplace.json",
+        "task_config_sha256": "757c251d82e67974cbc71be021433cf48335e265771bcd3d2c5aaeffd365ea59",
+        "task_id": "boltons-empty-multireplace"
+      },
+      {
+        "repository_sha256": "5e9a0e70fcf09eff6293de9459e5497b4d8bf2425388ecedbd677c76c0168bb5",
+        "source": {
+          "buggy_commit": "1ea82a711c69f590054987b5cb194157f8ce8ac4",
+          "fixed_commit": "67fcf640477c78605580f5ee703a54c73c1e7a8a",
+          "issue_url": "https://github.com/more-itertools/more-itertools/pull/1308",
+          "repository_url": "https://github.com/more-itertools/more-itertools"
+        },
+        "split": "locked",
+        "task_config": "more-itertools-falsey-validator.json",
+        "task_config_sha256": "245812df6c9523705eb3e1f53cc418ff69b1bb84dce656f294a6e51a7dfa5d52",
+        "task_id": "more-itertools-falsey-validator"
+      }
+    ]
+  },
+  "locked_at": "2026-10-20T12:23:50.525421+00:00"
+}

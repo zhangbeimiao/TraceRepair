@@ -1,0 +1,15 @@
+{
+  "$schema": "../../docs/repository-task.schema.json",
+  "schema_version": 1,
+  "name": "more-itertools-falsey-validator",
+  "repository_root": "../repositories/more-itertools-falsey-validator",
+  "issue": "bucket ignores a callable validator when the validator object itself is falsey and silently replaces it with the default validator",
+  "source_allowlist": ["more_itertools"],
+  "target_test": "tests/test_more.py::BucketTests::test_falsey_validator_is_honoured",
+  "regression_suite": "tests/test_more.py",
+  "diagnostic_queries": ["class bucket", "validator or"],
+  "pythonpath": ["."],
+  "timeout_seconds": 60,
+  "max_repository_bytes": 10485760,
+  "max_repository_files": 500
+}

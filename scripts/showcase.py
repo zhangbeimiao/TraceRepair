@@ -20,7 +20,13 @@ def load_demo_data(path: Path = DEFAULT_DATA) -> dict[str, Any]:
     payload = json.loads(source[len(DATA_PREFIX) : -2])
     if not isinstance(payload, dict):
         raise ValueError("demo data must contain a JSON object")
-    for key in ("summary", "traces", "failures", "recoveryScenarios"):
+    for key in (
+        "summary",
+        "historicalBenchmark",
+        "traces",
+        "failures",
+        "recoveryScenarios",
+    ):
         if key not in payload:
             raise ValueError(f"demo data is missing {key}")
     return payload
@@ -58,12 +64,23 @@ def render_showcase(
 
 def _render_evidence(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
+    historical = payload["historicalBenchmark"]
     repository = payload.get("repositoryCohort") or {}
     held_out = payload.get("lockedRepositoryResult") or {}
+    audit = historical["lockedFailureAudit"]
     return "\n".join(
         (
             "[1] FROZEN EVIDENCE",
-            f"  EventRelay controlled benchmark : {summary['successes']}/{summary['runs']} passed",
+            "  Real historical bugs, pass@1   : "
+            f"{historical['successes']}/{historical['runs']} passed; "
+            f"{historical['failures']} safely rejected",
+            "  Safety outcome                  : "
+            f"{historical['incorrectAcceptedPatches']} incorrect patches accepted; "
+            f"{historical['humanHandoffs']} human handoff",
+            "  Locked failure                  : PATCH_CONTEXT_MISMATCH; "
+            f"exact context was {audit['distance_lines']} lines away from the proposed hunk, "
+            "so no source was written and no tests ran",
+            f"  EventRelay controlled regression: {summary['successes']}/{summary['runs']} passed",
             "  Public configured repository    : "
             f"{repository.get('successes', '-')}/{repository.get('runs', '-')} passed, "
             f"avg tokens={repository.get('averageTokens', '-')}, "
@@ -73,7 +90,10 @@ def _render_evidence(payload: dict[str, Any]) -> str:
             f"tokens={held_out.get('tokens', '-')}, calls={held_out.get('modelCalls', '-')}, "
             f"tools={held_out.get('toolCalls', '-')}, "
             f"retried={str(held_out.get('retried', '-')).lower()}",
-            "  Claim boundary                   : small frozen tasks, not arbitrary-repo accuracy",
+            "  Claim boundary                   : three real historical bugs validate the bounded "
+            "workflow; they do not establish broad repair accuracy",
+            "  Versioning rule                  : any patch-location policy change requires a new "
+            "agent version and a new frozen benchmark",
         )
     )
 

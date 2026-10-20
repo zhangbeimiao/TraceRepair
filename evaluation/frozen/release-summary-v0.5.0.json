@@ -1,0 +1,220 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-19T10:26:25.357070+00:00",
+  "summary": {
+    "agentVersion": "0.5.0",
+    "controlledAgentVersion": "0.4.0-dev1",
+    "evaluatedBugTypes": 9,
+    "runs": 13,
+    "successes": 13,
+    "successRate": 1.0,
+    "averageTokens": 224.38,
+    "averageToolCalls": 5.0,
+    "development": {
+      "case_ids": [
+        "01",
+        "03",
+        "07",
+        "10"
+      ],
+      "agent_version": "0.4.0-dev1",
+      "runs": 8,
+      "successful_runs": 8,
+      "success_rate": 1.0,
+      "average_completion_tokens": 212.62,
+      "average_tool_calls": 5.0,
+      "stop_reasons": {},
+      "minimum_runs_per_case": 2,
+      "required_success_rate": 0.8,
+      "required_case_success_rate": 0.5,
+      "cases": [
+        {
+          "case_id": "01",
+          "agent_version": "0.4.0-dev1",
+          "runs": 2,
+          "successful_runs": 2,
+          "success_rate": 1.0,
+          "average_completion_tokens": 262.0,
+          "average_tool_calls": 5.0,
+          "stop_reasons": {},
+          "minimum_runs": 2,
+          "required_success_rate": 0.5,
+          "stable": true
+        },
+        {
+          "case_id": "03",
+          "agent_version": "0.4.0-dev1",
+          "runs": 2,
+          "successful_runs": 2,
+          "success_rate": 1.0,
+          "average_completion_tokens": 179.5,
+          "average_tool_calls": 5.0,
+          "stop_reasons": {},
+          "minimum_runs": 2,
+          "required_success_rate": 0.5,
+          "stable": true
+        },
+        {
+          "case_id": "07",
+          "agent_version": "0.4.0-dev1",
+          "runs": 2,
+          "successful_runs": 2,
+          "success_rate": 1.0,
+          "average_completion_tokens": 233.0,
+          "average_tool_calls": 5.0,
+          "stop_reasons": {},
+          "minimum_runs": 2,
+          "required_success_rate": 0.5,
+          "stable": true
+        },
+        {
+          "case_id": "10",
+          "agent_version": "0.4.0-dev1",
+          "runs": 2,
+          "successful_runs": 2,
+          "success_rate": 1.0,
+          "average_completion_tokens": 176.0,
+          "average_tool_calls": 5.0,
+          "stop_reasons": {},
+          "minimum_runs": 2,
+          "required_success_rate": 0.5,
+          "stable": true
+        }
+      ],
+      "stable": true
+    },
+    "locked": {
+      "case_ids": [
+        "02",
+        "04",
+        "06",
+        "08",
+        "09"
+      ],
+      "agent_version": "0.4.0-dev1",
+      "runs": 5,
+      "successful_runs": 5,
+      "success_rate": 1.0,
+      "average_model_calls": 3.0,
+      "average_completion_tokens": 243.2,
+      "average_tool_calls": 5.0,
+      "stop_reasons": {},
+      "run_counts": {
+        "02": 1,
+        "04": 1,
+        "06": 1,
+        "08": 1,
+        "09": 1
+      },
+      "complete": true
+    }
+  },
+  "source_manifests": [
+    "evaluation/frozen/devset-v0.4.0-dev1.json",
+    "evaluation/frozen/testset-v0.4.0-dev1.json",
+    "evaluation/frozen/failure-showcase-v0.4.0.json",
+    "evaluation/frozen/recovery-showcase-v0.4.1.json",
+    "evaluation/frozen/historical-python-v1.0.0.json",
+    "evaluation/frozen/repository-mini-repo-discount-v0.6.1.json",
+    "evaluation/frozen/locked-repository-v0.6.1.json"
+  ],
+  "repository_evidence": {
+    "repeat_stability": {
+      "projectVersion": "0.6.1",
+      "task": "mini-repo-discount",
+      "runs": 5,
+      "successes": 5,
+      "successRate": 1.0,
+      "averageTokens": 179.6,
+      "averageToolCalls": 5.0,
+      "scope": "repeat stability on a public configured repository"
+    },
+    "locked_one_shot": {
+      "projectVersion": "0.6.1",
+      "agentVersion": "0.4.0-dev1",
+      "model": "qwen3.8-flash",
+      "scope": "one-shot result on a held-out trusted small Python repository",
+      "success": true,
+      "status": "awaiting_review",
+      "modelCalls": 3,
+      "tokens": 234,
+      "toolCalls": 5,
+      "targetPassed": true,
+      "regressionPassed": true,
+      "oneShot": true,
+      "retried": false
+    }
+  },
+  "historical_benchmark": {
+    "benchmarkId": "historical-python-v1.0.0",
+    "protocol": "pass@1",
+    "agentVersion": "0.5.0",
+    "model": "qwen3.8-flash",
+    "runs": 3,
+    "successes": 2,
+    "failures": 1,
+    "passAt1": 0.6667,
+    "humanHandoffs": 1,
+    "incorrectAcceptedPatches": 0,
+    "averageTokens": 268.67,
+    "totalTokens": 806,
+    "p50Seconds": 7.719,
+    "p95Seconds": 18.234,
+    "wilson95": {
+      "lower": 0.2077,
+      "upper": 0.9385
+    },
+    "attempts": [
+      {
+        "task_id": "humanize-negative-fraction",
+        "split": "development",
+        "success": true,
+        "record_sha256": "a8acb6ada67a7c888de02fbb5758de556904f9fa158f705a37aef361121d142f"
+      },
+      {
+        "task_id": "boltons-empty-multireplace",
+        "split": "development",
+        "success": true,
+        "record_sha256": "a0d009e5170711f146b4819af31f0c99208ec92f19ca9ef770754bee0cdf83ae"
+      },
+      {
+        "task_id": "more-itertools-falsey-validator",
+        "split": "locked",
+        "success": false,
+        "status": "needs_human",
+        "stop_reason": "candidate patch rejected: PATCH_CONTEXT_MISMATCH",
+        "candidate_sha256": "e890549835c080d30be101cf12d692ee9e22c889a44cc7e8e21380b01b01b152",
+        "record_sha256": "e0310cc699e8d14ef381308de8a5eb5d43dcca5f9a3757b64f467f14ce4fd722"
+      }
+    ],
+    "lockedFailureAudit": {
+      "candidate_hunk_old_start": 1098,
+      "unique_exact_context_line": 1185,
+      "distance_lines": 87,
+      "maximum_exact_relocation_lines": 80,
+      "decision": "rejected without writing source or running tests",
+      "post_hoc_retry_performed": false
+    },
+    "manifestSha256": "d7a64ed4e32b107317bf63be995343ec1deb094a7679771378bc38ca67473e78",
+    "agentConfigSha256": "ad8b1a04c9b03246bc42ff393b6082f53f79c612a12e1eb57281ab65dee2575e",
+    "reportSha256": "041d52280dfd6ce08e7b48d14ae5e7b9d864c4ca671a963006011e9560c4dd32",
+    "terminalLedgerSha256": "e0310cc699e8d14ef381308de8a5eb5d43dcca5f9a3757b64f467f14ce4fd722",
+    "frozenSummarySha256": "1a30ad42750e223124dd29214003688890a30b7b68b2f7101c6aa8ee43c11f4b",
+    "scopeNote": "This small benchmark validates the bounded repair mechanism and one locked transfer attempt; it does not establish broad code-repair accuracy."
+  },
+  "failure_showcase": {
+    "runs": 3,
+    "categories": [
+      "patch_context_mismatch",
+      "diagnosis_budget_exhausted",
+      "invalid_patch_output"
+    ]
+  },
+  "recovery_showcase": {
+    "runs": 2,
+    "crash_points": [
+      "source_read",
+      "patch_applied"
+    ]
+  }
+}

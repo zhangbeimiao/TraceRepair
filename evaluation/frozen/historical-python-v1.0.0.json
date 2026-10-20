@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "historical-python-v1.0.0",
+  "protocol": "pass@1",
+  "agent_version": "0.5.0",
+  "model": "qwen3.8-flash",
+  "manifest_sha256": "d7a64ed4e32b107317bf63be995343ec1deb094a7679771378bc38ca67473e78",
+  "agent_config_sha256": "ad8b1a04c9b03246bc42ff393b6082f53f79c612a12e1eb57281ab65dee2575e",
+  "report_sha256": "041d52280dfd6ce08e7b48d14ae5e7b9d864c4ca671a963006011e9560c4dd32",
+  "terminal_ledger_sha256": "e0310cc699e8d14ef381308de8a5eb5d43dcca5f9a3757b64f467f14ce4fd722",
+  "summary": {
+    "attempted_tasks": 3,
+    "successes": 2,
+    "failures": 1,
+    "pass_at_1": 0.6667,
+    "human_handoffs": 1,
+    "incorrect_accepted_patches": 0,
+    "average_completion_tokens": 268.67,
+    "total_completion_tokens": 806,
+    "p50_wall_seconds": 7.719,
+    "p95_wall_seconds": 18.234,
+    "wilson_95_percent": {
+      "lower": 0.2077,
+      "upper": 0.9385
+    }
+  },
+  "attempts": [
+    {
+      "task_id": "humanize-negative-fraction",
+      "split": "development",
+      "success": true,
+      "record_sha256": "a8acb6ada67a7c888de02fbb5758de556904f9fa158f705a37aef361121d142f"
+    },
+    {
+      "task_id": "boltons-empty-multireplace",
+      "split": "development",
+      "success": true,
+      "record_sha256": "a0d009e5170711f146b4819af31f0c99208ec92f19ca9ef770754bee0cdf83ae"
+    },
+    {
+      "task_id": "more-itertools-falsey-validator",
+      "split": "locked",
+      "success": false,
+      "status": "needs_human",
+      "stop_reason": "candidate patch rejected: PATCH_CONTEXT_MISMATCH",
+      "candidate_sha256": "e890549835c080d30be101cf12d692ee9e22c889a44cc7e8e21380b01b01b152",
+      "record_sha256": "e0310cc699e8d14ef381308de8a5eb5d43dcca5f9a3757b64f467f14ce4fd722"
+    }
+  ],
+  "locked_failure_audit": {
+    "candidate_hunk_old_start": 1098,
+    "unique_exact_context_line": 1185,
+    "distance_lines": 87,
+    "maximum_exact_relocation_lines": 80,
+    "decision": "rejected without writing source or running tests",
+    "post_hoc_retry_performed": false
+  },
+  "scope_note": "This small benchmark validates the bounded repair mechanism and one locked transfer attempt; it does not establish broad code-repair accuracy."
+}
