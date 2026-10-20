@@ -45,7 +45,9 @@ jobs:
         run: python scripts/verify_release.py
 
       - name: Run test suite
-        run: python -m pytest -q
+        run: |
+          mkdir -p .tmp
+          python -m pytest -q
 
       - name: Check whitespace
         run: git diff --check
