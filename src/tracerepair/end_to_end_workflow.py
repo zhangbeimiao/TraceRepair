@@ -531,11 +531,33 @@ def _source_is_relevant(
 
 def _unique_hit_path(result: ReadOnlyResult) -> str | None:
     hits = result.data or []
-    paths = {getattr(hit, "path", None) for hit in hits}
-    paths.discard(None)
+    paths = {
+        str(path)
+        for hit in hits
+        if (path := getattr(hit, "path", None)) is not None
+    }
     if len(paths) != 1:
-        return None
+        source_paths = {path for path in paths if not _looks_like_test_path(path)}
+        if len(source_paths) != 1:
+            return None
+        return next(iter(source_paths))
     return str(next(iter(paths)))
+
+
+def _looks_like_test_path(path: str) -> bool:
+    """Identify conventional test paths without relying on repository-specific names."""
+
+    parts = tuple(
+        part.casefold() for part in path.replace("\\", "/").split("/") if part
+    )
+    if not parts:
+        return False
+    filename = parts[-1]
+    return (
+        any(part in {"test", "tests"} for part in parts[:-1])
+        or filename.startswith("test_")
+        or filename.endswith("_test.py")
+    )
 
 
 def _unique_hit_window(result: ReadOnlyResult) -> tuple[str, int, int] | None:

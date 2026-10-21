@@ -251,3 +251,27 @@ def test_unique_search_result_requires_one_path() -> None:
     )
 
     assert _unique_hit_window(result) is None
+
+
+def test_unique_search_result_prefers_only_non_test_source_path() -> None:
+    result = ReadOnlyResult(
+        ok=True,
+        data=[
+            SearchHit("package/core.py", 950, "def __len__(self):"),
+            SearchHit("package/tests/test_core.py", 143, "def __len__(self):"),
+        ],
+    )
+
+    assert _unique_hit_window(result) == ("package/core.py", 870, 1069)
+
+
+def test_unique_search_result_does_not_choose_between_test_only_paths() -> None:
+    result = ReadOnlyResult(
+        ok=True,
+        data=[
+            SearchHit("tests/test_a.py", 10, "def helper():"),
+            SearchHit("tests/test_b.py", 20, "def helper():"),
+        ],
+    )
+
+    assert _unique_hit_window(result) is None
