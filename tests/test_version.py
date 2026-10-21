@@ -2,7 +2,7 @@ import json
 import tomllib
 from pathlib import Path
 
-from tracerepair.version import AGENT_VERSION, PROJECT_VERSION
+from tracerepair.version import AGENT_VERSION, MAX_COMPLETION_TOKENS, PROJECT_VERSION
 
 
 ROOT = Path(__file__).parents[1]
@@ -15,7 +15,8 @@ def test_project_version_matches_package_metadata() -> None:
 
 
 def test_development_agent_does_not_relabel_frozen_historical_evidence() -> None:
-    assert AGENT_VERSION == "0.6.0-dev3"
+    assert AGENT_VERSION == "0.6.0-dev4"
+    assert MAX_COMPLETION_TOKENS == 800
     frozen = json.loads(
         (ROOT / "evaluation/frozen/historical-python-v1.0.0.json").read_text(
             encoding="utf-8"
@@ -36,8 +37,13 @@ def test_development_agent_does_not_relabel_frozen_historical_evidence() -> None
             encoding="utf-8"
         )
     )
-    development = json.loads(
+    development_v3 = json.loads(
         (ROOT / "evaluation/configs/agent-v0.6.0-dev3.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    development = json.loads(
+        (ROOT / "evaluation/configs/agent-v0.6.0-dev4.json").read_text(
             encoding="utf-8"
         )
     )
@@ -46,6 +52,8 @@ def test_development_agent_does_not_relabel_frozen_historical_evidence() -> None
     assert development["status"] == "development_only_not_benchmarked"
     assert development_v1["agent_version"] == "0.6.0-dev1"
     assert development_v2["agent_version"] == "0.6.0-dev2"
+    assert development_v3["agent_version"] == "0.6.0-dev3"
+    assert development["planner"]["max_completion_tokens"] == MAX_COMPLETION_TOKENS
     assert (
         development["patch_location"]["symbol_exact_relocation"]["fuzzy_matching"]
         is False

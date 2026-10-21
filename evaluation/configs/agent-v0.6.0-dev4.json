@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "agent_version": "0.6.0-dev4",
+  "parent_agent_version": "0.6.0-dev3",
+  "status": "development_only_not_benchmarked",
+  "model": "qwen3.8-flash",
+  "planner": {
+    "max_completion_tokens": 800,
+    "max_calls_per_task": 4,
+    "max_total_completion_tokens": 2048
+  },
+  "workflow": {
+    "max_diagnosis_turns": 3,
+    "max_patch_attempts": 1,
+    "final_success_state": "awaiting_review"
+  },
+  "output_normalization": {
+    "single_semantic_json_object": true,
+    "unambiguous_tool_or_patch_alias": true,
+    "multiple_plan_objects_rejected": true,
+    "ambiguous_tool_plus_patch_rejected": true,
+    "provider_retry_on_parse_error": false
+  },
+  "diagnosis_recovery": {
+    "prefer_single_non_test_path": true,
+    "require_exactly_one_non_test_path": true,
+    "repository_specific_path_hints": false
+  },
+  "patch_location": {
+    "advertised_line_exact": true,
+    "bounded_exact_relocation_lines": 80,
+    "symbol_exact_relocation": {
+      "enabled": true,
+      "global_exact_match_must_be_unique": true,
+      "minimum_context_lines": 2,
+      "minimum_removed_lines": 1,
+      "named_python_scope_required": true,
+      "fuzzy_matching": false
+    }
+  },
+  "evaluation_rule": "historical-python-v1.1.2 remains immutable; tune only on the declared development split"
+}
