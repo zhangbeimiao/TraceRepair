@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import os
 import shutil
 import stat
 import sys
@@ -107,6 +108,97 @@ CASES = (
         ),
         "tests/test_more.py",
     ),
+    HistoricalCase(
+        "pysnooper-file-output",
+        Archive(
+            "pysnooper-6e3d797",
+            "cool-RR",
+            "PySnooper",
+            "6e3d797be3fa0a746fb5b1b7c7fea78eb926c208",
+            "14d47558c98530126e8362356a005282dbf41d97ba130d7405b0995f44549ec1",
+        ),
+        Archive(
+            "pysnooper-15555ed",
+            "cool-RR",
+            "PySnooper",
+            "15555ed760000b049aff8fecc79d29339c1224c3",
+            "0194d03bb6ffed0eef4410619d82f0280e7046bdf6e638e618f9c0e6ae3d0f05",
+        ),
+        "tests/test_pysnooper.py",
+        (("pytest.ini", "[pytest]\n"),),
+    ),
+    HistoricalCase(
+        "tqdm-sizeless-bool",
+        Archive(
+            "tqdm-c2599e3",
+            "tqdm",
+            "tqdm",
+            "c2599e3cd6087429f48bae34347ec5d2473c8392",
+            "3f64176c44689f835f81367ec0e0c7749c7b9484704e98805b8ce122e14bcc81",
+        ),
+        Archive(
+            "tqdm-73962a4",
+            "tqdm",
+            "tqdm",
+            "73962a47026dd980ac0758820efc9c41cbf938e0",
+            "c4be7c83d2b4c9a88a0a48b0277696625a5adf419578bf52ef3fd145fdf2d3ae",
+        ),
+        "tqdm/tests/tests_tqdm.py",
+    ),
+    HistoricalCase(
+        "thefuck-git-push-match",
+        Archive(
+            "thefuck-7c858fa",
+            "nvbn",
+            "thefuck",
+            "7c858fadb3458be829d3d43666ccb46c3ed5b8a0",
+            "5b68e9b17483f87f987e25a3a3a90f7e8543bd6cb7db935efe0637e839fa5f4f",
+        ),
+        Archive(
+            "thefuck-c205683",
+            "nvbn",
+            "thefuck",
+            "c205683a8df8a57e2db1e9816a5a7ce3255b08fc",
+            "2fd5475e3168ccfedd5aba25eb790c6c918e5d92dc4779e9169f8afe4c7d4710",
+        ),
+        "tests/rules/test_git_push.py",
+    ),
+    HistoricalCase(
+        "httpie-host-header-case",
+        Archive(
+            "httpie-8c892ed",
+            "jakubroztocil",
+            "httpie",
+            "8c892edd4fe700a7ca5cc733dcb4817831d253e2",
+            "dea581dbdeb02cb6f15301f21a1b15752b8b632fcb31fdabcce101c5626f4532",
+        ),
+        Archive(
+            "httpie-040d981",
+            "jakubroztocil",
+            "httpie",
+            "040d981f00c3f6830b2d0db3daf3c64c080e96e3",
+            "5207068009e5419b66c48a3cc030165860ddd3da9bbf6ee1b61128ae74a2b779",
+        ),
+        "tests/test_regressions.py",
+    ),
+    HistoricalCase(
+        "youtube-dl-boolean-filter",
+        Archive(
+            "youtube-dl-99036a1",
+            "ytdl-org",
+            "youtube-dl",
+            "99036a1298089068dcf80c0985bfcc3f8c24f281",
+            "7bce14549fb13d554d5a64938d45e4c7ea64cd6890c95cdaed77643ef198f452",
+        ),
+        Archive(
+            "youtube-dl-1cc47c6",
+            "ytdl-org",
+            "youtube-dl",
+            "1cc47c667419e0eadc0a6989256ab7b276852adf",
+            "33c711a4c3378e21304f567c4e31c0c4875f84fd51f6ede701c26f061a6cf063",
+        ),
+        "test/test_utils.py",
+    ),
 )
 
 
@@ -118,7 +210,7 @@ def main() -> None:
         help="download missing pinned archives; without this flag only cached archives are used",
     )
     arguments = parser.parse_args()
-    if ROOT.drive.casefold() != "d:":
+    if os.name == "nt" and ROOT.drive.casefold() != "d:":
         raise SystemExit("historical benchmark assets must remain on D: on this workstation")
     archive_root = ROOT / "evaluation" / "archives"
     repository_root = ROOT / "evaluation" / "repositories"

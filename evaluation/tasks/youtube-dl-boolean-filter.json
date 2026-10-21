@@ -1,0 +1,15 @@
+{
+  "$schema": "../../docs/repository-task.schema.json",
+  "schema_version": 1,
+  "name": "youtube-dl-boolean-filter",
+  "repository_root": "../repositories/youtube-dl-boolean-filter",
+  "issue": "match_str treats a false boolean metadata field as present, so unary filters such as is_live and !is_live return incorrect results for False values.",
+  "source_allowlist": ["youtube_dl"],
+  "target_test": "test/test_utils.py::TestUtil::test_match_str",
+  "regression_suite": "test/test_utils.py",
+  "diagnostic_queries": ["def match_str", "UNARY_OPERATORS", "def _match_one"],
+  "pythonpath": ["."],
+  "timeout_seconds": 120,
+  "max_repository_bytes": 104857600,
+  "max_repository_files": 5000
+}

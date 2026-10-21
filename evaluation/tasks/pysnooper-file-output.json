@@ -1,0 +1,15 @@
+{
+  "$schema": "../../docs/repository-task.schema.json",
+  "schema_version": 1,
+  "name": "pysnooper-file-output",
+  "repository_root": "../repositories/pysnooper-file-output",
+  "issue": "Writing trace output to a filesystem path raises NameError because the writer opens an undefined output_path variable instead of the supplied path.",
+  "source_allowlist": ["pysnooper"],
+  "target_test": "tests/test_pysnooper.py::test_file_output",
+  "regression_suite": "tests/test_pysnooper.py",
+  "diagnostic_queries": ["def get_write_function", "output_path"],
+  "pythonpath": ["."],
+  "timeout_seconds": 60,
+  "max_repository_bytes": 20971520,
+  "max_repository_files": 1000
+}

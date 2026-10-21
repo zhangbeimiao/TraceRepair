@@ -67,3 +67,29 @@ def test_rejects_repository_above_configured_file_limit(tmp_path: Path) -> None:
 
     with pytest.raises(RepositoryTaskError, match="max_repository_files"):
         RepositoryTaskSpec.from_mapping(payload)
+
+
+def test_accepts_legacy_pytest_configuration_in_setup_cfg(tmp_path: Path) -> None:
+    repository = tmp_path / "legacy-repo"
+    (repository / "legacy").mkdir(parents=True)
+    (repository / "tests").mkdir()
+    (repository / "legacy" / "logic.py").write_text("VALUE = 1\n", encoding="utf-8")
+    (repository / "tests" / "test_logic.py").write_text(
+        "def test_value(): assert True\n", encoding="utf-8"
+    )
+    (repository / "setup.cfg").write_text("[tool:pytest]\n", encoding="utf-8")
+
+    spec = RepositoryTaskSpec.from_mapping(
+        {
+            "name": "legacy-repo",
+            "repository_root": str(repository),
+            "issue": "legacy repositories commonly configure pytest in setup.cfg",
+            "source_allowlist": ["legacy"],
+            "target_test": "tests/test_logic.py::test_value",
+            "regression_suite": "tests/test_logic.py",
+            "diagnostic_queries": ["VALUE"],
+            "pythonpath": ["."],
+        }
+    )
+
+    assert spec.repository_root == repository.resolve()

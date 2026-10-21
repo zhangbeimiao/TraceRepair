@@ -165,8 +165,11 @@ class RepositoryTaskSpec:
         regression = _resolve_inside(self.repository_root, self.regression_suite)
         if not regression.exists():
             raise RepositoryTaskError("regression_suite does not exist")
-        if not any((self.repository_root / name).is_file() for name in ("pytest.ini", "pyproject.toml")):
-            raise RepositoryTaskError("repository must contain pytest.ini or pyproject.toml")
+        pytest_configs = ("pytest.ini", "pyproject.toml", "setup.cfg", "tox.ini")
+        if not any((self.repository_root / name).is_file() for name in pytest_configs):
+            raise RepositoryTaskError(
+                "repository must contain pytest.ini, pyproject.toml, setup.cfg, or tox.ini"
+            )
         _repository_inventory(
             self.repository_root,
             max_files=self.max_repository_files,

@@ -1,0 +1,15 @@
+{
+  "$schema": "../../docs/repository-task.schema.json",
+  "schema_version": 1,
+  "name": "tqdm-sizeless-bool",
+  "repository_root": "../repositories/tqdm-sizeless-bool",
+  "issue": "Casting a tqdm instance to bool does not define correct behavior for iterables without a length, explicit totals, and manual mode.",
+  "source_allowlist": ["tqdm"],
+  "target_test": "tqdm/tests/tests_tqdm.py::test_bool",
+  "regression_suite": "tqdm/tests/tests_tqdm.py",
+  "diagnostic_queries": ["class tqdm", "def __len__", "def __bool__"],
+  "pythonpath": ["."],
+  "timeout_seconds": 120,
+  "max_repository_bytes": 31457280,
+  "max_repository_files": 1500
+}

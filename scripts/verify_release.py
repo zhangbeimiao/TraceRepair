@@ -1,6 +1,7 @@
 """Fail closed when a release candidate contains secrets, local paths, or large tracked files."""
 
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -74,13 +75,28 @@ MAX_RELEASE_FILE_BYTES = 5 * 1024 * 1024
 
 
 def release_files(root: Path):
-    for path in root.rglob("*"):
+    candidates = _tracked_paths(root) if (root / ".git").exists() else root.rglob("*")
+    for path in candidates:
         if not path.is_file():
             continue
         relative = path.relative_to(root)
         if any(part in EXCLUDED_DIRECTORIES for part in relative.parts):
             continue
         yield path, relative
+
+
+def _tracked_paths(root: Path):
+    """Yield Git-tracked release inputs so ignored benchmark snapshots cannot affect a release."""
+
+    completed = subprocess.run(
+        ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+    )
+    for raw in completed.stdout.split(b"\0"):
+        if raw:
+            yield root / raw.decode("utf-8")
 
 
 def verify(root: Path = ROOT) -> list[str]:

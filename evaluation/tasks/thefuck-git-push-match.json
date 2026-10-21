@@ -1,0 +1,15 @@
+{
+  "$schema": "../../docs/repository-task.schema.json",
+  "schema_version": 1,
+  "name": "thefuck-git-push-match",
+  "repository_root": "../repositories/thefuck-git-push-match",
+  "issue": "The git_push rule produces false positives for Bitbucket output because it accepts any output containing set-upstream instead of the exact git push guidance.",
+  "source_allowlist": ["thefuck"],
+  "target_test": "tests/rules/test_git_push.py::test_match_bitbucket",
+  "regression_suite": "tests/rules/test_git_push.py",
+  "diagnostic_queries": ["def match", "set-upstream", "git push"],
+  "pythonpath": ["."],
+  "timeout_seconds": 60,
+  "max_repository_bytes": 52428800,
+  "max_repository_files": 2500
+}

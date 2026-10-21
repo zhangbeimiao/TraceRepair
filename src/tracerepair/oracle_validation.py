@@ -40,6 +40,26 @@ _FIXED_ARCHIVES = {
         "more-itertools-67fcf64.zip",
         "82671a4c72d0cc55a50860257d1547a00bb9fb2d5eee6f1853b2901c92ca0a5f",
     ),
+    "15555ed760000b049aff8fecc79d29339c1224c3": (
+        "pysnooper-15555ed.zip",
+        "0194d03bb6ffed0eef4410619d82f0280e7046bdf6e638e618f9c0e6ae3d0f05",
+    ),
+    "73962a47026dd980ac0758820efc9c41cbf938e0": (
+        "tqdm-73962a4.zip",
+        "c4be7c83d2b4c9a88a0a48b0277696625a5adf419578bf52ef3fd145fdf2d3ae",
+    ),
+    "c205683a8df8a57e2db1e9816a5a7ce3255b08fc": (
+        "thefuck-c205683.zip",
+        "2fd5475e3168ccfedd5aba25eb790c6c918e5d92dc4779e9169f8afe4c7d4710",
+    ),
+    "040d981f00c3f6830b2d0db3daf3c64c080e96e3": (
+        "httpie-040d981.zip",
+        "5207068009e5419b66c48a3cc030165860ddd3da9bbf6ee1b61128ae74a2b779",
+    ),
+    "1cc47c667419e0eadc0a6989256ab7b276852adf": (
+        "youtube-dl-1cc47c6.zip",
+        "33c711a4c3378e21304f567c4e31c0c4875f84fd51f6ede701c26f061a6cf063",
+    ),
 }
 
 
@@ -146,15 +166,16 @@ def _single_top_directory(path: Path) -> Path:
 
 
 def _write_generated_files(task_id: str, root: Path) -> None:
-    if task_id != "humanize-negative-fraction":
-        return
-    target = root / "src" / "humanize" / "_version.py"
-    target.write_text(
-        '"""Deterministic version stub for the source-archive benchmark fixture."""\n\n'
-        '__version__ = "0+tracerepair-benchmark"\n',
-        encoding="utf-8",
-        newline="\n",
-    )
+    if task_id == "humanize-negative-fraction":
+        target = root / "src" / "humanize" / "_version.py"
+        target.write_text(
+            '"""Deterministic version stub for the source-archive benchmark fixture."""\n\n'
+            '__version__ = "0+tracerepair-benchmark"\n',
+            encoding="utf-8",
+            newline="\n",
+        )
+    elif task_id == "pysnooper-file-output":
+        (root / "pytest.ini").write_text("[pytest]\n", encoding="utf-8", newline="\n")
 
 
 def _file_sha256(path: Path) -> str:
