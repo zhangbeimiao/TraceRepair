@@ -9,6 +9,9 @@ def test_offline_showcase_replays_all_evidence_without_private_metadata() -> Non
     assert "0 incorrect patches accepted; 2 human handoffs" in output
     assert "1/2 passed; each task ran once" in output
     assert "EventRelay controlled regression: 13/13 passed" in output
+    assert "not part of the 3/5 historical benchmark" in output
+    assert "not part of the 3/5 benchmark" in output
+    assert "not a benchmark repair attempt" in output
     assert "Public configured repository    : 5/5 passed" in output
     assert "Held-out repository, one shot   : 1/1 passed" in output
     assert "search_code -> read_file -> apply_patch -> run_tests -> run_regression" in output
@@ -25,4 +28,4 @@ def test_offline_showcase_can_render_one_section_and_case() -> None:
 
     assert "case 10 (batch-isolation)" in output
     assert "[1] FROZEN EVIDENCE" not in output
-    assert "[3] SAFE FAILURE" not in output
+    assert "[3] CONTROLLED EVENTRELAY SAFE FAILURE" not in output

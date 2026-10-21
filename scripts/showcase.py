@@ -111,7 +111,8 @@ def _render_repair(payload: dict[str, Any], case_id: str) -> str:
     tools = _ordered_tools(trace["timeline"])
     patch = trace["patchPreview"]
     lines = [
-        f"[2] SUCCESSFUL REPAIR TRACE - case {trace['caseId']} ({trace['caseName']})",
+        f"[2] CONTROLLED EVENTRELAY REPAIR TRACE - case {trace['caseId']} ({trace['caseName']})",
+        "  Evidence scope: engineering regression; not part of the 3/5 historical benchmark",
         f"  Issue       : {trace['issue']}",
         f"  Model usage : calls={trace['modelCalls']}, output_tokens={trace['tokens']}",
         f"  Tool chain  : {' -> '.join(tools)}",
@@ -135,7 +136,8 @@ def _render_failure(payload: dict[str, Any]) -> str:
     control = failure["control"]
     return "\n".join(
         (
-            f"[3] SAFE FAILURE - {failure['category']}",
+            f"[3] CONTROLLED EVENTRELAY SAFE FAILURE - {failure['category']}",
+            "  Evidence scope: retained engineering failure; not part of the 3/5 benchmark",
             f"  Issue         : {failure['issue']}",
             f"  Error         : {control['errorCode']}",
             f"  Patch applied : {str(control['patchApplied']).lower()}",
@@ -162,7 +164,8 @@ def _render_recovery(payload: dict[str, Any]) -> str:
     )
     return "\n".join(
         (
-            "[4] CHECKPOINT CRASH RECOVERY - patch already applied",
+            "[4] CONTROLLED CHECKPOINT CRASH RECOVERY - patch already applied",
+            "  Evidence scope: deterministic recovery test; not a benchmark repair attempt",
             f"  Before crash : {' -> '.join(phase_one_tools)}",
             "  Crash        : process exits after checkpoint persistence",
             f"  Resume       : model_calls={recovery['resume_model_calls']}, "

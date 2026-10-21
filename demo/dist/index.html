@@ -51,7 +51,7 @@
         </div>
       </section>
       <section class="section shell" id="trace">
-        <div class="section-heading"><div><span class="section-index">03</span><h2>打开一条真实 Trace</h2></div><p>展示脱敏状态、工具结果、测试门禁与经 SHA-256 校验的 EventRelay 示例 Diff；绝对路径、模型原文和完整日志不进入页面。</p></div>
+        <div class="section-heading"><div><span class="section-index">03</span><h2>打开一条 EventRelay 受控 Trace</h2></div><p>这是用于验证状态机与门禁的工程回归证据，不属于上方五仓库 3/5 主指标；展示脱敏状态、工具结果、测试门禁与经 SHA-256 校验的示例 Diff。</p></div>
         <div class="trace-layout">
           <aside class="trace-sidebar">
             <div class="filter-row" role="group" aria-label="运行集筛选"><button class="filter active" data-filter="all">全部</button><button class="filter" data-filter="development">开发集</button><button class="filter" data-filter="locked">锁定集</button></div>
@@ -78,7 +78,7 @@
       </section>
       <section class="section failure-section" id="failures">
         <div class="shell">
-          <div class="section-heading"><div><span class="section-index">04</span><h2>失败没有被隐藏，而是被系统接住</h2></div><p>以下均为真实历史运行。切换案例，查看错误发生在哪一步，以及为什么未验证的修改没有进入测试或审核。</p></div>
+          <div class="section-heading"><div><span class="section-index">04</span><h2>EventRelay 工程失败没有被隐藏</h2></div><p>以下是开发阶段保留的真实受控运行，不计入五仓库 3/5 benchmark。切换案例可查看错误发生在哪一步，以及系统如何安全停止。</p></div>
           <div id="failure-tabs" class="failure-tabs" role="tablist" aria-label="失败案例选择"></div>
           <div class="failure-layout">
             <aside class="failure-summary">
@@ -97,7 +97,7 @@
         </div>
       </section>
       <section class="section shell recovery-section" id="recovery">
-        <div class="section-heading"><div><span class="section-index">05</span><h2>崩溃不是重来，而是从可信 Checkpoint 继续</h2></div><p>两个故障点都真正关闭并重新打开 SQLite、重建运行时依赖；恢复前必须验证工件或工作副本哈希。</p></div>
+        <div class="section-heading"><div><span class="section-index">05</span><h2>崩溃不是重来，而是从可信 Checkpoint 继续</h2></div><p>这是独立的确定性恢复测试，不计入修复成功率；两个故障点都真正关闭并重新打开 SQLite，恢复前必须验证工件或工作副本哈希。</p></div>
         <div id="recovery-tabs" class="recovery-tabs" role="tablist" aria-label="崩溃恢复场景"></div>
         <div class="recovery-board">
           <aside class="recovery-summary">
