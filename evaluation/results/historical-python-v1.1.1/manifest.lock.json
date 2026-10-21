@@ -1,0 +1,79 @@
+{
+  "benchmark": {
+    "agent_version": "0.6.0-dev2",
+    "benchmark_id": "historical-python-v1.1.1",
+    "completion_cny_per_million_tokens": 0.0,
+    "manifest_sha256": "9995dddb68fbef13c8199bf2d0aa72c374d0bf60055a0880fb8e568e67a2ed51",
+    "model": "qwen3.8-flash",
+    "protocol": "pass@1",
+    "schema_version": 1,
+    "tasks": [
+      {
+        "repository_sha256": "167b52780f6eb398221572b0fd8947fc11d4bf5a7c52bdfde518ef31c963c89c",
+        "source": {
+          "buggy_commit": "6e3d797be3fa0a746fb5b1b7c7fea78eb926c208",
+          "fixed_commit": "15555ed760000b049aff8fecc79d29339c1224c3",
+          "issue_url": "https://github.com/cool-RR/PySnooper/issues/2",
+          "repository_url": "https://github.com/cool-RR/PySnooper"
+        },
+        "split": "development",
+        "task_config": "pysnooper-file-output.json",
+        "task_config_sha256": "b02b72ae9028485b5d993a8701901d91859e986fcaab64d6b840e592cdd239fd",
+        "task_id": "pysnooper-file-output"
+      },
+      {
+        "repository_sha256": "030cd38f607eb99327d9a383dd5639944cec1bebbd0e3cdda590ec39d387fd92",
+        "source": {
+          "buggy_commit": "c2599e3cd6087429f48bae34347ec5d2473c8392",
+          "fixed_commit": "73962a47026dd980ac0758820efc9c41cbf938e0",
+          "issue_url": null,
+          "repository_url": "https://github.com/tqdm/tqdm"
+        },
+        "split": "development",
+        "task_config": "tqdm-sizeless-bool.json",
+        "task_config_sha256": "5c6c72a46126d06a463bb825125a3030ef199853d8344aac3386905078f39d41",
+        "task_id": "tqdm-sizeless-bool"
+      },
+      {
+        "repository_sha256": "b7dd5dbe7052c462df635a7e1a6d0b66608eb51f6606ba0b18fb1dc8e9d3c406",
+        "source": {
+          "buggy_commit": "7c858fadb3458be829d3d43666ccb46c3ed5b8a0",
+          "fixed_commit": "c205683a8df8a57e2db1e9816a5a7ce3255b08fc",
+          "issue_url": null,
+          "repository_url": "https://github.com/nvbn/thefuck"
+        },
+        "split": "development",
+        "task_config": "thefuck-git-push-match.json",
+        "task_config_sha256": "0142ed8d4d728ceb3a09e3a2b117ec7384b1bf3036775e5d4c733b47bb7fa7cf",
+        "task_id": "thefuck-git-push-match"
+      },
+      {
+        "repository_sha256": "30a2572282c218cb1c747d7d74c25075ead293b093d878fc804c354b70d8e676",
+        "source": {
+          "buggy_commit": "8c892edd4fe700a7ca5cc733dcb4817831d253e2",
+          "fixed_commit": "040d981f00c3f6830b2d0db3daf3c64c080e96e3",
+          "issue_url": null,
+          "repository_url": "https://github.com/httpie/cli"
+        },
+        "split": "locked",
+        "task_config": "httpie-host-header-case.json",
+        "task_config_sha256": "6694599b6854d727b9288f0b845ae8fc16fddecd408ed409c177cf55577de09f",
+        "task_id": "httpie-host-header-case"
+      },
+      {
+        "repository_sha256": "50cdd13024396476f45a5d2751e905134f146d586721801c8a61c07c8e3e39ad",
+        "source": {
+          "buggy_commit": "99036a1298089068dcf80c0985bfcc3f8c24f281",
+          "fixed_commit": "1cc47c667419e0eadc0a6989256ab7b276852adf",
+          "issue_url": null,
+          "repository_url": "https://github.com/ytdl-org/youtube-dl"
+        },
+        "split": "locked",
+        "task_config": "youtube-dl-boolean-filter.json",
+        "task_config_sha256": "731295c5ba236c6a8a64b4e81e639f093bdf09379ac33e0d22b4c70478184a38",
+        "task_id": "youtube-dl-boolean-filter"
+      }
+    ]
+  },
+  "locked_at": "2026-10-21T06:03:10.492940+00:00"
+}
