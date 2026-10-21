@@ -73,22 +73,31 @@ def validate_historical_oracles(
     root = project_root.resolve()
     temporary_root = root / ".tmp" / f"oracle-preflight-{uuid4().hex}"
     results: list[OracleResult] = []
+    failures: list[str] = []
     try:
         for task in tasks:
-            spec = RepositoryTaskSpec.load(task.config_path)
-            task_root = temporary_root / task.task_id
-            buggy = materialize_repository(spec, task_root / "buggy")
-            archive = _fixed_archive(root, task)
-            extracted = task_root / "fixed-extracted"
-            _safe_extract(archive, extracted)
-            fixed = _single_top_directory(extracted)
-            _write_generated_files(task.task_id, fixed)
-            fixed_spec = replace(spec, repository_root=fixed)
-            fixed_spec.validate_repository()
-            results.append(validate_oracle_pair(task.task_id, spec, buggy, fixed_spec, fixed))
+            try:
+                spec = RepositoryTaskSpec.load(task.config_path)
+                task_root = temporary_root / task.task_id
+                buggy = materialize_repository(spec, task_root / "buggy")
+                archive = _fixed_archive(root, task)
+                extracted = task_root / "fixed-extracted"
+                _safe_extract(archive, extracted)
+                fixed = _single_top_directory(extracted)
+                _write_generated_files(task.task_id, fixed)
+                fixed_spec = replace(spec, repository_root=fixed)
+                fixed_spec.validate_repository()
+                results.append(
+                    validate_oracle_pair(task.task_id, spec, buggy, fixed_spec, fixed)
+                )
+            except OracleValidationError as error:
+                failures.append(str(error))
     finally:
         if temporary_root.exists() and temporary_root.is_relative_to(root / ".tmp"):
             shutil.rmtree(temporary_root, ignore_errors=True)
+    if failures:
+        details = "\n".join(f"- {failure}" for failure in failures)
+        raise OracleValidationError(f"oracle preflight failed for {len(failures)} task(s):\n{details}")
     return tuple(results)
 
 
@@ -187,7 +196,9 @@ def _file_sha256(path: Path) -> str:
 
 
 def _outcome(result: TestRunResult) -> str:
+    stdout = " ".join(result.stdout.split())[-600:]
+    stderr = " ".join(result.stderr.split())[-600:]
     return (
         f"exit_code={result.exit_code}, timed_out={result.timed_out}, "
-        f"error_code={result.error_code}"
+        f"error_code={result.error_code}, stdout={stdout!r}, stderr={stderr!r}"
     )

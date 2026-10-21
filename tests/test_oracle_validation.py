@@ -64,3 +64,17 @@ def test_oracle_rejects_collection_error_as_invalid_bug_signal(tmp_path: Path) -
         validate_oracle_pair(
             "sample-value", spec, buggy, replace(spec, repository_root=fixed), fixed
         )
+
+
+def test_oracle_error_includes_bounded_pytest_diagnostics(tmp_path: Path) -> None:
+    buggy = _repository(tmp_path / "buggy", 1)
+    fixed = _repository(tmp_path / "fixed", 2)
+    (buggy / "tests" / "test_logic.py").write_text(
+        "def test_value(:\n", encoding="utf-8"
+    )
+    spec = _spec(buggy)
+
+    with pytest.raises(OracleValidationError, match="stdout=.*SyntaxError"):
+        validate_oracle_pair(
+            "sample-value", spec, buggy, replace(spec, repository_root=fixed), fixed
+        )

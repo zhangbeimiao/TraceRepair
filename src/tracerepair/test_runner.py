@@ -140,10 +140,15 @@ class RestrictedTestRunner:
         temporary_directory.mkdir(exist_ok=True)
         environment["TMP"] = str(temporary_directory)
         environment["TEMP"] = str(temporary_directory)
-        config_file = self._workspace / "pytest.ini"
-        if not config_file.is_file():
-            config_file = self._workspace / "pyproject.toml"
-        if not config_file.is_file():
+        config_file = next(
+            (
+                self._workspace / name
+                for name in ("pytest.ini", "pyproject.toml", "tox.ini", "setup.cfg")
+                if (self._workspace / name).is_file()
+            ),
+            None,
+        )
+        if config_file is None:
             return TestRunResult(
                 ok=False,
                 selector=selector,
