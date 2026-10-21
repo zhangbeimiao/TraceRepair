@@ -39,3 +39,13 @@ def test_v110_task_sources_use_distinct_buggy_and_fixed_commits() -> None:
 
     assert all(source["buggy_commit"] != source["fixed_commit"] for source in sources)
     assert len({source["fixed_commit"] for source in sources}) == 5
+
+
+def test_v110_compatibility_harnesses_are_outside_model_write_allowlists() -> None:
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+
+    for task in manifest["tasks"]:
+        config_path = (MANIFEST.parent / task["task_config"]).resolve()
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+        assert "conftest.py" not in config["source_allowlist"]
+        assert "tests" not in config["source_allowlist"]

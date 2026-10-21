@@ -18,6 +18,47 @@ from uuid import uuid4
 ROOT = Path(__file__).resolve().parents[1]
 
 
+PYSNOOPER_PY311_COMPAT = '''"""Benchmark-only compatibility for a dependency predating Python 3.11."""
+
+import inspect
+from collections import namedtuple
+
+
+if not hasattr(inspect, "getargspec"):
+    _ArgSpec = namedtuple("ArgSpec", "args varargs keywords defaults")
+
+    def _getargspec(function):
+        spec = inspect.getfullargspec(function)
+        return _ArgSpec(spec.args, spec.varargs, spec.varkw, spec.defaults)
+
+    inspect.getargspec = _getargspec
+'''
+
+
+HTTPie_REQUESTS_COMPAT = '''"""Benchmark-only compatibility for the historical Requests API."""
+
+import sys
+
+import requests.compat
+
+
+if not hasattr(requests.compat, "is_windows"):
+    requests.compat.is_windows = sys.platform.startswith("win")
+if not hasattr(requests.compat, "is_py26"):
+    requests.compat.is_py26 = False
+'''
+
+
+THEFUCK_PYTEST_COMPAT = '''"""Benchmark-only compatibility for the historical pytest Node API."""
+
+from _pytest.nodes import Node
+
+
+if not hasattr(Node, "get_marker"):
+    Node.get_marker = Node.get_closest_marker
+'''
+
+
 @dataclass(frozen=True)
 class Archive:
     label: str
@@ -125,7 +166,10 @@ CASES = (
             "0194d03bb6ffed0eef4410619d82f0280e7046bdf6e638e618f9c0e6ae3d0f05",
         ),
         "tests/test_pysnooper.py",
-        (("pytest.ini", "[pytest]\n"),),
+        (
+            ("pytest.ini", "[pytest]\n"),
+            ("conftest.py", PYSNOOPER_PY311_COMPAT),
+        ),
     ),
     HistoricalCase(
         "tqdm-sizeless-bool",
@@ -162,6 +206,7 @@ CASES = (
             "2fd5475e3168ccfedd5aba25eb790c6c918e5d92dc4779e9169f8afe4c7d4710",
         ),
         "tests/rules/test_git_push.py",
+        (("conftest.py", THEFUCK_PYTEST_COMPAT),),
     ),
     HistoricalCase(
         "httpie-host-header-case",
@@ -180,6 +225,7 @@ CASES = (
             "5207068009e5419b66c48a3cc030165860ddd3da9bbf6ee1b61128ae74a2b779",
         ),
         "tests/test_regressions.py",
+        (("conftest.py", HTTPie_REQUESTS_COMPAT),),
     ),
     HistoricalCase(
         "youtube-dl-boolean-filter",

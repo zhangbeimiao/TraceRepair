@@ -63,6 +63,47 @@ _FIXED_ARCHIVES = {
 }
 
 
+_PYSNOOPER_PY311_COMPAT = '''"""Benchmark-only compatibility for a dependency predating Python 3.11."""
+
+import inspect
+from collections import namedtuple
+
+
+if not hasattr(inspect, "getargspec"):
+    _ArgSpec = namedtuple("ArgSpec", "args varargs keywords defaults")
+
+    def _getargspec(function):
+        spec = inspect.getfullargspec(function)
+        return _ArgSpec(spec.args, spec.varargs, spec.varkw, spec.defaults)
+
+    inspect.getargspec = _getargspec
+'''
+
+
+_HTTPIE_REQUESTS_COMPAT = '''"""Benchmark-only compatibility for the historical Requests API."""
+
+import sys
+
+import requests.compat
+
+
+if not hasattr(requests.compat, "is_windows"):
+    requests.compat.is_windows = sys.platform.startswith("win")
+if not hasattr(requests.compat, "is_py26"):
+    requests.compat.is_py26 = False
+'''
+
+
+_THEFUCK_PYTEST_COMPAT = '''"""Benchmark-only compatibility for the historical pytest Node API."""
+
+from _pytest.nodes import Node
+
+
+if not hasattr(Node, "get_marker"):
+    Node.get_marker = Node.get_closest_marker
+'''
+
+
 def validate_historical_oracles(
     manifest: BenchmarkManifest,
     tasks: tuple[BenchmarkTask, ...],
@@ -185,6 +226,17 @@ def _write_generated_files(task_id: str, root: Path) -> None:
         )
     elif task_id == "pysnooper-file-output":
         (root / "pytest.ini").write_text("[pytest]\n", encoding="utf-8", newline="\n")
+        (root / "conftest.py").write_text(
+            _PYSNOOPER_PY311_COMPAT, encoding="utf-8", newline="\n"
+        )
+    elif task_id == "httpie-host-header-case":
+        (root / "conftest.py").write_text(
+            _HTTPIE_REQUESTS_COMPAT, encoding="utf-8", newline="\n"
+        )
+    elif task_id == "thefuck-git-push-match":
+        (root / "conftest.py").write_text(
+            _THEFUCK_PYTEST_COMPAT, encoding="utf-8", newline="\n"
+        )
 
 
 def _file_sha256(path: Path) -> str:
@@ -196,8 +248,8 @@ def _file_sha256(path: Path) -> str:
 
 
 def _outcome(result: TestRunResult) -> str:
-    stdout = " ".join(result.stdout.split())[-600:]
-    stderr = " ".join(result.stderr.split())[-600:]
+    stdout = " ".join(result.stdout.split())[-1_600:]
+    stderr = " ".join(result.stderr.split())[-1_600:]
     return (
         f"exit_code={result.exit_code}, timed_out={result.timed_out}, "
         f"error_code={result.error_code}, stdout={stdout!r}, stderr={stderr!r}"
