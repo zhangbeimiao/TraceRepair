@@ -65,9 +65,28 @@ _FIXED_ARCHIVES = {
 
 _PYSNOOPER_PY311_COMPAT = '''"""Benchmark-only compatibility for a dependency predating Python 3.11."""
 
+import collections
+import collections.abc
 import inspect
 from collections import namedtuple
 
+
+for _name in (
+    "Callable",
+    "Container",
+    "Hashable",
+    "Iterable",
+    "Iterator",
+    "Mapping",
+    "MutableMapping",
+    "MutableSequence",
+    "MutableSet",
+    "Sequence",
+    "Set",
+    "Sized",
+):
+    if not hasattr(collections, _name):
+        setattr(collections, _name, getattr(collections.abc, _name))
 
 if not hasattr(inspect, "getargspec"):
     _ArgSpec = namedtuple("ArgSpec", "args varargs keywords defaults")
