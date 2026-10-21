@@ -1,0 +1,216 @@
+{
+  "attempts": [
+    {
+      "attempt_started_record_sha256": "aca3d070c5f5d779142a9b7f6a42d3f8901c0907e1580fdb133c6e4de9cde176",
+      "benchmark_id": "historical-python-v1.1.3",
+      "benchmark_task_id": "pysnooper-file-output",
+      "completion_tokens": 246,
+      "log_path": "evaluation/results/historical-python-v1.1.3/logs/pysnooper-file-output.log",
+      "log_sha256": "753e5369e39391d606f15600556a4608e087009b355d02a97040166006cce3e5",
+      "manifest_sha256": "8ac7465ecf3cc515e81565dd8bcbcbb71a3c7f9c7d3bf5fdc96d807f3f2dfd94",
+      "model_calls": 3,
+      "previous_record_sha256": "aca3d070c5f5d779142a9b7f6a42d3f8901c0907e1580fdb133c6e4de9cde176",
+      "process_returncode": 0,
+      "record_kind": "attempt_finished",
+      "record_sha256": "6c3c6fe6e86896288857d5fd2fef2762321408a16d35e175d4dec346ec9e750c",
+      "recorded_at": "2026-10-21T10:10:10.926518+00:00",
+      "regression_passed": true,
+      "repository_sha256": "167b52780f6eb398221572b0fd8947fc11d4bf5a7c52bdfde518ef31c963c89c",
+      "sequence": 2,
+      "source": {
+        "buggy_commit": "6e3d797be3fa0a746fb5b1b7c7fea78eb926c208",
+        "fixed_commit": "15555ed760000b049aff8fecc79d29339c1224c3",
+        "issue_url": "https://github.com/cool-RR/PySnooper/issues/2",
+        "repository_url": "https://github.com/cool-RR/PySnooper"
+      },
+      "split": "development",
+      "status": "awaiting_review",
+      "stop_reason": "candidate patch passed target and regression tests; human review required",
+      "success": true,
+      "target_test_passed": true,
+      "task_config_sha256": "b02b72ae9028485b5d993a8701901d91859e986fcaab64d6b840e592cdd239fd",
+      "timed_out": false,
+      "tool_calls": 5,
+      "tool_failures": 0,
+      "trace_task_id": "model-agent-repo-pysnooper-file-output-b93cd7d5",
+      "wall_seconds": 10.647
+    },
+    {
+      "attempt_started_record_sha256": "7b2c9864e376747872ee86d4c4ccc8afff2b0ac32ebbf2b35cfc021c088f8074",
+      "benchmark_id": "historical-python-v1.1.3",
+      "benchmark_task_id": "tqdm-sizeless-bool",
+      "completion_tokens": 337,
+      "log_path": "evaluation/results/historical-python-v1.1.3/logs/tqdm-sizeless-bool.log",
+      "log_sha256": "066f08a17b0092210bf40bc62e5fa01372bf9f3d99ca3604d4a223c06383d853",
+      "manifest_sha256": "8ac7465ecf3cc515e81565dd8bcbcbb71a3c7f9c7d3bf5fdc96d807f3f2dfd94",
+      "model_calls": 4,
+      "previous_record_sha256": "7b2c9864e376747872ee86d4c4ccc8afff2b0ac32ebbf2b35cfc021c088f8074",
+      "process_returncode": 0,
+      "record_kind": "attempt_finished",
+      "record_sha256": "6e2a9f3aac9823289ff54664dfd729e3a91c9067a2e430d3a7b5fa18f7cd9e45",
+      "recorded_at": "2026-10-21T10:10:22.196733+00:00",
+      "regression_passed": false,
+      "repository_sha256": "030cd38f607eb99327d9a383dd5639944cec1bebbd0e3cdda590ec39d387fd92",
+      "sequence": 4,
+      "source": {
+        "buggy_commit": "c2599e3cd6087429f48bae34347ec5d2473c8392",
+        "fixed_commit": "73962a47026dd980ac0758820efc9c41cbf938e0",
+        "issue_url": null,
+        "repository_url": "https://github.com/tqdm/tqdm"
+      },
+      "split": "development",
+      "status": "needs_human",
+      "stop_reason": "candidate patch failed target test: TEST_FAILED",
+      "success": false,
+      "target_test_passed": false,
+      "task_config_sha256": "5c6c72a46126d06a463bb825125a3030ef199853d8344aac3386905078f39d41",
+      "timed_out": false,
+      "tool_calls": 7,
+      "tool_failures": 1,
+      "trace_task_id": "model-agent-repo-tqdm-sizeless-bool-27464b52",
+      "wall_seconds": 11.267
+    },
+    {
+      "attempt_started_record_sha256": "5d882dc6447db7b6473627768289fe41e3032429a7371c1e755114d09a4823f9",
+      "benchmark_id": "historical-python-v1.1.3",
+      "benchmark_task_id": "thefuck-git-push-match",
+      "completion_tokens": 220,
+      "log_path": "evaluation/results/historical-python-v1.1.3/logs/thefuck-git-push-match.log",
+      "log_sha256": "4893ec3319ab5e4804d4b7cf4d0e98bebf5b388f963efc31ff63d65be059baac",
+      "manifest_sha256": "8ac7465ecf3cc515e81565dd8bcbcbb71a3c7f9c7d3bf5fdc96d807f3f2dfd94",
+      "model_calls": 3,
+      "previous_record_sha256": "5d882dc6447db7b6473627768289fe41e3032429a7371c1e755114d09a4823f9",
+      "process_returncode": 0,
+      "record_kind": "attempt_finished",
+      "record_sha256": "5b47a177222c6111987001d86f2b4aa1f9ef5e387dc5bc1b5f5af5c5912849a0",
+      "recorded_at": "2026-10-21T10:10:30.584692+00:00",
+      "regression_passed": true,
+      "repository_sha256": "b7dd5dbe7052c462df635a7e1a6d0b66608eb51f6606ba0b18fb1dc8e9d3c406",
+      "sequence": 6,
+      "source": {
+        "buggy_commit": "7c858fadb3458be829d3d43666ccb46c3ed5b8a0",
+        "fixed_commit": "c205683a8df8a57e2db1e9816a5a7ce3255b08fc",
+        "issue_url": null,
+        "repository_url": "https://github.com/nvbn/thefuck"
+      },
+      "split": "development",
+      "status": "awaiting_review",
+      "stop_reason": "candidate patch passed target and regression tests; human review required",
+      "success": true,
+      "target_test_passed": true,
+      "task_config_sha256": "0142ed8d4d728ceb3a09e3a2b117ec7384b1bf3036775e5d4c733b47bb7fa7cf",
+      "timed_out": false,
+      "tool_calls": 5,
+      "tool_failures": 0,
+      "trace_task_id": "model-agent-repo-thefuck-git-push-match-35056fa0",
+      "wall_seconds": 8.38
+    }
+  ],
+  "benchmark": {
+    "agent_version": "0.6.0-dev4",
+    "benchmark_id": "historical-python-v1.1.3",
+    "completion_cny_per_million_tokens": 0.0,
+    "manifest_sha256": "8ac7465ecf3cc515e81565dd8bcbcbb71a3c7f9c7d3bf5fdc96d807f3f2dfd94",
+    "model": "qwen3.8-flash",
+    "protocol": "pass@1",
+    "schema_version": 1,
+    "tasks": [
+      {
+        "repository_sha256": "167b52780f6eb398221572b0fd8947fc11d4bf5a7c52bdfde518ef31c963c89c",
+        "source": {
+          "buggy_commit": "6e3d797be3fa0a746fb5b1b7c7fea78eb926c208",
+          "fixed_commit": "15555ed760000b049aff8fecc79d29339c1224c3",
+          "issue_url": "https://github.com/cool-RR/PySnooper/issues/2",
+          "repository_url": "https://github.com/cool-RR/PySnooper"
+        },
+        "split": "development",
+        "task_config": "pysnooper-file-output.json",
+        "task_config_sha256": "b02b72ae9028485b5d993a8701901d91859e986fcaab64d6b840e592cdd239fd",
+        "task_id": "pysnooper-file-output"
+      },
+      {
+        "repository_sha256": "030cd38f607eb99327d9a383dd5639944cec1bebbd0e3cdda590ec39d387fd92",
+        "source": {
+          "buggy_commit": "c2599e3cd6087429f48bae34347ec5d2473c8392",
+          "fixed_commit": "73962a47026dd980ac0758820efc9c41cbf938e0",
+          "issue_url": null,
+          "repository_url": "https://github.com/tqdm/tqdm"
+        },
+        "split": "development",
+        "task_config": "tqdm-sizeless-bool.json",
+        "task_config_sha256": "5c6c72a46126d06a463bb825125a3030ef199853d8344aac3386905078f39d41",
+        "task_id": "tqdm-sizeless-bool"
+      },
+      {
+        "repository_sha256": "b7dd5dbe7052c462df635a7e1a6d0b66608eb51f6606ba0b18fb1dc8e9d3c406",
+        "source": {
+          "buggy_commit": "7c858fadb3458be829d3d43666ccb46c3ed5b8a0",
+          "fixed_commit": "c205683a8df8a57e2db1e9816a5a7ce3255b08fc",
+          "issue_url": null,
+          "repository_url": "https://github.com/nvbn/thefuck"
+        },
+        "split": "development",
+        "task_config": "thefuck-git-push-match.json",
+        "task_config_sha256": "0142ed8d4d728ceb3a09e3a2b117ec7384b1bf3036775e5d4c733b47bb7fa7cf",
+        "task_id": "thefuck-git-push-match"
+      },
+      {
+        "repository_sha256": "30a2572282c218cb1c747d7d74c25075ead293b093d878fc804c354b70d8e676",
+        "source": {
+          "buggy_commit": "8c892edd4fe700a7ca5cc733dcb4817831d253e2",
+          "fixed_commit": "040d981f00c3f6830b2d0db3daf3c64c080e96e3",
+          "issue_url": null,
+          "repository_url": "https://github.com/httpie/cli"
+        },
+        "split": "locked",
+        "task_config": "httpie-host-header-case.json",
+        "task_config_sha256": "6694599b6854d727b9288f0b845ae8fc16fddecd408ed409c177cf55577de09f",
+        "task_id": "httpie-host-header-case"
+      },
+      {
+        "repository_sha256": "50cdd13024396476f45a5d2751e905134f146d586721801c8a61c07c8e3e39ad",
+        "source": {
+          "buggy_commit": "99036a1298089068dcf80c0985bfcc3f8c24f281",
+          "fixed_commit": "1cc47c667419e0eadc0a6989256ab7b276852adf",
+          "issue_url": null,
+          "repository_url": "https://github.com/ytdl-org/youtube-dl"
+        },
+        "split": "locked",
+        "task_config": "youtube-dl-boolean-filter.json",
+        "task_config_sha256": "731295c5ba236c6a8a64b4e81e639f093bdf09379ac33e0d22b4c70478184a38",
+        "task_id": "youtube-dl-boolean-filter"
+      }
+    ]
+  },
+  "generated_at": "2026-10-21T10:10:30.584916+00:00",
+  "integrity": {
+    "claim": "tamper-evident after the terminal hash is published; not an immutable store",
+    "ledger_records_verified": 6,
+    "terminal_record_sha256": "5b47a177222c6111987001d86f2b4aa1f9ef5e387dc5bc1b5f5af5c5912849a0"
+  },
+  "report_sha256": "0de3d9b6e063be22e618d5cae6051744c3f7e5337f1c411de12ccb767b9baa61",
+  "schema_version": 1,
+  "summary": {
+    "attempted_tasks": 3,
+    "average_completion_tokens": 267.67,
+    "cost_scope": "unavailable: no completion-token price was frozen in the manifest",
+    "estimated_completion_cost_cny": null,
+    "expected_tasks": 5,
+    "failures": 1,
+    "human_handoffs": 1,
+    "incorrect_accepted_patches": 0,
+    "missing_task_ids": [
+      "httpie-host-header-case",
+      "youtube-dl-boolean-filter"
+    ],
+    "p50_wall_seconds": 10.647,
+    "p95_wall_seconds": 11.267,
+    "pass_at_1": 0.6667,
+    "successes": 2,
+    "total_completion_tokens": 803,
+    "wilson_95_percent": {
+      "lower": 0.2077,
+      "upper": 0.9385
+    }
+  }
+}
