@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "release_agent_version": "0.6.0",
+  "evaluated_runtime_agent_version": "0.6.0-dev4",
+  "historical_benchmark": {
+    "benchmark_id": "historical-python-v1.1.3",
+    "tasks": 5,
+    "successes": 3,
+    "pass_at_1": 0.6,
+    "development_pass_at_1": 0.6667,
+    "locked_pass_at_1": 0.5,
+    "human_handoffs": 2,
+    "incorrect_accepted_patches": 0,
+    "average_completion_tokens": 273.8,
+    "p50_wall_seconds": 11.267,
+    "p95_wall_seconds": 12.6
+  },
+  "baseline": {
+    "agent_version": "0.5.0",
+    "benchmark_id": "historical-python-v1.0.0",
+    "tasks": 3,
+    "successes": 2,
+    "pass_at_1": 0.6667,
+    "human_handoffs": 1,
+    "incorrect_accepted_patches": 0,
+    "average_completion_tokens": 268.67,
+    "p50_wall_seconds": 7.719,
+    "p95_wall_seconds": 18.234
+  },
+  "engineering_changes": [
+    "bounded exact symbol relocation without fuzzy patching",
+    "deterministic recovery prefers one non-test source among test-only hits",
+    "unambiguous planner-output normalization with ambiguous outputs denied",
+    "evidence-backed 800-token per-call ceiling inside an unchanged 2048-token task budget",
+    "separate disposable development and one-shot locked GitHub Actions workflows"
+  ],
+  "comparison_note": "The benchmark task sets differ, so pass@1 percentages are reported separately and are not evidence of a direct accuracy increase.",
+  "source_files": [
+    "evaluation/frozen/agent-v0.6.0.json",
+    "evaluation/frozen/historical-python-v1.1.3.json",
+    "evaluation/results/historical-python-v1.1.3/attempts.jsonl",
+    "evaluation/results/historical-python-v1.1.3/report.json",
+    "evaluation/results/historical-python-v1.1.3/report.json.sha256"
+  ]
+}

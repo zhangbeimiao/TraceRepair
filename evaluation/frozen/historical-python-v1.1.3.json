@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "historical-python-v1.1.3",
+  "protocol": "pass@1",
+  "release_agent_version": "0.6.0",
+  "evaluated_runtime_agent_version": "0.6.0-dev4",
+  "model": "qwen3.8-flash",
+  "manifest_sha256": "8ac7465ecf3cc515e81565dd8bcbcbb71a3c7f9c7d3bf5fdc96d807f3f2dfd94",
+  "agent_config_sha256": "2dec208ed6eba925ac402dca281112d95aeb1beb5f24811b9143c2a3bb025e0b",
+  "report_sha256": "fa274cb6a02a0623be780b94ad1286ec3704a29e8e3021a8485350f29af31646",
+  "terminal_ledger_sha256": "a22b116185f95f74dd8980460764d2fb4433714233823b1b9e1fe38c073b1b3a",
+  "summary": {
+    "attempted_tasks": 5,
+    "successes": 3,
+    "failures": 2,
+    "pass_at_1": 0.6,
+    "human_handoffs": 2,
+    "incorrect_accepted_patches": 0,
+    "average_completion_tokens": 273.8,
+    "total_completion_tokens": 1369,
+    "p50_wall_seconds": 11.267,
+    "p95_wall_seconds": 12.6,
+    "wilson_95_percent": {
+      "lower": 0.2307,
+      "upper": 0.8824
+    }
+  },
+  "splits": {
+    "development": {
+      "attempts": 3,
+      "successes": 2,
+      "pass_at_1": 0.6667
+    },
+    "locked": {
+      "attempts": 2,
+      "successes": 1,
+      "pass_at_1": 0.5,
+      "one_shot": true,
+      "retried": false,
+      "workflow_run": 39584933038
+    }
+  },
+  "attempts": [
+    {
+      "task_id": "pysnooper-file-output",
+      "split": "development",
+      "success": true,
+      "record_sha256": "6c3c6fe6e86896288857d5fd2fef2762321408a16d35e175d4dec346ec9e750c"
+    },
+    {
+      "task_id": "tqdm-sizeless-bool",
+      "split": "development",
+      "success": false,
+      "status": "needs_human",
+      "stop_reason": "candidate patch failed target test: TEST_FAILED",
+      "record_sha256": "6e2a9f3aac9823289ff54664dfd729e3a91c9067a2e430d3a7b5fa18f7cd9e45"
+    },
+    {
+      "task_id": "thefuck-git-push-match",
+      "split": "development",
+      "success": true,
+      "record_sha256": "5b47a177222c6111987001d86f2b4aa1f9ef5e387dc5bc1b5f5af5c5912849a0"
+    },
+    {
+      "task_id": "httpie-host-header-case",
+      "split": "locked",
+      "success": true,
+      "record_sha256": "124a50bc615444d3270a432a9728b9e8604855e5a3b48e39bde802c673ea3c51"
+    },
+    {
+      "task_id": "youtube-dl-boolean-filter",
+      "split": "locked",
+      "success": false,
+      "status": "needs_human",
+      "stop_reason": "candidate patch failed target test: TEST_FAILED",
+      "record_sha256": "a22b116185f95f74dd8980460764d2fb4433714233823b1b9e1fe38c073b1b3a"
+    }
+  ],
+  "scope_note": "Five historical tasks validate the bounded mechanism and two one-shot locked transfers; this sample does not establish broad code-repair accuracy."
+}
