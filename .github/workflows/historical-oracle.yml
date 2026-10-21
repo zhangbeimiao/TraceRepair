@@ -56,4 +56,3 @@ jobs:
           python scripts/run_benchmark.py \
             --manifest evaluation/benchmarks/historical-python-v1.1.0.json \
             --dry-run
-

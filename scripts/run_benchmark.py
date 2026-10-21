@@ -54,7 +54,7 @@ def main() -> None:
     arguments = parser.parse_args()
     if not 30 <= arguments.process_timeout_seconds <= 900:
         parser.error("--process-timeout-seconds must be between 30 and 900")
-    if ROOT.drive.casefold() != "d:":
+    if os.name == "nt" and ROOT.drive.casefold() != "d:":
         raise SystemExit("TraceRepair benchmark artifacts must remain on D: on this workstation")
 
     try:
