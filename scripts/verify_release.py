@@ -51,6 +51,7 @@ REQUIRED_FILES = {
     Path("evaluation/frozen/recovery-showcase-v0.4.1.json"),
     Path("examples/tasks/mini-repo.json"),
     Path("scripts/showcase.py"),
+    Path("scripts/verify_benchmark_evidence.py"),
     Path("docs/releases/v0.6.0.md"),
     Path("docs/releases/v0.6.1.md"),
     Path("docs/releases/agent-v0.6.0.md"),

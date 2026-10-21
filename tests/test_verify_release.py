@@ -39,6 +39,7 @@ def make_release_tree(root: Path) -> None:
         "evaluation/frozen/locked-repository-v0.6.1.json",
         "examples/tasks/mini-repo.json",
         "scripts/showcase.py",
+        "scripts/verify_benchmark_evidence.py",
         "demo/dist/index.html",
         "demo/dist/data.js",
     ):
