@@ -1,0 +1,61 @@
+{
+  "$schema": "../../docs/benchmark-manifest.schema.json",
+  "schema_version": 1,
+  "benchmark_id": "historical-python-v1.1.2",
+  "agent_version": "0.6.0-dev3",
+  "model": "qwen3.8-flash",
+  "protocol": "pass@1",
+  "tasks": [
+    {
+      "id": "pysnooper-file-output",
+      "split": "development",
+      "task_config": "../tasks/pysnooper-file-output.json",
+      "source": {
+        "repository_url": "https://github.com/cool-RR/PySnooper",
+        "buggy_commit": "6e3d797be3fa0a746fb5b1b7c7fea78eb926c208",
+        "fixed_commit": "15555ed760000b049aff8fecc79d29339c1224c3",
+        "issue_url": "https://github.com/cool-RR/PySnooper/issues/2"
+      }
+    },
+    {
+      "id": "tqdm-sizeless-bool",
+      "split": "development",
+      "task_config": "../tasks/tqdm-sizeless-bool.json",
+      "source": {
+        "repository_url": "https://github.com/tqdm/tqdm",
+        "buggy_commit": "c2599e3cd6087429f48bae34347ec5d2473c8392",
+        "fixed_commit": "73962a47026dd980ac0758820efc9c41cbf938e0"
+      }
+    },
+    {
+      "id": "thefuck-git-push-match",
+      "split": "development",
+      "task_config": "../tasks/thefuck-git-push-match.json",
+      "source": {
+        "repository_url": "https://github.com/nvbn/thefuck",
+        "buggy_commit": "7c858fadb3458be829d3d43666ccb46c3ed5b8a0",
+        "fixed_commit": "c205683a8df8a57e2db1e9816a5a7ce3255b08fc"
+      }
+    },
+    {
+      "id": "httpie-host-header-case",
+      "split": "locked",
+      "task_config": "../tasks/httpie-host-header-case.json",
+      "source": {
+        "repository_url": "https://github.com/httpie/cli",
+        "buggy_commit": "8c892edd4fe700a7ca5cc733dcb4817831d253e2",
+        "fixed_commit": "040d981f00c3f6830b2d0db3daf3c64c080e96e3"
+      }
+    },
+    {
+      "id": "youtube-dl-boolean-filter",
+      "split": "locked",
+      "task_config": "../tasks/youtube-dl-boolean-filter.json",
+      "source": {
+        "repository_url": "https://github.com/ytdl-org/youtube-dl",
+        "buggy_commit": "99036a1298089068dcf80c0985bfcc3f8c24f281",
+        "fixed_commit": "1cc47c667419e0eadc0a6989256ab7b276852adf"
+      }
+    }
+  ]
+}

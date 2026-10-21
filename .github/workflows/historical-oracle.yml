@@ -6,7 +6,7 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/historical-oracle.yml"
-      - "evaluation/benchmarks/historical-python-v1.1.1.json"
+      - "evaluation/benchmarks/historical-python-v1.1.2.json"
       - "evaluation/requirements-historical-v1.1.txt"
       - "evaluation/tasks/*.json"
       - "scripts/prepare_historical_benchmark.py"
@@ -54,5 +54,5 @@ jobs:
         run: |
           mkdir -p .tmp tmp
           python scripts/run_benchmark.py \
-            --manifest evaluation/benchmarks/historical-python-v1.1.1.json \
+            --manifest evaluation/benchmarks/historical-python-v1.1.2.json \
             --dry-run

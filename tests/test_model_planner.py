@@ -125,6 +125,83 @@ def test_json_inside_generic_markdown_fence_is_accepted(tmp_path: Path) -> None:
     store.close()
 
 
+def test_one_semantic_json_object_surrounded_by_prose_is_accepted(tmp_path: Path) -> None:
+    transport = FakeTransport(
+        'Decision:\n{"kind":"tool","tool":"search_code",'
+        '"arguments":{"query":"bool"},"reason":"locate"}\nDone.'
+    )
+    store = planner_store(tmp_path)
+
+    plan = ModelPlanner(transport).suggest("planner-01", store, "evidence")
+
+    assert plan.kind == "tool"
+    assert plan.tool == "search_code"
+    store.close()
+
+
+def test_unknown_kind_with_one_allowlisted_tool_is_normalized(tmp_path: Path) -> None:
+    transport = FakeTransport(
+        '{"kind":"action","tool":"read_file",'
+        '"arguments":{"path":"src/example.py"},"reason":"inspect"}'
+    )
+    store = planner_store(tmp_path)
+
+    plan = ModelPlanner(transport).suggest(
+        "planner-01", store, "evidence", allowed_tools={"read_file"}, allow_patch=False
+    )
+
+    assert plan.kind == "tool"
+    assert plan.tool == "read_file"
+    store.close()
+
+
+def test_unknown_kind_with_one_diff_is_normalized_but_still_validated(tmp_path: Path) -> None:
+    diff = (
+        "--- a/src/example.py\n+++ b/src/example.py\n"
+        "@@ -1,1 +1,1 @@\n-old = 1\n+new = 1\n"
+    )
+    transport = FakeTransport(
+        json.dumps({"kind": "candidate", "unified_diff": diff, "reason": "repair"})
+    )
+    store = planner_store(tmp_path)
+
+    plan = ModelPlanner(transport).suggest(
+        "planner-01", store, "evidence", allowed_tools=set(), allow_patch=True
+    )
+
+    assert plan.kind == "patch"
+    assert plan.unified_diff == diff.strip()
+    store.close()
+
+
+def test_ambiguous_tool_and_patch_alias_is_rejected(tmp_path: Path) -> None:
+    transport = FakeTransport(
+        '{"kind":"action","tool":"search_code","arguments":{"query":"x"},'
+        '"unified_diff":"--- a/x.py\\n+++ b/x.py\\n@@ -1 +1 @@\\n-x\\n+y",'
+        '"reason":"ambiguous"}'
+    )
+    store = planner_store(tmp_path)
+
+    with pytest.raises(PlannerError, match="ambiguous"):
+        ModelPlanner(transport).suggest("planner-01", store, "evidence")
+
+    assert store.list_events("planner-01")[-1].payload["policy_accepted"] is False
+    store.close()
+
+
+def test_multiple_semantic_json_objects_are_rejected(tmp_path: Path) -> None:
+    transport = FakeTransport(
+        '{"kind":"handoff","reason":"one"}\n'
+        '{"kind":"handoff","reason":"two"}'
+    )
+    store = planner_store(tmp_path)
+
+    with pytest.raises(PlannerError, match="invalid structured output"):
+        ModelPlanner(transport).suggest("planner-01", store, "evidence")
+
+    store.close()
+
+
 def test_patch_stage_does_not_advertise_tools(tmp_path: Path) -> None:
     transport = FakeTransport('{"kind":"handoff","reason":"need more evidence"}')
     store = planner_store(tmp_path)

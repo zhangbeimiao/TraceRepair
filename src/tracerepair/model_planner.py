@@ -260,8 +260,8 @@ class ModelPlanner:
             choices = response["choices"]
             first = choices[0]  # type: ignore[index]
             content = first["message"]["content"]  # type: ignore[index]
-            parsed = json.loads(_strip_fence(str(content)))
-        except (KeyError, IndexError, TypeError, json.JSONDecodeError) as error:
+            parsed = _decode_plan_object(str(content))
+        except (KeyError, IndexError, TypeError, ValueError) as error:
             raise PlannerError("model returned invalid structured output") from error
         completion_tokens = self._reported_completion_tokens(response)
         if not 0 <= completion_tokens <= self._config.max_completion_tokens:
@@ -270,14 +270,25 @@ class ModelPlanner:
         reason = parsed.get("reason", "")
         if not isinstance(reason, str) or len(reason) > 500:
             raise PlannerError("model reason is invalid")
-        # Small models occasionally return the tool name directly or use a
-        # natural stop label despite being asked for the schema. Normalize only
-        # these harmless aliases; everything else remains denied.
+        # Small models occasionally use a harmless schema alias despite being
+        # asked for the exact shape. Normalize only when the semantic action is
+        # unique; ambiguous tool-plus-patch payloads remain denied.
         if kind in _ALLOWED_TOOLS:
             parsed = {**parsed, "tool": kind, "kind": "tool"}
             kind = "tool"
         elif kind in {"done", "final", "stop", "needs_human"}:
             kind = "handoff"
+        elif kind not in {"tool", "patch", "handoff"}:
+            tool = parsed.get("tool", parsed.get("action"))
+            has_tool = tool in _ALLOWED_TOOLS
+            has_patch = isinstance(parsed.get("unified_diff"), str)
+            if has_tool == has_patch:
+                raise PlannerError("model proposed an unknown or ambiguous plan kind")
+            if has_tool:
+                parsed = {**parsed, "tool": tool, "kind": "tool"}
+                kind = "tool"
+            else:
+                kind = "patch"
         if kind == "tool":
             tool = parsed.get("tool")
             arguments = parsed.get("arguments", {})
@@ -318,6 +329,39 @@ def _strip_fence(content: str) -> str:
     if first_brace != -1 and last_brace > first_brace:
         return stripped[first_brace : last_brace + 1]
     return stripped
+
+
+def _decode_plan_object(content: str) -> dict[str, object]:
+    """Decode exactly one semantic plan object, allowing harmless wrapper text."""
+
+    stripped = _strip_fence(content)
+    try:
+        direct = json.loads(stripped)
+    except json.JSONDecodeError:
+        direct = None
+    if isinstance(direct, dict):
+        return direct
+    if direct is not None:
+        raise ValueError("plan response must be a JSON object")
+
+    decoder = json.JSONDecoder()
+    candidates: list[dict[str, object]] = []
+    for index, character in enumerate(content):
+        if character != "{":
+            continue
+        try:
+            decoded, _ = decoder.raw_decode(content[index:])
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(decoded, dict):
+            continue
+        if not {"kind", "tool", "action", "unified_diff"}.intersection(decoded):
+            continue
+        if decoded not in candidates:
+            candidates.append(decoded)
+    if len(candidates) != 1:
+        raise ValueError("response must contain exactly one semantic plan object")
+    return candidates[0]
 
 
 def _http_error_detail(error: HTTPError) -> str:

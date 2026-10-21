@@ -53,14 +53,16 @@ jobs:
         run: |
           mkdir -p .tmp tmp data
           python scripts/run_benchmark.py \
-            --manifest evaluation/benchmarks/historical-python-v1.1.1.json \
+            --manifest evaluation/benchmarks/historical-python-v1.1.2.json \
             --split development
 
       - name: Upload tamper-evident development results
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: historical-python-v1.1.1-development-${{ github.run_id }}
-          path: evaluation/results/historical-python-v1.1.1/
+          name: historical-python-v1.1.2-development-${{ github.run_id }}
+          path: |
+            evaluation/results/historical-python-v1.1.2/
+            data/model-agent.sqlite3
           if-no-files-found: ignore
           retention-days: 30
