@@ -44,6 +44,9 @@ jobs:
       - name: Verify release safety
         run: python scripts/verify_release.py
 
+      - name: Verify frozen benchmark evidence
+        run: python scripts/verify_benchmark_evidence.py
+
       - name: Run test suite
         run: |
           mkdir -p .tmp

@@ -24,11 +24,15 @@ def test_agent_v060_freeze_pins_evaluated_config_before_locked_run() -> None:
     ]
 
 
-def test_locked_workflow_cannot_run_development_or_all_splits() -> None:
+def test_completed_locked_workflow_is_read_only_and_has_no_provider_credentials() -> None:
     workflow = (ROOT / ".github/workflows/historical-locked.yml").read_text(encoding="utf-8")
 
     assert "workflow_dispatch:" in workflow
-    assert "--split locked" in workflow
+    assert "verify_benchmark_evidence.py" in workflow
+    assert "run_benchmark.py" not in workflow
+    assert "DASHSCOPE_API_KEY" not in workflow
+    assert "TRACEREPAIR_BAILIAN_BASE_URL" not in workflow
+    assert "--split locked" not in workflow
     assert "--split development" not in workflow
     assert "--split all" not in workflow
-    assert "historical-python-v1.1.3.json" in workflow
+    assert "39584933038" in workflow
