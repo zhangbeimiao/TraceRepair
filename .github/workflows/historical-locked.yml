@@ -1,0 +1,68 @@
+name: Historical Locked One-Shot
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: historical-locked-v1.1.3
+  cancel-in-progress: false
+
+jobs:
+  locked:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out frozen repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            evaluation/requirements-historical-v1.1.txt
+
+      - name: Install isolated benchmark dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+          python -m pip install -r evaluation/requirements-historical-v1.1.txt
+
+      - name: Download and verify pinned source archives
+        run: python scripts/prepare_historical_benchmark.py --download
+
+      - name: Require provider credentials
+        env:
+          DASHSCOPE_API_KEY: ${{ secrets.DASHSCOPE_API_KEY }}
+          TRACEREPAIR_BAILIAN_BASE_URL: ${{ secrets.TRACEREPAIR_BAILIAN_BASE_URL }}
+        run: |
+          test -n "$DASHSCOPE_API_KEY"
+          test -n "$TRACEREPAIR_BAILIAN_BASE_URL"
+
+      - name: Run locked split exactly once
+        env:
+          DASHSCOPE_API_KEY: ${{ secrets.DASHSCOPE_API_KEY }}
+          TRACEREPAIR_BAILIAN_BASE_URL: ${{ secrets.TRACEREPAIR_BAILIAN_BASE_URL }}
+          TRACEREPAIR_BAILIAN_MODEL: qwen3.8-flash
+        run: |
+          mkdir -p .tmp tmp data
+          python scripts/run_benchmark.py \
+            --manifest evaluation/benchmarks/historical-python-v1.1.3.json \
+            --split locked
+
+      - name: Upload complete tamper-evident results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: historical-python-v1.1.3-locked-${{ github.run_id }}
+          path: |
+            evaluation/results/historical-python-v1.1.3/
+            data/model-agent.sqlite3
+          if-no-files-found: error
+          retention-days: 30

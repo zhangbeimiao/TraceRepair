@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "release_agent_version": "0.6.0",
+  "evaluated_runtime_agent_version": "0.6.0-dev4",
+  "status": "frozen_for_locked_evaluation",
+  "frozen_at": "2026-10-21T18:20:00+08:00",
+  "implementation_commit": "3fc9bee9afe27bafbca62a63e028a255ee06d391",
+  "configuration": {
+    "path": "evaluation/configs/agent-v0.6.0-dev4.json",
+    "sha256": "2dec208ed6eba925ac402dca281112d95aeb1beb5f24811b9143c2a3bb025e0b"
+  },
+  "benchmark": {
+    "id": "historical-python-v1.1.3",
+    "manifest_sha256": "8ac7465ecf3cc515e81565dd8bcbcbb71a3c7f9c7d3bf5fdc96d807f3f2dfd94",
+    "protocol": "pass@1",
+    "development_attempts": 3,
+    "development_successes": 2,
+    "development_pass_at_1": 0.6667,
+    "incorrect_accepted_patches": 0,
+    "development_terminal_ledger_sha256": "5b47a177222c6111987001d86f2b4aa1f9ef5e387dc5bc1b5f5af5c5912849a0",
+    "development_report_file_sha256": "fe73381ee2d9ba5df7f6593da97c3e85dda57e3943251a26953e9acd8e0d7fdf"
+  },
+  "locked_protocol": {
+    "task_ids": [
+      "httpie-host-header-case",
+      "youtube-dl-boolean-filter"
+    ],
+    "attempts_at_freeze": 0,
+    "maximum_attempts_per_task": 1,
+    "configuration_changes_after_freeze": false
+  },
+  "unchanged_gates": [
+    "tool_allowlist",
+    "source_path_allowlist",
+    "one_patch_attempt",
+    "exact_diff_validation",
+    "target_test",
+    "regression_test",
+    "human_review"
+  ]
+}
