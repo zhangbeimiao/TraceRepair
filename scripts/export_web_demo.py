@@ -20,8 +20,8 @@ from tracerepair.version import PROJECT_VERSION
 DEV_CASES = {"01", "03", "07", "10"}
 LOCKED_CASES = {"02", "04", "06", "08", "09"}
 CONTROLLED_AGENT_VERSION = "0.4.0-dev1"
-HISTORICAL_BENCHMARK_ID = "historical-python-v1.0.0"
-FROZEN_HISTORICAL_AGENT_VERSION = "0.5.0"
+HISTORICAL_BENCHMARK_ID = "historical-python-v1.1.3"
+FROZEN_HISTORICAL_AGENT_VERSION = "0.6.0"
 
 
 def read_json(path: Path) -> object:
@@ -52,19 +52,21 @@ def main() -> None:
     expected_historical_sha = historical_checksum_path.read_text(encoding="utf-8").split()[0]
     if sha256_file(historical_path) != expected_historical_sha:
         raise ValueError("historical benchmark summary checksum mismatch")
-    if historical.get("agent_version") != FROZEN_HISTORICAL_AGENT_VERSION:
+    if historical.get("release_agent_version") != FROZEN_HISTORICAL_AGENT_VERSION:
         raise ValueError("historical benchmark agent version changed unexpectedly")
     historical_summary = historical.get("summary")
     historical_attempts = historical.get("attempts")
-    locked_failure_audit = historical.get("locked_failure_audit")
     if not isinstance(historical_summary, dict) or not isinstance(historical_attempts, list):
         raise ValueError("historical benchmark summary is incomplete")
-    if not isinstance(locked_failure_audit, dict):
-        raise ValueError("historical benchmark locked failure audit is missing")
+    historical_splits = historical.get("splits")
+    if not isinstance(historical_splits, dict):
+        raise ValueError("historical benchmark split summary is missing")
+    failure_attempts = [attempt for attempt in historical_attempts if not attempt.get("success")]
     historical_benchmark = {
         "benchmarkId": historical.get("benchmark_id"),
         "protocol": historical.get("protocol"),
-        "agentVersion": historical.get("agent_version"),
+        "agentVersion": historical.get("release_agent_version"),
+        "evaluatedRuntimeAgentVersion": historical.get("evaluated_runtime_agent_version"),
         "model": historical.get("model"),
         "runs": historical_summary.get("attempted_tasks"),
         "successes": historical_summary.get("successes"),
@@ -78,7 +80,8 @@ def main() -> None:
         "p95Seconds": historical_summary.get("p95_wall_seconds"),
         "wilson95": historical_summary.get("wilson_95_percent"),
         "attempts": historical_attempts,
-        "lockedFailureAudit": locked_failure_audit,
+        "splits": historical_splits,
+        "failureAttempts": failure_attempts,
         "manifestSha256": historical.get("manifest_sha256"),
         "agentConfigSha256": historical.get("agent_config_sha256"),
         "reportSha256": historical.get("report_sha256"),
@@ -309,58 +312,6 @@ def main() -> None:
         "window.TRACEREPAIR_DEMO = "
         + json.dumps(payload, ensure_ascii=False, indent=2)
         + ";\n",
-        encoding="utf-8",
-    )
-    release_path = (
-        ROOT
-        / "evaluation"
-        / "frozen"
-        / f"release-summary-v{FROZEN_HISTORICAL_AGENT_VERSION}.json"
-    )
-    release_path.write_text(
-        json.dumps(
-            {
-                "schema_version": 1,
-                "generated_at": payload["generatedAt"],
-                "summary": summary,
-                "source_manifests": [
-                    dev_path.relative_to(ROOT).as_posix(),
-                    test_path.relative_to(ROOT).as_posix(),
-                    failure_path.relative_to(ROOT).as_posix(),
-                    recovery_path.relative_to(ROOT).as_posix(),
-                    historical_path.relative_to(ROOT).as_posix(),
-                ]
-                + (
-                    [repository_path.relative_to(ROOT).as_posix()]
-                    if repository_path.is_file()
-                    else []
-                )
-                + (
-                    [locked_repository_path.relative_to(ROOT).as_posix()]
-                    if locked_repository_path.is_file()
-                    else []
-                ),
-                "repository_evidence": {
-                    "repeat_stability": repository_cohort,
-                    "locked_one_shot": locked_repository_result,
-                },
-                "historical_benchmark": historical_benchmark,
-                "failure_showcase": {
-                    "runs": len(failures),
-                    "categories": [failure["category"] for failure in failures],
-                },
-                "recovery_showcase": {
-                    "runs": len(recovery_manifest["scenarios"]),
-                    "crash_points": [
-                        scenario["crash_point"]
-                        for scenario in recovery_manifest["scenarios"]
-                    ],
-                },
-            },
-            ensure_ascii=False,
-            indent=2,
-        )
-        + "\n",
         encoding="utf-8",
     )
     print(

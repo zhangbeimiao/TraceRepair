@@ -53,6 +53,7 @@ REQUIRED_FILES = {
     Path("scripts/showcase.py"),
     Path("docs/releases/v0.6.0.md"),
     Path("docs/releases/v0.6.1.md"),
+    Path("docs/releases/agent-v0.6.0.md"),
     Path("docs/agent-architecture.md"),
     Path("docs/interview-pitch.md"),
     Path("docs/patch-location-v0.6.0-dev1.md"),

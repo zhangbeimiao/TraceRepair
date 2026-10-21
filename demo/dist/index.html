@@ -12,7 +12,7 @@
     <div class="grid-overlay" aria-hidden="true"></div>
     <header class="nav shell">
       <a class="brand" href="#top" aria-label="TraceRepair 首页"><span class="brand-mark">TR</span><span>TraceRepair</span></a>
-      <div class="nav-meta"><span class="live-dot"></span> frozen evidence · agent v0.5.0</div>
+      <div class="nav-meta"><span class="live-dot"></span> frozen evidence · agent v0.6.0</div>
     </header>
     <main id="top">
       <section class="hero shell">
@@ -40,12 +40,12 @@
       </section>
       <section class="section evidence-section">
         <div class="shell">
-          <div class="section-heading"><div><span class="section-index">02</span><h2>真实历史 Bug：成功与安全拒绝都公开</h2></div><p>冻结 Agent v0.5.0、Prompt、配置和 pass@1 协议；失败不会重试，也不会边测边改策略。</p></div>
+          <div class="section-heading"><div><span class="section-index">02</span><h2>真实历史 Bug：成功与安全拒绝都公开</h2></div><p>冻结 Agent v0.6.0、Prompt、配置和 pass@1 协议；锁定任务每题一次，失败不会重试。</p></div>
           <div class="evidence-grid">
-            <article class="score-card development"><div class="score-top"><span>DEVELOPMENT</span><span>2 real historical bugs</span></div><strong id="dev-score">--</strong><p>Humanize 与 Boltons 的修复前提交；oracle 预检确认 buggy 失败、fixed 通过。</p></article>
-            <article class="score-card locked"><div class="score-top"><span>LOCKED / ONE-SHOT</span><span>1 unseen repository</span></div><strong id="test-score">--</strong><p>More Itertools 只运行一次；补丁定位越过安全边界后拒绝写入并转人工。</p></article>
+            <article class="score-card development"><div class="score-top"><span>DEVELOPMENT</span><span>3 real historical bugs</span></div><strong id="dev-score">--</strong><p>PySnooper、tqdm 与 TheFuck；仅使用这三题调整 Agent，所有任务先通过 oracle 预检。</p></article>
+            <article class="score-card locked"><div class="score-top"><span>LOCKED / ONE-SHOT</span><span>2 unseen repositories</span></div><strong id="test-score">--</strong><p>HTTPie 与 youtube-dl 在配置冻结后各运行一次；成功和失败都完整保留。</p></article>
           </div>
-          <div class="failure-outcome"><article><span>LOCKED FAILURE</span><p id="historical-stop-reason">--</p></article><article><span>INTEGRITY</span><p id="historical-integrity">--</p></article></div>
+          <div class="failure-outcome"><article><span>SAFE HANDOFFS</span><p id="historical-stop-reason">--</p></article><article><span>INTEGRITY</span><p id="historical-integrity">--</p></article></div>
           <p class="evidence-note" id="historical-scope">--</p>
           <div class="cohort-panel"><div><h3>受控工程回归证据（不是主成功率）</h3><p>EventRelay 13/13 用于验证状态机、门禁和 Trace；历史 cohort 保留早期错误路由、上下文不匹配与预算耗尽。</p></div><div id="cohorts" class="cohorts" aria-label="各版本受控运行成功率"></div></div>
         </div>

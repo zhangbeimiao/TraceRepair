@@ -23,9 +23,9 @@ def test_agent_architecture_documents_current_boundaries() -> None:
 def test_interview_pitch_matches_frozen_metrics_and_demo_commands() -> None:
     content = (ROOT / "docs" / "interview-pitch.md").read_text(encoding="utf-8")
 
-    for evidence in ("2/3", "0 个错误补丁", "268.67", "13/13", "5/5"):
+    for evidence in ("3/5", "1/2", "0 个错误补丁", "273.8", "13/13", "5/5"):
         assert evidence in content
-    assert "PATCH_CONTEXT_MISMATCH" in content
+    assert "目标测试" in content
     assert "python scripts\\showcase.py" in content
     assert "不能声称" in content
     assert "提升 Agent 版本" in content

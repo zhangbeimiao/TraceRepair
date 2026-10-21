@@ -20,7 +20,7 @@ Demo 只回放冻结并脱敏的真实 Trace，不需要 API Key，也不会产�
 
 TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Agent。大模型负责在不确定环境中选择搜索、读取和补丁动作；确定性控制器负责权限、状态、成本、测试和人工审核。模型不能直接运行 Shell，也不能绕过验证门禁修改仓库。仓库差异由 JSON 任务配置描述，不再写死 EventRelay 路径。
 
-当前冻结 Agent 为 `0.5.0`。在三个来自真实开源仓库历史提交的 Bug 上，严格 `pass@1` 结果为 **2/3**：两个开发任务通过目标测试与完整回归；一个锁定任务因 `PATCH_CONTEXT_MISMATCH` 在写入源码和启动测试前被安全拒绝并转人工。结果中 **错误接受补丁数为 0**。样本量很小，因此这里只证明受控闭环能够处理真实历史 Bug 并在定位不确定时安全停止，不宣称任意仓库修复准确率。
+当前冻结 Agent 为 `0.6.0`（评测运行时 `0.6.0-dev4`）。在五个来自不同开源仓库历史提交的 Bug 上，严格 `pass@1` 结果为 **3/5**：开发集 `2/3`，配置冻结后的锁定集 `1/2`，锁定任务每题只运行一次。两个失败候选都被目标测试拦截并转人工，**错误接受补丁数为 0**。样本量仍小，因此这里只证明受控闭环、一次性锁定迁移和安全停止能力，不宣称任意仓库修复准确率。
 
 ## 评测结果
 
@@ -28,28 +28,25 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 
 | 协议 | Agent | 真实历史 Bug | pass@1 | 安全拒绝 | 错误接受补丁 | 平均输出 Tokens |
 |---|---|---:|---:|---:|---:|---:|
-| 冻结配置、每题一次 | `0.5.0` | 3 | **2/3（66.67%）** | 1 | **0** | 268.67 |
+| 冻结配置、pass@1 | `0.6.0` | 5 | **3/5（60%）** | 2 | **0** | 273.80 |
+| 历史基线（不同题集） | `0.5.0` | 3 | **2/3（66.67%）** | 1 | **0** | 268.67 |
 
-- Development：Humanize、Boltons，`2/2`。
-- Locked one-shot：More Itertools，`0/1`；候选补丁意图接近正确修复，但 hunk 位置与唯一精确上下文相差 87 行，超过 ±80 行的精确重定位上限，因此在写文件和运行测试前拒绝。
+- Development：PySnooper、tqdm、TheFuck，`2/3`；只有这三题用于调整 `0.6.0`。
+- Locked one-shot：HTTPie、youtube-dl，`1/2`；冻结配置后各运行一次，没有失败重试或事后调参。
+- 两个失败均为候选 Diff 通过补丁策略并写入一次性副本后，目标测试仍失败；控制器停止在完整回归之前，未接受错误补丁。
 - 每个任务先运行 oracle 预检：修复前提交必须使目标测试失败，历史修复后提交必须通过目标测试和回归测试。
 - 所有尝试（包括失败）追加到 SHA-256 哈希链；最终报告、终端账本和 Agent 配置均有独立摘要。
 
 冻结证据：
 
-- `evaluation/benchmarks/historical-python-v1.0.0.json`
-- `evaluation/frozen/agent-v0.5.0.json`
-- `evaluation/results/historical-python-v1.0.0/report.json`
-- `evaluation/results/historical-python-v1.0.0/attempts.jsonl`
-- `evaluation/frozen/historical-python-v1.0.0.json`
-- `evaluation/frozen/historical-python-v1.0.0.json.sha256`
+- `evaluation/benchmarks/historical-python-v1.1.3.json`
+- `evaluation/frozen/agent-v0.6.0.json`
+- `evaluation/results/historical-python-v1.1.3/report.json`
+- `evaluation/results/historical-python-v1.1.3/attempts.jsonl`
+- `evaluation/frozen/historical-python-v1.1.3.json`
+- `evaluation/frozen/historical-python-v1.1.3.json.sha256`
 
-任何补丁定位策略、重定位窗口或 Prompt 的改动，都必须提升 Agent 版本并创建新的 benchmark manifest 与结果目录；**不得用新逻辑覆盖或重跑 `historical-python-v1.0.0` 的锁定结果**。
-
-开发分支当前为 Agent `0.6.0-dev1`：新增“全局精确唯一 + Python 命名符号锚点”
-补丁定位，但仍禁用模糊匹配。该版本尚未产生新的 benchmark 成功率，公开主结论仍是
-`0.5.0` 的 `2/3`。设计与评测隔离规则见
-[`docs/patch-location-v0.6.0-dev1.md`](docs/patch-location-v0.6.0-dev1.md)。
+任何补丁定位策略、预算或 Prompt 的改动，都必须提升 Agent 版本并创建新的 benchmark manifest 与结果目录；**不得覆盖或重跑 `historical-python-v1.1.3` 的锁定结果**。`0.5.0 / historical-python-v1.0.0` 的 `2/3` 也永久保留。两个版本题集不同，百分比不能解释为直接精度升降。
 
 ### 受控工程回归证据（次要结论）
 
@@ -75,7 +72,7 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 
 ## 30 秒介绍
 
-用户提交 Issue 和失败测试后，Agent 在最多三轮诊断中选择受限的代码搜索与读取工具，然后生成一次候选 unified diff。Diff 必须依次通过路径与变更量策略、目标测试和完整回归测试；全部通过后任务仍只进入 `awaiting_review`，等待人工确认。所有模型决策、工具生命周期、状态迁移和 checkpoint 都持久化到 SQLite。冻结的真实历史 Bug 评测为 **2/3 pass@1，另 1 次在写文件前安全拒绝，0 个错误补丁被接受**。
+用户提交 Issue 和失败测试后，Agent 在最多三轮诊断中选择受限的代码搜索与读取工具，然后生成一次候选 unified diff。Diff 必须依次通过路径与变更量策略、目标测试和完整回归测试；全部通过后任务仍只进入 `awaiting_review`，等待人工确认。所有模型决策、工具生命周期、状态迁移和 checkpoint 都持久化到 SQLite。冻结的五仓库历史 Bug 评测为 **3/5 pass@1，另 2 次被目标测试安全拦截，0 个错误补丁被接受**。
 
 ## 架构
 
@@ -238,17 +235,16 @@ python scripts\export_web_demo.py
 
 真实历史 Bug benchmark 使用统一 manifest 串行执行多个仓库任务。每个任务严格
 `pass@1`；失败、超时和人工接管都会追加到 SHA-256 哈希链账本，不允许用成功重跑
-覆盖。先执行零费用预检，再执行所有尚未尝试的任务：
+覆盖。`historical-python-v1.1.3` 已完成并冻结，尤其不得再次运行 locked split。
+下面的 provider-free 命令只用于核对清单状态，不会新增模型尝试：
 
 ```powershell
-python scripts\prepare_historical_benchmark.py --download
 python scripts\run_benchmark.py `
-  --manifest evaluation\benchmarks\historical-python-v1.0.0.json `
+  --manifest evaluation\benchmarks\historical-python-v1.1.3.json `
   --dry-run
 ```
 
-`historical-python-v1.0.0` 已完成并冻结，不应再次运行。上面的 `--dry-run` 只做清单与
-状态预检，不发起模型请求。生成的 `report.json` 汇总 pass@1、Wilson 95% 区间、人工
+上面的 `--dry-run` 只做清单与状态预检，不发起模型请求。冻结的 `report.json` 汇总 pass@1、Wilson 95% 区间、人工
 接管、错误接受检查、P50/P95 时延、Token 与 completion-only 成本估算。哈希链只能在
 终端哈希发布后提供篡改检测，不等同于外部不可变存储。完整协议见
 `docs/BENCHMARK_PROTOCOL.md`。
@@ -287,8 +283,8 @@ TraceRepair/
 
 ## 当前限制
 
-- 真实历史 Bug 只有 3 个，结果为 `2/3 pass@1`；Wilson 95% 区间很宽，因此不能据此声称广泛泛化能力。
-- 锁定任务因补丁 hunk 与唯一精确上下文相距 87 行、超过 ±80 行上限而安全拒绝。未来若改进补丁定位，必须作为新 Agent 版本和新评测集运行，不能回填本次结果。
+- 真实历史 Bug 只有 5 个，结果为 `3/5 pass@1`，Wilson 95% 区间为 `23.07%–88.24%`；不能据此声称广泛泛化能力。
+- 两个失败候选均未通过目标测试。当前每题只允许一次补丁提案，不做测试反馈后的多轮自修复，因此自动化率仍受保守策略限制。
 - 除 EventRelay 外，公开配置仓库获得 `5/5` 重复稳定性，另一个未公开仓库完成 `1/1` 无重试盲测；样本仍小，因此分层报告而不宣称普适成功率。
 - pytest 会导入并执行仓库代码，因此当前只接受操作者拥有或信任的仓库；未知第三方代码仍需要容器沙箱。
 - 当前定位是小型仓库，默认最多 2,000 个文件与 50 MiB，可在受控上限内配置。
@@ -317,6 +313,8 @@ TraceRepair/
 - `docs/BENCHMARK_PROTOCOL.md`：pass@1、数据冻结和防结果篡改协议
 - `docs/releases/v0.6.0.md`：可配置仓库适配层
 - `docs/releases/v0.6.1.md`：跨仓库稳定性与一次性盲测
+- `docs/releases/agent-v0.6.0.md`：冻结 Agent 0.6.0 与五仓库真实历史 Bug 评测
+- `evaluation/results/historical-python-v1.1.3/LOCKED_FINDINGS.md`：Agent 0.6.0 一次性锁定集结论
 
 ## 磁盘与依赖
 

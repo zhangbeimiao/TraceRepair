@@ -12,6 +12,7 @@ def make_release_tree(root: Path) -> None:
         "evaluation/frozen/recovery-showcase-v0.4.1.json",
         "docs/releases/v0.6.0.md",
         "docs/releases/v0.6.1.md",
+        "docs/releases/agent-v0.6.0.md",
         "docs/agent-architecture.md",
         "docs/interview-pitch.md",
         "docs/patch-location-v0.6.0-dev1.md",

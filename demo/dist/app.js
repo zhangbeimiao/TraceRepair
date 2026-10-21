@@ -20,9 +20,8 @@
   setText("#test-score", `${countSuccesses(lockedAttempts)}/${lockedAttempts.length}`);
   setText(
     "#historical-stop-reason",
-    "PATCH_CONTEXT_MISMATCH：候选 hunk 与唯一精确上下文相差 "
-      + `${historical.lockedFailureAudit.distance_lines} 行，超过 `
-      + `${historical.lockedFailureAudit.maximum_exact_relocation_lines} 行上限；未写源码、未跑测试。`,
+    `${historical.failures} 个候选补丁未通过目标测试，控制器均在完整回归前停止并转人工；`
+      + `锁定集每题只运行一次，未进行失败重试。`,
   );
   setText(
     "#historical-integrity",

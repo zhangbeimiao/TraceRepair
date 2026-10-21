@@ -1,7 +1,7 @@
 window.TRACEREPAIR_DEMO = {
   "generatedAt": "2026-10-19T10:26:25.357070+00:00",
   "summary": {
-    "agentVersion": "0.5.0",
+    "agentVersion": "0.6.0",
     "controlledAgentVersion": "0.4.0-dev1",
     "evaluatedBugTypes": 9,
     "runs": 13,
@@ -1838,61 +1838,100 @@ window.TRACEREPAIR_DEMO = {
     }
   ],
   "historicalBenchmark": {
-    "benchmarkId": "historical-python-v1.0.0",
+    "benchmarkId": "historical-python-v1.1.3",
     "protocol": "pass@1",
-    "agentVersion": "0.5.0",
+    "agentVersion": "0.6.0",
+    "evaluatedRuntimeAgentVersion": "0.6.0-dev4",
     "model": "qwen3.8-flash",
-    "runs": 3,
-    "successes": 2,
-    "failures": 1,
-    "passAt1": 0.6667,
-    "humanHandoffs": 1,
+    "runs": 5,
+    "successes": 3,
+    "failures": 2,
+    "passAt1": 0.6,
+    "humanHandoffs": 2,
     "incorrectAcceptedPatches": 0,
-    "averageTokens": 268.67,
-    "totalTokens": 806,
-    "p50Seconds": 7.719,
-    "p95Seconds": 18.234,
+    "averageTokens": 273.8,
+    "totalTokens": 1369,
+    "p50Seconds": 11.267,
+    "p95Seconds": 12.6,
     "wilson95": {
-      "lower": 0.2077,
-      "upper": 0.9385
+      "lower": 0.2307,
+      "upper": 0.8824
     },
     "attempts": [
       {
-        "task_id": "humanize-negative-fraction",
+        "task_id": "pysnooper-file-output",
         "split": "development",
         "success": true,
-        "record_sha256": "a8acb6ada67a7c888de02fbb5758de556904f9fa158f705a37aef361121d142f"
+        "record_sha256": "6c3c6fe6e86896288857d5fd2fef2762321408a16d35e175d4dec346ec9e750c"
       },
       {
-        "task_id": "boltons-empty-multireplace",
+        "task_id": "tqdm-sizeless-bool",
+        "split": "development",
+        "success": false,
+        "status": "needs_human",
+        "stop_reason": "candidate patch failed target test: TEST_FAILED",
+        "record_sha256": "6e2a9f3aac9823289ff54664dfd729e3a91c9067a2e430d3a7b5fa18f7cd9e45"
+      },
+      {
+        "task_id": "thefuck-git-push-match",
         "split": "development",
         "success": true,
-        "record_sha256": "a0d009e5170711f146b4819af31f0c99208ec92f19ca9ef770754bee0cdf83ae"
+        "record_sha256": "5b47a177222c6111987001d86f2b4aa1f9ef5e387dc5bc1b5f5af5c5912849a0"
       },
       {
-        "task_id": "more-itertools-falsey-validator",
+        "task_id": "httpie-host-header-case",
+        "split": "locked",
+        "success": true,
+        "record_sha256": "124a50bc615444d3270a432a9728b9e8604855e5a3b48e39bde802c673ea3c51"
+      },
+      {
+        "task_id": "youtube-dl-boolean-filter",
         "split": "locked",
         "success": false,
         "status": "needs_human",
-        "stop_reason": "candidate patch rejected: PATCH_CONTEXT_MISMATCH",
-        "candidate_sha256": "e890549835c080d30be101cf12d692ee9e22c889a44cc7e8e21380b01b01b152",
-        "record_sha256": "e0310cc699e8d14ef381308de8a5eb5d43dcca5f9a3757b64f467f14ce4fd722"
+        "stop_reason": "candidate patch failed target test: TEST_FAILED",
+        "record_sha256": "a22b116185f95f74dd8980460764d2fb4433714233823b1b9e1fe38c073b1b3a"
       }
     ],
-    "lockedFailureAudit": {
-      "candidate_hunk_old_start": 1098,
-      "unique_exact_context_line": 1185,
-      "distance_lines": 87,
-      "maximum_exact_relocation_lines": 80,
-      "decision": "rejected without writing source or running tests",
-      "post_hoc_retry_performed": false
+    "splits": {
+      "development": {
+        "attempts": 3,
+        "successes": 2,
+        "pass_at_1": 0.6667
+      },
+      "locked": {
+        "attempts": 2,
+        "successes": 1,
+        "pass_at_1": 0.5,
+        "one_shot": true,
+        "retried": false,
+        "workflow_run": 39584933038
+      }
     },
-    "manifestSha256": "d7a64ed4e32b107317bf63be995343ec1deb094a7679771378bc38ca67473e78",
-    "agentConfigSha256": "ad8b1a04c9b03246bc42ff393b6082f53f79c612a12e1eb57281ab65dee2575e",
-    "reportSha256": "041d52280dfd6ce08e7b48d14ae5e7b9d864c4ca671a963006011e9560c4dd32",
-    "terminalLedgerSha256": "e0310cc699e8d14ef381308de8a5eb5d43dcca5f9a3757b64f467f14ce4fd722",
-    "frozenSummarySha256": "1a30ad42750e223124dd29214003688890a30b7b68b2f7101c6aa8ee43c11f4b",
-    "scopeNote": "This small benchmark validates the bounded repair mechanism and one locked transfer attempt; it does not establish broad code-repair accuracy."
+    "failureAttempts": [
+      {
+        "task_id": "tqdm-sizeless-bool",
+        "split": "development",
+        "success": false,
+        "status": "needs_human",
+        "stop_reason": "candidate patch failed target test: TEST_FAILED",
+        "record_sha256": "6e2a9f3aac9823289ff54664dfd729e3a91c9067a2e430d3a7b5fa18f7cd9e45"
+      },
+      {
+        "task_id": "youtube-dl-boolean-filter",
+        "split": "locked",
+        "success": false,
+        "status": "needs_human",
+        "stop_reason": "candidate patch failed target test: TEST_FAILED",
+        "record_sha256": "a22b116185f95f74dd8980460764d2fb4433714233823b1b9e1fe38c073b1b3a"
+      }
+    ],
+    "manifestSha256": "8ac7465ecf3cc515e81565dd8bcbcbb71a3c7f9c7d3bf5fdc96d807f3f2dfd94",
+    "agentConfigSha256": "2dec208ed6eba925ac402dca281112d95aeb1beb5f24811b9143c2a3bb025e0b",
+    "reportSha256": "fa274cb6a02a0623be780b94ad1286ec3704a29e8e3021a8485350f29af31646",
+    "terminalLedgerSha256": "a22b116185f95f74dd8980460764d2fb4433714233823b1b9e1fe38c073b1b3a",
+    "frozenSummarySha256": "4c978aa6dd5a5e7ee882d02dfccfae594d1b655f8992f5f6f86ea110f54cec7f",
+    "scopeNote": "Five historical tasks validate the bounded mechanism and two one-shot locked transfers; this sample does not establish broad code-repair accuracy."
   },
   "repositoryCohort": {
     "projectVersion": "0.6.1",

@@ -5,14 +5,14 @@ def test_offline_showcase_replays_all_evidence_without_private_metadata() -> Non
     output = render_showcase(load_demo_data())
 
     assert "provider requests: 0" in output
-    assert "Real historical bugs, pass@1   : 2/3 passed; 1 safely rejected" in output
-    assert "0 incorrect patches accepted; 1 human handoff" in output
-    assert "PATCH_CONTEXT_MISMATCH" in output
+    assert "Real historical bugs, pass@1   : 3/5 passed; 2 safely rejected" in output
+    assert "0 incorrect patches accepted; 2 human handoffs" in output
+    assert "1/2 passed; each task ran once" in output
     assert "EventRelay controlled regression: 13/13 passed" in output
     assert "Public configured repository    : 5/5 passed" in output
     assert "Held-out repository, one shot   : 1/1 passed" in output
     assert "search_code -> read_file -> apply_patch -> run_tests -> run_regression" in output
-    assert "PATCH_CONTEXT_MISMATCH" in output
+    assert "failed their target tests" in output
     assert "model_calls=0, skipped=apply_patch" in output
     assert "After resume : run_tests -> run_regression" in output
     assert "repository writes: 0" in output

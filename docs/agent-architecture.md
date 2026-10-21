@@ -91,10 +91,14 @@ VM sandbox.
 
 ## Evidence boundary
 
+- Real historical benchmark: Agent 0.6.0 completed 3/5 pass@1 across five
+  repositories; development was 2/3 and the one-shot locked split was 1/2.
+  Both failures stopped at the target-test gate, and no incorrect patch was
+  accepted.
 - EventRelay controlled benchmark: 13/13 successful frozen runs.
 - Public configured repository: 5/5 repeat runs, 179.6 average output tokens.
 - Held-out trusted repository: 1/1 strict one-shot run, 234 output tokens,
   three model calls, five tool calls, and no retry.
 
-These are deliberately reported as three different protocols. They do not
+These are deliberately reported as separate protocols. They do not
 constitute a claim of 100% accuracy on arbitrary Python repositories.

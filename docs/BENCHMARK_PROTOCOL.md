@@ -77,7 +77,7 @@ disposable workspaces but makes no model request and writes no benchmark result:
 
 ```powershell
 python scripts\run_benchmark.py `
-  --manifest evaluation\benchmarks\historical-python-v1.0.0.json `
+  --manifest evaluation\benchmarks\historical-python-v1.1.3.json `
   --split development `
   --dry-run
 ```
@@ -86,12 +86,16 @@ Then run every pending development task exactly once:
 
 ```powershell
 python scripts\run_benchmark.py `
-  --manifest evaluation\benchmarks\historical-python-v1.0.0.json `
+  --manifest evaluation\benchmarks\historical-python-v1.1.3.json `
   --split development
 ```
 
 The locked split is invoked exactly once only after the development result and frozen Agent
 configuration have been reviewed.
+
+`historical-python-v1.1.3` is now complete and frozen. Its locked split must not be invoked again;
+the commands above document the protocol for a newly created benchmark and are not rerun
+instructions for this benchmark ID.
 
 Re-running the command does not repeat recorded tasks. It verifies the ledger and regenerates the
 report from the complete attempt history.

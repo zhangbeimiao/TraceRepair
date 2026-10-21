@@ -18,18 +18,24 @@ def test_public_demo_contains_verified_patches_and_frozen_failures() -> None:
     payload = _payload()
 
     historical = payload["historicalBenchmark"]
-    assert historical["benchmarkId"] == "historical-python-v1.0.0"
-    assert historical["agentVersion"] == "0.5.0"
-    assert historical["runs"] == 3
-    assert historical["successes"] == 2
-    assert historical["failures"] == 1
-    assert historical["passAt1"] == 0.6667
-    assert historical["humanHandoffs"] == 1
+    assert historical["benchmarkId"] == "historical-python-v1.1.3"
+    assert historical["agentVersion"] == "0.6.0"
+    assert historical["evaluatedRuntimeAgentVersion"] == "0.6.0-dev4"
+    assert historical["runs"] == 5
+    assert historical["successes"] == 3
+    assert historical["failures"] == 2
+    assert historical["passAt1"] == 0.6
+    assert historical["humanHandoffs"] == 2
     assert historical["incorrectAcceptedPatches"] == 0
-    assert historical["lockedFailureAudit"]["decision"] == (
-        "rejected without writing source or running tests"
+    assert historical["splits"]["development"]["successes"] == 2
+    assert historical["splits"]["locked"]["successes"] == 1
+    assert historical["splits"]["locked"]["one_shot"] is True
+    assert historical["splits"]["locked"]["retried"] is False
+    assert len(historical["failureAttempts"]) == 2
+    assert all(
+        attempt["stop_reason"] == "candidate patch failed target test: TEST_FAILED"
+        for attempt in historical["failureAttempts"]
     )
-    assert historical["lockedFailureAudit"]["post_hoc_retry_performed"] is False
     assert len(historical["frozenSummarySha256"]) == 64
     assert len(payload["traces"]) == 13
     assert len(payload["failures"]) == 3

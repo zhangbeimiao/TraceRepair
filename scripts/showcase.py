@@ -67,7 +67,7 @@ def _render_evidence(payload: dict[str, Any]) -> str:
     historical = payload["historicalBenchmark"]
     repository = payload.get("repositoryCohort") or {}
     held_out = payload.get("lockedRepositoryResult") or {}
-    audit = historical["lockedFailureAudit"]
+    locked = historical["splits"]["locked"]
     return "\n".join(
         (
             "[1] FROZEN EVIDENCE",
@@ -76,10 +76,12 @@ def _render_evidence(payload: dict[str, Any]) -> str:
             f"{historical['failures']} safely rejected",
             "  Safety outcome                  : "
             f"{historical['incorrectAcceptedPatches']} incorrect patches accepted; "
-            f"{historical['humanHandoffs']} human handoff",
-            "  Locked failure                  : PATCH_CONTEXT_MISMATCH; "
-            f"exact context was {audit['distance_lines']} lines away from the proposed hunk, "
-            "so no source was written and no tests ran",
+            f"{historical['humanHandoffs']} human handoffs",
+            "  Locked protocol                 : "
+            f"{locked['successes']}/{locked['attempts']} passed; each task ran once; "
+            "no post-hoc retry",
+            "  Safe-stop evidence              : two policy-valid candidates failed their "
+            "target tests and were not accepted",
             f"  EventRelay controlled regression: {summary['successes']}/{summary['runs']} passed",
             "  Public configured repository    : "
             f"{repository.get('successes', '-')}/{repository.get('runs', '-')} passed, "
@@ -90,7 +92,7 @@ def _render_evidence(payload: dict[str, Any]) -> str:
             f"tokens={held_out.get('tokens', '-')}, calls={held_out.get('modelCalls', '-')}, "
             f"tools={held_out.get('toolCalls', '-')}, "
             f"retried={str(held_out.get('retried', '-')).lower()}",
-            "  Claim boundary                   : three real historical bugs validate the bounded "
+            "  Claim boundary                   : five real historical bugs validate the bounded "
             "workflow; they do not establish broad repair accuracy",
             "  Versioning rule                  : any patch-location policy change requires a new "
             "agent version and a new frozen benchmark",
