@@ -1,0 +1,11 @@
+--- a/httpie/models.py
++++ b/httpie/models.py
+@@ -107,7 +107,7 @@
+ 
+         headers = dict(self._orig.headers)
+ 
+-        if 'Host' not in headers:
++        if 'host' not in {k.lower() for k in headers}:
+             headers['Host'] = url.netloc.split('@')[-1]
+ 
+         headers = ['%s: %s' % (name, value)

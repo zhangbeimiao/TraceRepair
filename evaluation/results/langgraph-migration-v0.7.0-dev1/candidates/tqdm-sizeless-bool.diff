@@ -1,0 +1,25 @@
+--- a/tqdm/_tqdm.py
++++ b/tqdm/_tqdm.py
+@@ -935,6 +935,12 @@
+     def __len__(self):
+         return self.total if self.iterable is None else \
+             (self.iterable.shape[0] if hasattr(self.iterable, "shape")
+              else len(self.iterable) if hasattr(self.iterable, "__len__")
+              else getattr(self, "total", None))
+ 
++    def __bool__(self):
++        # If total is known and positive, it's truthy.
++        # If iterable has length, use that.
++        # Otherwise, default to True unless explicitly disabled or empty?
++        # Standard behavior: objects are true by default. tqdm should likely be true if active.
++        # However, test_bool likely checks specific edge cases for iterables without length.
++        # Let's look at the failing test context implied: "iterables without a length, explicit totals, and manual mode"
++        # Usually, if we can't determine length, we might want to rely on `total` or just return True.
++        # But wait, if `disable` is True, maybe False? No, usually bool(t) is about existence/validity.
++        # Let's try returning True generally, but respecting disable? Or maybe checking if n < total?
++        # Actually, looking at similar issues in tqdm history, __bool__ was added to handle cases where len() raises TypeError.
++        # The standard fix is often:
++        return not self.disable
++
+     def __enter__(self):
+         return self

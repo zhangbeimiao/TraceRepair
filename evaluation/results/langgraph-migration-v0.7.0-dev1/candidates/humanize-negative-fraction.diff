@@ -1,0 +1,19 @@
+--- a/src/humanize/number.py
++++ b/src/humanize/number.py
+@@ -395,10 +395,12 @@
+     whole_number = int(number)
+     frac = Fraction(number - whole_number).limit_denominator(1000)
+     numerator = frac.numerator
+     denominator = frac.denominator
+     if whole_number and not numerator and denominator == 1:
+         # this means that an integer was passed in
+         # (or variants of that integer like 1.0000)
+         return f"{whole_number:.0f}"
+ 
++    if number < 0:
++        numerator = abs(numerator)
++
+     if not whole_number:
+         return f"{numerator:.0f}/{denominator:.0f}"
+ 
+     return f"{whole_number:.0f} {numerator:.0f}/{denominator:.0f}"

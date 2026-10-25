@@ -1,0 +1,13 @@
+--- a/boltons/strutils.py
++++ b/boltons/strutils.py
+@@ -1230,6 +1230,9 @@
+         if isinstance(sub_map, Mapping):
+             sub_map = sub_map.items()
+ 
++        if not sub_map:
++            self.combined_pattern = re.compile('')
++            return
++
+         for idx, vals in enumerate(sub_map):
+             group_name = f'group{idx}'
+             if isinstance(vals[0], str):
