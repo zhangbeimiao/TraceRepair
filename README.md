@@ -28,6 +28,8 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 
 当前冻结 Agent 为 `0.6.0`（评测运行时 `0.6.0-dev4`）。在五个来自不同开源仓库历史提交的 Bug 上，严格 `pass@1` 结果为 **3/5**：开发集 `2/3`，配置冻结后的锁定集 `1/2`，锁定任务每题只运行一次。两个失败候选都被目标测试拦截并转人工，**错误接受补丁数为 0**。样本量仍小，因此这里只证明受控闭环、一次性锁定迁移和安全停止能力，不宣称任意仓库修复准确率。
 
+当前开发中的 `0.7.0-dev1` 已把正式端到端入口迁移为 LangGraph：诊断循环、源码 Checkpoint、补丁生成、补丁应用、目标测试、回归测试和恢复路由都是显式节点。LangGraph 仅负责编排且未配置 checkpointer；SQLite 仍是任务状态、预算、Trace 与恢复 Checkpoint 的唯一持久化源。该版本尚未冻结，不能继承或覆盖下方 `0.6.0` 的评测结论。
+
 ## 评测结果
 
 ### 真实历史 Bug（主要结论）
@@ -85,6 +87,8 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 完整的分层架构、状态边界与恢复路径见
 [`docs/agent-architecture.md`](docs/agent-architecture.md)；可直接练习的三分钟项目讲稿见
 [`docs/interview-pitch.md`](docs/interview-pitch.md)。
+当前 LangGraph 迁移范围、恢复证据与重新评测规则见
+[`docs/langgraph-migration-v0.7.0-dev1.md`](docs/langgraph-migration-v0.7.0-dev1.md)。
 
 ```mermaid
 flowchart LR
@@ -105,6 +109,8 @@ flowchart LR
     J --- F
     J --- G
 ```
+
+正式运行时由 LangGraph 显式编排 `diagnose → checkpoint_source → generate_patch → apply_patch → run_target → run_regression`；重启时从 SQLite 校验后的恢复阶段路由到 `generate_patch`、`run_target` 或 `run_regression`。图状态只在进程内存在，不构成第二套持久化真相源。
 
 | 模型负责 | 控制器负责 |
 |---|---|

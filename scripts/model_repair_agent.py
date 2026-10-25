@@ -9,8 +9,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from evaluation.materialize import load_case, materialize_case
-from tracerepair.end_to_end_workflow import EndToEndRepairWorkflow
 from tracerepair.instrumented_tools import InstrumentedTools
+from tracerepair.langgraph_end_to_end import LangGraphEndToEndRepairWorkflow
 from tracerepair.model_planner import BailianChatTransport, ModelPlanner, PlannerConfig, PlannerError
 from tracerepair.models import Task, TaskStatus
 from tracerepair.patch_apply import PatchApplier
@@ -225,7 +225,7 @@ def main() -> None:
             ),
         )
         task_evidence = f"{issue} Failing target: {selector}."
-        result = EndToEndRepairWorkflow(
+        result = LangGraphEndToEndRepairWorkflow(
             task_id,
             store,
             planner,

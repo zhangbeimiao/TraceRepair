@@ -11,7 +11,7 @@ flowchart TB
     ADAPTER --> COPY[Disposable workspace<br/>original repository remains unchanged]
 
     subgraph RUNTIME[Bounded repair runtime]
-        CTRL[Deterministic controller<br/>state, stage, budget and retry policy]
+        CTRL[Deterministic controller on LangGraph<br/>explicit nodes, routing and bounded loops]
         MODEL[Qwen planner<br/>structured tool choice or candidate diff]
         READ[Read-only tools<br/>repo_map · search_code · read_file]
         POLICY[Patch policy<br/>allowlist · size · unique context]
@@ -70,6 +70,14 @@ Any invalid structured output, disallowed tool, patch-policy rejection, timeout,
 target-test failure, regression failure, or integrity mismatch ends in
 `needs_human`. The workflow does not loop indefinitely to make the metrics look
 better.
+
+Agent `0.7.0-dev1` represents this path as explicit LangGraph nodes:
+`diagnose`, `checkpoint_source`, `generate_patch`, `apply_patch`, `run_target`,
+`run_regression`, plus a `resume` router. The graph is compiled without a
+LangGraph checkpointer. Graph state is ephemeral; after a restart the runtime
+reconstructs its route from SQLite and verifies workspace hashes before it
+skips any completed action. This prevents two persistence systems from
+disagreeing about the authoritative task state.
 
 ## Crash recovery
 
