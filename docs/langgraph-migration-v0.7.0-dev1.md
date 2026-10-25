@@ -31,15 +31,20 @@ through target and regression tests.
 The historical `0.6.0 / historical-python-v1.1.3` evidence is immutable. It is
 not relabelled as evidence for this migration.
 
-## Migration regression protocol
+## Migration regression result
 
 `evaluation/benchmarks/langgraph-migration-v0.7.0-dev1.json` contains five
 previously known historical tasks. All are labelled `development`; this is an
 architecture-regression comparison, not a fresh locked-set generalisation
-claim. Oracle preflight succeeds for all five tasks on the supported local
-environment.
+claim. Oracle preflight succeeded for all five tasks on the supported local
+environment. The one-shot result was **2/5 pass@1**, with three incorrect
+candidates rejected by the target-test gate and zero incorrect patches accepted.
+The complete report and candidate diffs are preserved under
+`evaluation/results/langgraph-migration-v0.7.0-dev1/`.
 
-Run the model-backed comparison once with:
+The model-backed comparison has already been run once. The following command is
+retained for reproducibility but must not be used to overwrite or relabel the
+recorded pass@1 result:
 
 ```powershell
 & .\.venv\Scripts\python.exe scripts\run_benchmark.py `
