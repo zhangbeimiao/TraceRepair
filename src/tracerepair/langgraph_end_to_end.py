@@ -151,6 +151,7 @@ class LangGraphEndToEndRepairWorkflow:
         graph.add_node("diagnose", self._diagnose)
         graph.add_node("checkpoint_source", self._checkpoint_source)
         graph.add_node("generate_patch", self._generate_patch)
+        graph.add_node("review_patch", self._review_patch)
         graph.add_node("apply_patch", self._apply_patch)
         graph.add_node("run_target", self._run_target)
         graph.add_node("run_regression", self._run_regression)
@@ -176,7 +177,10 @@ class LangGraphEndToEndRepairWorkflow:
         )
         graph.add_edge("checkpoint_source", "generate_patch")
         graph.add_conditional_edges(
-            "generate_patch", self._route_next, {"apply_patch": "apply_patch", "end": END}
+            "generate_patch", self._route_next, {"review_patch": "review_patch", "end": END}
+        )
+        graph.add_conditional_edges(
+            "review_patch", self._route_next, {"apply_patch": "apply_patch", "end": END}
         )
         graph.add_conditional_edges(
             "apply_patch", self._route_next, {"run_target": "run_target", "end": END}
@@ -460,21 +464,94 @@ class LangGraphEndToEndRepairWorkflow:
                 int(state.get("diagnosis_turns", 0)),
                 total_tokens,
             )
-        self._store.transition(
-            self._task_id,
-            TaskStatus.NEEDS_HUMAN,
-            "model candidate requires controlled verification",
-        )
         return self._complete_node(
             "generate_patch",
             {
                 "candidate": candidate,
                 "completion_tokens": total_tokens,
-                "next_node": "apply_patch",
+                "next_node": "review_patch",
                 "action": "generate_patch",
-                "detail": "candidate persisted; deterministic verification required",
-                "task_status": TaskStatus.NEEDS_HUMAN.value,
+                "detail": "draft candidate persisted; bounded semantic review required",
+                "task_status": TaskStatus.RUNNING.value,
                 "node_history": ["generate_patch"],
+            },
+        )
+
+    def _review_patch(self, state: RepairGraphState) -> dict[str, object]:
+        """Perform one bounded semantic review without granting execution authority."""
+
+        self._node_started("review_patch")
+        source = state.get("source")
+        draft = str(state.get("candidate", ""))
+        diagnosis_turns = int(state.get("diagnosis_turns", 0))
+        total_tokens = int(state.get("completion_tokens", 0))
+        if not isinstance(source, FileSlice) or not draft:
+            return self._stop_node(
+                "review_patch",
+                "patch_review",
+                "semantic review has no verified source and draft pair",
+                diagnosis_turns,
+                total_tokens,
+            )
+        self._store.append_event(
+            self._task_id,
+            "workflow_phase_changed",
+            {"phase": "patch_review", "source_path": source.path},
+        )
+        review_plan = self._planner.suggest(
+            self._task_id,
+            self._store,
+            self._review_evidence(str(state["issue"]), source, draft),
+            allowed_tools=set(),
+            allow_patch=True,
+        )
+        total_tokens += review_plan.completion_tokens
+        if review_plan.kind != "patch":
+            return self._stop_node(
+                "review_patch",
+                "handoff",
+                review_plan.reason or "reviewer declined to approve a candidate patch",
+                diagnosis_turns,
+                total_tokens,
+            )
+        reviewed = review_plan.unified_diff or ""
+        try:
+            self._persist_candidate(reviewed)
+        except OSError:
+            return self._stop_node(
+                "review_patch",
+                "candidate_artifact",
+                "reviewed candidate diff could not be persisted for audit",
+                diagnosis_turns,
+                total_tokens,
+            )
+        draft_digest = hashlib.sha256(draft.encode("utf-8")).hexdigest()
+        reviewed_digest = hashlib.sha256(reviewed.encode("utf-8")).hexdigest()
+        self._store.append_event(
+            self._task_id,
+            "candidate_patch_reviewed",
+            {
+                "draft_sha256": draft_digest,
+                "reviewed_sha256": reviewed_digest,
+                "changed": draft_digest != reviewed_digest,
+                "execution_authority": False,
+            },
+        )
+        self._store.transition(
+            self._task_id,
+            TaskStatus.NEEDS_HUMAN,
+            "reviewed model candidate requires controlled verification",
+        )
+        return self._complete_node(
+            "review_patch",
+            {
+                "candidate": reviewed,
+                "completion_tokens": total_tokens,
+                "next_node": "apply_patch",
+                "action": "review_patch",
+                "detail": "reviewed candidate persisted; deterministic verification required",
+                "task_status": TaskStatus.NEEDS_HUMAN.value,
+                "node_history": ["review_patch"],
             },
         )
 
@@ -909,5 +986,22 @@ class LangGraphEndToEndRepairWorkflow:
             "include at least three unchanged context lines around the edit. Preserve behavior outside "
             "the reported defect: inspect neighboring branches and boundary values implied by the "
             "current control flow, and make every new condition as narrow as possible.\n"
+            f"Source:\n{source.content}"
+        )
+
+    @staticmethod
+    def _review_evidence(issue: str, source: FileSlice, draft: str) -> str:
+        return (
+            "You are the bounded semantic reviewer, not an executor. "
+            "You cannot call tools, write files, run tests, or approve a final result. "
+            "Return the unchanged draft as a unified diff if it is semantically correct; otherwise "
+            "return one corrected smallest unified diff. Return handoff when the supplied evidence "
+            "is insufficient. Check the exact issue contract, mentally simulate the named failing "
+            "example plus adjacent boundary classes, verify that downstream code consumes the state "
+            "being changed, and reject speculative or unrelated edits. Never edit tests.\n"
+            f"Task: {issue}\n"
+            f"Draft candidate:\n{draft}\n"
+            f"Confirmed source path: {source.path}\n"
+            f"Source lines: {source.start_line}-{source.end_line}\n"
             f"Source:\n{source.content}"
         )

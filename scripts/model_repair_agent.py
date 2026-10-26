@@ -152,8 +152,8 @@ def main() -> None:
                     "regression_suite": regression_suite,
                     "source_allowlist": list(source_allowlist),
                     "diagnostic_queries": list(diagnostic_queries),
-                    "max_model_calls": 4,
-                    "max_completion_tokens": 2_048,
+                    "max_model_calls": MAX_MODEL_CALLS,
+                    "max_completion_tokens": MAX_TOTAL_COMPLETION_TOKENS,
                 },
             )
             store.transition(task_id, TaskStatus.READY, "configured repository workspace created")
@@ -194,8 +194,8 @@ def main() -> None:
                     "evaluation_split": str(case["split"]),
                     "target_selector": selector,
                     "diagnostic_queries": list(diagnostic_queries),
-                    "max_model_calls": 4,
-                    "max_completion_tokens": 2_048,
+                    "max_model_calls": MAX_MODEL_CALLS,
+                    "max_completion_tokens": MAX_TOTAL_COMPLETION_TOKENS,
                 },
             )
             store.transition(task_id, TaskStatus.READY, "end-to-end workspace created")

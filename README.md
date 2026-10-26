@@ -28,9 +28,9 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 
 当前冻结 Agent 为 `0.6.0`（评测运行时 `0.6.0-dev4`）。在五个来自不同开源仓库历史提交的 Bug 上，严格 `pass@1` 结果为 **3/5**：开发集 `2/3`，配置冻结后的锁定集 `1/2`，锁定任务每题只运行一次。两个失败候选都被目标测试拦截并转人工，**错误接受补丁数为 0**。样本量仍小，因此这里只证明受控闭环、一次性锁定迁移和安全停止能力，不宣称任意仓库修复准确率。
 
-当前开发中的 `0.7.0-dev1` 已把正式端到端入口迁移为 LangGraph：诊断循环、源码 Checkpoint、补丁生成、补丁应用、目标测试、回归测试和恢复路由都是显式节点。LangGraph 仅负责编排且未配置 checkpointer；SQLite 仍是任务状态、预算、Trace 与恢复 Checkpoint 的唯一持久化源。该版本尚未冻结，不能继承或覆盖下方 `0.6.0` 的评测结论。
+当前开发中的 `0.7.0-dev2` 使用完整 LangGraph 端到端编排，并在补丁生成与应用之间新增一次受限语义复核：`generate_patch → review_patch → apply_patch`。复核器只能返回修订后的 unified diff 或交给人工，没有工具、文件写入、Shell、测试和状态修改权限。LangGraph 未配置 checkpointer；SQLite 仍是任务状态、预算、Trace 与恢复 Checkpoint 的唯一持久化源。该版本尚未评测冻结，不能继承或覆盖下方 `0.6.0` 的评测结论。
 
-迁移后在五个**已知开发任务**上的独立 pass@1 回归结果为 `2/5`：2 个候选通过目标测试和回归，3 个语义错误候选被目标测试安全拒绝，错误接受补丁数为 0。该结果用于暴露迁移后的模型补丁质量问题，不是新的盲测或泛化结论；完整账本、候选 Diff 与失败分析位于 `evaluation/results/langgraph-migration-v0.7.0-dev1/`。
+前一开发版 `0.7.0-dev1` 在五个**已知开发任务**上的独立 pass@1 回归结果为 `2/5`：2 个候选通过目标测试和回归，3 个语义错误候选被目标测试安全拒绝，错误接受补丁数为 0。该结果继续冻结不动；完整账本、候选 Diff 与失败分析位于 `evaluation/results/langgraph-migration-v0.7.0-dev1/`。`0.7.0-dev2` 必须使用新 manifest `langgraph-review-v0.7.0-dev2` 重新评测。
 
 ## 评测结果
 
@@ -82,7 +82,7 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 
 ## 30 秒介绍
 
-用户提交 Issue 和失败测试后，Agent 在最多三轮诊断中选择受限的代码搜索与读取工具，然后生成一次候选 unified diff。Diff 必须依次通过路径与变更量策略、目标测试和完整回归测试；全部通过后任务仍只进入 `awaiting_review`，等待人工确认。所有模型决策、工具生命周期、状态迁移和 checkpoint 都持久化到 SQLite。冻结的五仓库历史 Bug 评测为 **3/5 pass@1，另 2 次被目标测试安全拦截，0 个错误补丁被接受**。
+用户提交 Issue 和失败测试后，Agent 在最多三轮诊断中选择受限的代码搜索与读取工具，生成候选 unified diff，并由无执行权限的语义复核节点选择原样保留、修订或交给人工。最终 Diff 必须依次通过路径与变更量策略、目标测试和完整回归测试；全部通过后仍只进入 `awaiting_review`。所有模型决策、工具生命周期、状态迁移和 checkpoint 都持久化到 SQLite。冻结的五仓库历史 Bug 评测为 **3/5 pass@1，另 2 次被目标测试安全拦截，0 个错误补丁被接受**；新增复核节点的效果尚待独立评测。
 
 ## 架构
 
@@ -90,14 +90,17 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 [`docs/agent-architecture.md`](docs/agent-architecture.md)；可直接练习的三分钟项目讲稿见
 [`docs/interview-pitch.md`](docs/interview-pitch.md)。
 当前 LangGraph 迁移范围、恢复证据与重新评测规则见
-[`docs/langgraph-migration-v0.7.0-dev1.md`](docs/langgraph-migration-v0.7.0-dev1.md)。
+[`docs/langgraph-migration-v0.7.0-dev1.md`](docs/langgraph-migration-v0.7.0-dev1.md)；受限语义复核的权限边界见
+[`docs/patch-review-v0.7.0-dev2.md`](docs/patch-review-v0.7.0-dev2.md)。
 
 ```mermaid
 flowchart LR
     A[Issue + failing test] --> B[Bounded model planner]
     B -->|repo_map / search / read| C[Read-only tools]
     C --> B
-    B -->|candidate diff| D[Patch policy]
+    B -->|draft diff| R[Bounded semantic review]
+    R -->|handoff| H
+    R -->|reviewed diff| D[Patch policy]
     D -->|rejected| H[needs_human]
     D -->|accepted| E[Disposable workspace]
     E --> F[Target test]
@@ -106,19 +109,21 @@ flowchart LR
     G -->|failed| H
     G -->|passed| I[awaiting_review]
     J[(SQLite trace + checkpoint)] --- B
+    J --- R
     J --- C
     J --- D
     J --- F
     J --- G
 ```
 
-正式运行时由 LangGraph 显式编排 `diagnose → checkpoint_source → generate_patch → apply_patch → run_target → run_regression`；重启时从 SQLite 校验后的恢复阶段路由到 `generate_patch`、`run_target` 或 `run_regression`。图状态只在进程内存在，不构成第二套持久化真相源。
+正式运行时由 LangGraph 显式编排 `diagnose → checkpoint_source → generate_patch → review_patch → apply_patch → run_target → run_regression`；重启时从 SQLite 校验后的恢复阶段路由到 `generate_patch`、`run_target` 或 `run_regression`。图状态只在进程内存在，不构成第二套持久化真相源；补丁已持久化落盘后的验证恢复不会再次调用生成器或复核器。
 
 | 模型负责 | 控制器负责 |
 |---|---|
 | 判断下一步搜索什么 | 限制可调用工具和参数 |
 | 选择需要读取的源码 | 路径白名单和行数上限 |
 | 根据证据提出候选 Diff | 补丁范围、体积和上下文校验 |
+| 在无执行权限的复核阶段保留、修订 Diff 或交给人工 | 只允许复核结果进入确定性验证门禁 |
 | 信息不足时请求人工处理 | Token、轮次、超时和状态机 |
 | — | 目标测试、完整回归和人工审核 |
 

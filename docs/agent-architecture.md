@@ -62,7 +62,7 @@ flowchart TB
 ## Main execution path
 
 ```text
-new -> ready -> diagnosis -> patch_generation -> controlled_verification
+new -> ready -> diagnosis -> patch_generation -> semantic_review -> controlled_verification
     -> target_test -> regression_test -> awaiting_review
 ```
 
@@ -71,9 +71,11 @@ target-test failure, regression failure, or integrity mismatch ends in
 `needs_human`. The workflow does not loop indefinitely to make the metrics look
 better.
 
-Agent `0.7.0-dev1` represents this path as explicit LangGraph nodes:
-`diagnose`, `checkpoint_source`, `generate_patch`, `apply_patch`, `run_target`,
-`run_regression`, plus a `resume` router. The graph is compiled without a
+Agent `0.7.0-dev2` represents this path as explicit LangGraph nodes:
+`diagnose`, `checkpoint_source`, `generate_patch`, `review_patch`, `apply_patch`,
+`run_target`, `run_regression`, plus a `resume` router. `review_patch` may only
+return a reviewed unified diff or handoff; it has no tools or execution authority.
+The graph is compiled without a
 LangGraph checkpointer. Graph state is ephemeral; after a restart the runtime
 reconstructs its route from SQLite and verifies workspace hashes before it
 skips any completed action. This prevents two persistence systems from

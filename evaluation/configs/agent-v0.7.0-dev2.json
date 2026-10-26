@@ -1,0 +1,40 @@
+{
+  "agent_version": "0.7.0-dev2",
+  "parent_agent_version": "0.7.0-dev1",
+  "status": "development_only_not_benchmarked",
+  "architecture": "langgraph_end_to_end",
+  "durable_state": "sqlite_only",
+  "langgraph_checkpointer": false,
+  "model": "qwen3.8-flash",
+  "planner": {
+    "max_completion_tokens": 800,
+    "max_calls_per_task": 5,
+    "max_total_completion_tokens": 3072
+  },
+  "workflow": {
+    "max_diagnosis_turns": 3,
+    "max_patch_attempts": 1,
+    "semantic_review_attempts": 1,
+    "final_success_state": "awaiting_review"
+  },
+  "semantic_review": {
+    "allowed_outputs": ["unified_diff", "handoff"],
+    "tool_access": false,
+    "file_write_access": false,
+    "shell_access": false,
+    "test_access": false,
+    "execution_authority": false
+  },
+  "verification": [
+    "patch_policy",
+    "target_test",
+    "regression_test",
+    "human_review"
+  ],
+  "frozen_predecessor_unchanged": {
+    "agent_version": "0.7.0-dev1",
+    "benchmark": "langgraph-migration-v0.7.0-dev1",
+    "result": "2/5 pass@1; 3 safe rejections"
+  },
+  "evaluation_rule": "semantic review is a new agent policy and requires a new benchmark id; all predecessor evidence remains immutable"
+}

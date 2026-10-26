@@ -38,15 +38,33 @@ READ = (
 PATCH = json.dumps(
     {"kind": "patch", "unified_diff": FIX_CASE_05, "reason": "remove shortcut"}
 )
+BAD_PATCH = json.dumps(
+    {
+        "kind": "patch",
+        "unified_diff": """--- a/src/eventrelay/config.py
++++ b/src/eventrelay/config.py
+@@ -6,4 +6,5 @@
+     if value is None:
+         return default
+     normalized = value.strip().lower()
++    normalized = value.lower()
+     if value:
+""",
+        "reason": "draft overlooks whitespace handling",
+    }
+)
+HANDOFF = '{"kind":"handoff","reason":"insufficient evidence"}'
 
 
 class SequenceTransport:
     def __init__(self, responses: list[str]) -> None:
         self._responses = iter(responses)
         self.calls = 0
+        self.payloads: list[dict[str, object]] = []
 
     def complete(self, payload: dict[str, object]) -> dict[str, object]:
         self.calls += 1
+        self.payloads.append(payload)
         return {
             "choices": [{"message": {"content": next(self._responses)}}],
             "usage": {"completion_tokens": 30},
@@ -86,8 +104,8 @@ def _make_runtime(
         transport,  # type: ignore[arg-type]
         PlannerConfig(
             max_completion_tokens=512,
-            max_calls_per_task=4,
-            max_total_completion_tokens=2_048,
+            max_calls_per_task=5,
+            max_total_completion_tokens=3_072,
         ),
     )
     return store, LangGraphEndToEndRepairWorkflow(
@@ -100,7 +118,7 @@ def test_complete_graph_exposes_and_runs_every_repair_phase(tmp_path: Path) -> N
     store, workflow = _make_runtime(
         tmp_path / "trace.sqlite3",
         workspace,
-        SequenceTransport([SEARCH, READ, PATCH]),
+        SequenceTransport([SEARCH, READ, PATCH, PATCH]),
         create=True,
     )
 
@@ -110,6 +128,7 @@ def test_complete_graph_exposes_and_runs_every_repair_phase(tmp_path: Path) -> N
         "diagnose",
         "checkpoint_source",
         "generate_patch",
+        "review_patch",
         "apply_patch",
         "run_target",
         "run_regression",
@@ -130,19 +149,29 @@ def test_complete_graph_exposes_and_runs_every_repair_phase(tmp_path: Path) -> N
         "diagnose",
         "checkpoint_source",
         "generate_patch",
+        "review_patch",
         "apply_patch",
         "run_target",
         "run_regression",
     ]
     tools = [item["tool"] for item in store.load_checkpoint("graph-agent-05")["completed_tools"]]
     assert tools == ["search_code", "read_file", "apply_patch", "run_tests", "run_regression"]
+    reviews = [
+        event.payload
+        for event in store.list_events("graph-agent-05")
+        if event.event_type == "candidate_patch_reviewed"
+    ]
+    assert len(reviews) == 1
+    assert reviews[0]["changed"] is False
+    assert reviews[0]["draft_sha256"] == reviews[0]["reviewed_sha256"]
+    assert reviews[0]["execution_authority"] is False
     store.close()
 
 
 def test_graph_resume_uses_sqlite_checkpoint_and_skips_model_and_patch(tmp_path: Path) -> None:
     workspace = materialize_case("05", tmp_path / "case-05")
     database = tmp_path / "trace.sqlite3"
-    first = SequenceTransport([SEARCH, READ, PATCH])
+    first = SequenceTransport([SEARCH, READ, PATCH, PATCH])
     store, workflow = _make_runtime(
         database, workspace, first, create=True, crash_after=PATCH_APPLIED
     )
@@ -185,4 +214,52 @@ def test_compiled_graph_has_no_langgraph_checkpointer(tmp_path: Path) -> None:
     )
 
     assert workflow.graph.checkpointer is None
+    store.close()
+
+
+def test_semantic_reviewer_can_replace_draft_before_deterministic_gates(tmp_path: Path) -> None:
+    workspace = materialize_case("05", tmp_path / "case-05")
+    transport = SequenceTransport([SEARCH, READ, BAD_PATCH, PATCH])
+    store, workflow = _make_runtime(
+        tmp_path / "trace.sqlite3", workspace, transport, create=True
+    )
+
+    result = workflow.run("config value false must parse as False")
+
+    assert result.task_status is TaskStatus.AWAITING_REVIEW
+    assert transport.calls == 4
+    review = next(
+        event.payload
+        for event in store.list_events("graph-agent-05")
+        if event.event_type == "candidate_patch_reviewed"
+    )
+    assert review["changed"] is True
+    assert review["draft_sha256"] != review["reviewed_sha256"]
+    review_system = transport.payloads[-1]["messages"][0]["content"]  # type: ignore[index]
+    assert '"kind":"tool"' not in review_system
+    assert '"kind":"patch"' in review_system
+    assert '"kind":"handoff"' in review_system
+    store.close()
+
+
+def test_semantic_reviewer_handoff_never_applies_or_tests_draft(tmp_path: Path) -> None:
+    workspace = materialize_case("05", tmp_path / "case-05")
+    store, workflow = _make_runtime(
+        tmp_path / "trace.sqlite3",
+        workspace,
+        SequenceTransport([SEARCH, READ, PATCH, HANDOFF]),
+        create=True,
+    )
+
+    result = workflow.run("config value false must parse as False")
+
+    assert result.task_status is TaskStatus.NEEDS_HUMAN
+    assert result.action == "handoff"
+    started_tools = [
+        event.payload["tool"]
+        for event in store.list_events("graph-agent-05")
+        if event.event_type == "tool_started"
+    ]
+    assert started_tools == ["search_code", "read_file"]
+    assert "if value:" in (workspace / "src/eventrelay/config.py").read_text(encoding="utf-8")
     store.close()
