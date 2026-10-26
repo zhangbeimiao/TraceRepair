@@ -28,7 +28,7 @@ from tracerepair.benchmark_suite import (
 from tracerepair.evaluation_report import RunMetrics, TraceEvaluator
 from tracerepair.oracle_validation import OracleValidationError, validate_historical_oracles
 from tracerepair.repository_task import RepositoryTaskSpec
-from tracerepair.version import AGENT_VERSION, MODEL_ID
+from tracerepair.version import AGENT_VERSION, MAX_MODEL_CALLS, MODEL_ID
 
 
 def main() -> None:
@@ -79,6 +79,16 @@ def main() -> None:
             and record.get("manifest_sha256") == manifest.manifest_sha256
         }
         pending = tuple(task for task in selected if task.task_id not in attempted)
+        if not pending and not arguments.dry_run:
+            _print_preflight(manifest, selected, pending, result_root)
+            _write_or_verify_lock(result_root / "manifest.lock.json", manifest)
+            report = _load_or_finalize_report(report_path, manifest, records)
+            print(
+                "No pending tasks: verified the existing ledger and report without "
+                "rerunning oracle or model calls."
+            )
+            _print_benchmark_result(manifest, report, ledger_path, report_path)
+            return
         oracle_results = validate_historical_oracles(manifest, selected, ROOT)
         print("Historical oracle preflight")
         for result in oracle_results:
@@ -103,7 +113,10 @@ def main() -> None:
                 "Bailian environment variables are not configured. The manifest was locked, "
                 "but no benchmark task was attempted."
             )
-        print(f"Maximum provider requests in this command: {len(pending) * 4}.")
+        print(
+            f"Maximum provider requests in this command: "
+            f"{len(pending) * MAX_MODEL_CALLS}."
+        )
         for index, task in enumerate(pending, start=1):
             print(f"\n=== pass@1 task {index}/{len(pending)}: {task.task_id} ===")
             _run_task(
@@ -116,22 +129,7 @@ def main() -> None:
         records = read_ledger(ledger_path)
         report = build_report(manifest, records)
         write_report(report_path, report)
-        summary = report["summary"]
-        assert isinstance(summary, dict)
-        print("\n=== benchmark result ===")
-        print(
-            f"benchmark={manifest.benchmark_id} attempted={summary['attempted_tasks']}/"
-            f"{summary['expected_tasks']} successes={summary['successes']} "
-            f"pass@1={float(summary['pass_at_1']):.2%} failures={summary['failures']}"
-        )
-        print(
-            f"p50={summary['p50_wall_seconds']}s p95={summary['p95_wall_seconds']}s "
-            f"avg_completion_tokens={summary['average_completion_tokens']} "
-            f"estimated_completion_cost_cny={summary['estimated_completion_cost_cny']}"
-        )
-        print(f"Tamper-evident ledger: {ledger_path.relative_to(ROOT)}")
-        print(f"Frozen report: {report_path.relative_to(ROOT)}")
-        print(f"Report checksum: {report_path.relative_to(ROOT)}.sha256")
+        _print_benchmark_result(manifest, report, ledger_path, report_path)
     except (BenchmarkManifestError, OracleValidationError) as error:
         raise SystemExit(f"Benchmark rejected safely: {error}") from error
 
@@ -182,6 +180,60 @@ def _write_or_verify_lock(path: Path, manifest: BenchmarkManifest) -> None:
         encoding="utf-8",
         newline="\n",
     )
+
+
+def _load_or_finalize_report(
+    path: Path,
+    manifest: BenchmarkManifest,
+    records: list[dict[str, object]],
+) -> dict[str, object]:
+    """Return a completed report without mutating an already published artifact."""
+
+    reconstructed = build_report(manifest, records)
+    if not path.exists():
+        write_report(path, reconstructed)
+        return reconstructed
+    checksum_path = path.with_suffix(path.suffix + ".sha256")
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        expected = checksum_path.read_text(encoding="utf-8").split()[0]
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError, IndexError) as error:
+        raise BenchmarkManifestError("existing completed report is unreadable") from error
+    if not isinstance(payload, dict):
+        raise BenchmarkManifestError("existing completed report root is invalid")
+    actual = hashlib.sha256(path.read_bytes()).hexdigest()
+    if actual != expected:
+        raise BenchmarkManifestError("existing completed report checksum mismatch")
+    for key in ("benchmark", "attempts", "summary", "integrity"):
+        if payload.get(key) != reconstructed.get(key):
+            raise BenchmarkManifestError(
+                f"existing completed report does not match the verified ledger: {key}"
+            )
+    return payload
+
+
+def _print_benchmark_result(
+    manifest: BenchmarkManifest,
+    report: dict[str, object],
+    ledger_path: Path,
+    report_path: Path,
+) -> None:
+    summary = report["summary"]
+    assert isinstance(summary, dict)
+    print("\n=== benchmark result ===")
+    print(
+        f"benchmark={manifest.benchmark_id} attempted={summary['attempted_tasks']}/"
+        f"{summary['expected_tasks']} successes={summary['successes']} "
+        f"pass@1={float(summary['pass_at_1']):.2%} failures={summary['failures']}"
+    )
+    print(
+        f"p50={summary['p50_wall_seconds']}s p95={summary['p95_wall_seconds']}s "
+        f"avg_completion_tokens={summary['average_completion_tokens']} "
+        f"estimated_completion_cost_cny={summary['estimated_completion_cost_cny']}"
+    )
+    print(f"Tamper-evident ledger: {ledger_path.relative_to(ROOT)}")
+    print(f"Frozen report: {report_path.relative_to(ROOT)}")
+    print(f"Report checksum: {report_path.relative_to(ROOT)}.sha256")
 
 
 def _print_preflight(

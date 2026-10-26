@@ -3,7 +3,12 @@ from pathlib import Path
 
 import pytest
 
-from tracerepair.oracle_validation import OracleValidationError, validate_oracle_pair
+from scripts.prepare_historical_benchmark import HTTPIE_OFFLINE_ORACLE
+from tracerepair.oracle_validation import (
+    _HTTPIE_OFFLINE_ORACLE,
+    OracleValidationError,
+    validate_oracle_pair,
+)
 from tracerepair.repository_task import RepositoryTaskSpec
 
 
@@ -78,3 +83,9 @@ def test_oracle_error_includes_bounded_pytest_diagnostics(tmp_path: Path) -> Non
         validate_oracle_pair(
             "sample-value", spec, buggy, replace(spec, repository_root=fixed), fixed
         )
+
+
+def test_httpie_offline_oracle_is_identical_in_preparation_and_validation() -> None:
+    assert HTTPIE_OFFLINE_ORACLE == _HTTPIE_OFFLINE_ORACLE
+    assert "socket" not in HTTPIE_OFFLINE_ORACLE
+    assert "httpbin.org" not in HTTPIE_OFFLINE_ORACLE

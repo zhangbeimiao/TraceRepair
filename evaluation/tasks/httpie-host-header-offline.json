@@ -1,0 +1,15 @@
+{
+  "$schema": "../../docs/repository-task.schema.json",
+  "schema_version": 1,
+  "name": "httpie-host-header-offline",
+  "repository_root": "../repositories/httpie-host-header-offline",
+  "issue": "HTTPRequest overwrites a user-supplied lowercase host header because it checks membership in a plain copied dict instead of the original case-insensitive header mapping.",
+  "source_allowlist": ["httpie"],
+  "target_test": "tests/test_tracerepair_host_header.py::test_lowercase_host_is_not_duplicated",
+  "regression_suite": "tests/test_tracerepair_host_header.py",
+  "diagnostic_queries": ["class HTTPRequest", "def headers", "Host"],
+  "pythonpath": ["."],
+  "timeout_seconds": 30,
+  "max_repository_bytes": 52428800,
+  "max_repository_files": 2500
+}

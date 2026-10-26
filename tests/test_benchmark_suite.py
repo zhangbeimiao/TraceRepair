@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from scripts.run_benchmark import _load_or_finalize_report
 from tracerepair.benchmark_suite import (
     BenchmarkManifest,
     BenchmarkManifestError,
@@ -190,3 +191,43 @@ def test_started_attempt_without_result_counts_as_failure_and_is_not_missing(
     assert report["summary"]["failures"] == 1
     assert report["summary"]["missing_task_ids"] == ["beta-value"]
     assert report["attempts"][0]["status"] == "interrupted_before_result_record"
+
+
+def test_completed_report_is_verified_without_being_rewritten(tmp_path: Path) -> None:
+    manifest = BenchmarkManifest.load(_manifest(tmp_path))
+    ledger = tmp_path / "attempts.jsonl"
+    for task in manifest.tasks:
+        append_ledger_record(
+            ledger,
+            {
+                "record_kind": "attempt_finished",
+                "benchmark_id": manifest.benchmark_id,
+                "manifest_sha256": manifest.manifest_sha256,
+                "benchmark_task_id": task.task_id,
+                "success": True,
+                "status": "awaiting_review",
+                "wall_seconds": 1.0,
+                "completion_tokens": 10,
+                "regression_passed": True,
+                "stop_reason": "verified",
+            },
+        )
+    records = read_ledger(ledger)
+    path = tmp_path / "report.json"
+    write_report(path, build_report(manifest, records))
+    before = path.read_bytes()
+
+    loaded = _load_or_finalize_report(path, manifest, records)
+
+    assert loaded["summary"]["attempted_tasks"] == 2
+    assert path.read_bytes() == before
+
+
+def test_completed_report_checksum_mismatch_is_rejected(tmp_path: Path) -> None:
+    manifest = BenchmarkManifest.load(_manifest(tmp_path))
+    path = tmp_path / "report.json"
+    write_report(path, build_report(manifest, []))
+    path.write_text(path.read_text(encoding="utf-8") + " ", encoding="utf-8")
+
+    with pytest.raises(BenchmarkManifestError, match="checksum mismatch"):
+        _load_or_finalize_report(path, manifest, [])

@@ -113,6 +113,40 @@ if not hasattr(requests.compat, "is_py26"):
 '''
 
 
+_HTTPIE_OFFLINE_ORACLE = '''"""Offline oracle for the historical lowercase Host-header regression."""
+
+from types import SimpleNamespace
+
+from requests.structures import CaseInsensitiveDict
+
+from httpie.models import HTTPRequest
+
+
+def _render(headers):
+    request = SimpleNamespace(
+        method="GET",
+        url="http://127.0.0.1:8765/get",
+        headers=CaseInsensitiveDict(headers),
+        body=None,
+    )
+    return HTTPRequest(request).headers
+
+
+def test_lowercase_host_is_not_duplicated():
+    rendered = _render({"host": "example.test"})
+
+    assert rendered.lower().count("host:") == 1
+    assert "host: example.test" in rendered.lower()
+
+
+def test_missing_host_uses_url_authority():
+    rendered = _render({"Accept": "application/json"})
+
+    assert rendered.lower().count("host:") == 1
+    assert "host: 127.0.0.1:8765" in rendered.lower()
+'''
+
+
 _THEFUCK_PYTEST_COMPAT = '''"""Benchmark-only compatibility for the historical pytest Node API."""
 
 from _pytest.nodes import Node
@@ -248,10 +282,13 @@ def _write_generated_files(task_id: str, root: Path) -> None:
         (root / "conftest.py").write_text(
             _PYSNOOPER_PY311_COMPAT, encoding="utf-8", newline="\n"
         )
-    elif task_id == "httpie-host-header-case":
+    elif task_id in {"httpie-host-header-case", "httpie-host-header-offline"}:
         (root / "conftest.py").write_text(
             _HTTPIE_REQUESTS_COMPAT, encoding="utf-8", newline="\n"
         )
+        if task_id == "httpie-host-header-offline":
+            target = root / "tests" / "test_tracerepair_host_header.py"
+            target.write_text(_HTTPIE_OFFLINE_ORACLE, encoding="utf-8", newline="\n")
     elif task_id == "thefuck-git-push-match":
         (root / "conftest.py").write_text(
             _THEFUCK_PYTEST_COMPAT, encoding="utf-8", newline="\n"

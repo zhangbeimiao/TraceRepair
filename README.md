@@ -30,7 +30,7 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 
 当前开发中的 `0.7.0-dev2` 使用完整 LangGraph 端到端编排，并在补丁生成与应用之间新增一次受限语义复核：`generate_patch → review_patch → apply_patch`。复核器只能返回修订后的 unified diff 或交给人工，没有工具、文件写入、Shell、测试和状态修改权限。LangGraph 未配置 checkpointer；SQLite 仍是任务状态、预算、Trace 与恢复 Checkpoint 的唯一持久化源。该版本尚未评测冻结，不能继承或覆盖下方 `0.6.0` 的评测结论。
 
-前一开发版 `0.7.0-dev1` 在五个**已知开发任务**上的独立 pass@1 回归结果为 `2/5`：2 个候选通过目标测试和回归，3 个语义错误候选被目标测试安全拒绝，错误接受补丁数为 0。该结果继续冻结不动；完整账本、候选 Diff 与失败分析位于 `evaluation/results/langgraph-migration-v0.7.0-dev1/`。`0.7.0-dev2` 必须使用新 manifest `langgraph-review-v0.7.0-dev2` 重新评测。
+前一开发版 `0.7.0-dev1` 在五个**已知开发任务**上的独立 pass@1 回归结果为 `2/5`：2 个候选通过目标测试和回归，3 个语义错误候选被目标测试安全拒绝，错误接受补丁数为 0。该结果继续冻结不动；完整账本、候选 Diff 与失败分析位于 `evaluation/results/langgraph-migration-v0.7.0-dev1/`。`0.7.0-dev2` 使用新 manifest `langgraph-review-offline-v0.7.0-dev2` 重新评测，其中 HTTPie oracle 已改为不访问外网的确定性测试。
 
 ## 评测结果
 

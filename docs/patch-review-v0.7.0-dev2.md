@@ -41,6 +41,10 @@ durable source for budgets, state transitions, tool results, candidate evidence,
 ## Evaluation rule
 
 The frozen `0.7.0-dev1` result remains `2/5 pass@1` with three safe rejections. `0.7.0-dev2` uses the
-new benchmark id `langgraph-review-v0.7.0-dev2`; no predecessor attempt is overwritten or retried.
+new benchmark id `langgraph-review-offline-v0.7.0-dev2`; no predecessor attempt is overwritten or retried.
 The five tasks are known development tasks, so this benchmark measures whether the review mechanism
 addresses observed failure modes. It is not a fresh generalization claim.
+
+An earlier development run under `langgraph-review-v0.7.0-dev2` is retained for audit, but its HTTPie
+oracle called `httpbin.org` and was found to be network-dependent on a later preflight. It is therefore
+superseded for comparison purposes, not deleted or silently rewritten.

@@ -1,0 +1,283 @@
+{
+  "attempts": [
+    {
+      "attempt_started_record_sha256": "ddbdce8e85c66299a49ee24b17bfca0fb43b2d1ef00942bedd6466f468ad993c",
+      "benchmark_id": "langgraph-review-v0.7.0-dev2",
+      "benchmark_task_id": "humanize-negative-fraction",
+      "completion_tokens": 578,
+      "log_path": "evaluation/results/langgraph-review-v0.7.0-dev2/logs/humanize-negative-fraction.log",
+      "log_sha256": "6315c5a3e49a033cd9c591368f52ca499c28b98c7b7a2bed51082fa9170eb083",
+      "manifest_sha256": "bf9dec4f05f8f80f3baa47701da278b69dc0b142706a4d4307a1a0dea37a82ef",
+      "model_calls": 4,
+      "previous_record_sha256": "ddbdce8e85c66299a49ee24b17bfca0fb43b2d1ef00942bedd6466f468ad993c",
+      "process_returncode": 0,
+      "record_kind": "attempt_finished",
+      "record_sha256": "2cd3b18ab1316869e41e886da689593a99bc41f0f3367a1fb0fa51fcd032cff8",
+      "recorded_at": "2026-10-26T15:49:01.658172+00:00",
+      "regression_passed": true,
+      "repository_sha256": "ea3ab743793c3b84d53f093975a013a6eb9108477ebd35c85f236e2080cf6193",
+      "sequence": 2,
+      "source": {
+        "buggy_commit": "976484a655df046aa6849f440a4f0cd44fc4918c",
+        "fixed_commit": "c2c410c1521a3b1eb3efef52f3b06c2e42f7b92b",
+        "issue_url": "https://github.com/python-humanize/humanize/pull/320",
+        "repository_url": "https://github.com/python-humanize/humanize"
+      },
+      "split": "development",
+      "status": "awaiting_review",
+      "stop_reason": "candidate patch passed target and regression tests; human review required",
+      "success": true,
+      "target_test_passed": true,
+      "task_config_sha256": "e085648cc1d813a5c9404dcb7cb541a24b22509d8e2a0be4005cd5683a57f5b6",
+      "timed_out": false,
+      "tool_calls": 7,
+      "tool_failures": 0,
+      "trace_task_id": "model-agent-repo-humanize-negative-fraction-93c561f4",
+      "wall_seconds": 14.516
+    },
+    {
+      "attempt_started_record_sha256": "91a968d1e7772deb36e44c0d96e39ce99d647bb78d8f37851cdbc60d5cbc8b60",
+      "benchmark_id": "langgraph-review-v0.7.0-dev2",
+      "benchmark_task_id": "boltons-empty-multireplace",
+      "completion_tokens": 1003,
+      "log_path": "evaluation/results/langgraph-review-v0.7.0-dev2/logs/boltons-empty-multireplace.log",
+      "log_sha256": "4a463bd69a3408e8a5c722b2d209fc8332d28b3fcadf2380c404c52a9d3c7603",
+      "manifest_sha256": "bf9dec4f05f8f80f3baa47701da278b69dc0b142706a4d4307a1a0dea37a82ef",
+      "model_calls": 4,
+      "previous_record_sha256": "91a968d1e7772deb36e44c0d96e39ce99d647bb78d8f37851cdbc60d5cbc8b60",
+      "process_returncode": 1,
+      "record_kind": "attempt_finished",
+      "record_sha256": "1abd1de73f7d8d6f3b66650130cf825d3ac7aa1bc778856a0a66576f3180dcbf",
+      "recorded_at": "2026-10-26T15:49:18.727874+00:00",
+      "regression_passed": false,
+      "repository_sha256": "8b55bc3c3b7d3a2ec81cb5aaa985fe50a106d1ad3e7f94093d25e52089e4c9c5",
+      "sequence": 4,
+      "source": {
+        "buggy_commit": "0a3084e3058fd814684b1fc98343ec2e76d13ddc",
+        "fixed_commit": "435774ef8b10c1355bf77483a837945034011754",
+        "issue_url": null,
+        "repository_url": "https://github.com/mahmoud/boltons"
+      },
+      "split": "development",
+      "status": "needs_human",
+      "stop_reason": "planner stopped safely: model returned invalid structured output",
+      "success": false,
+      "target_test_passed": false,
+      "task_config_sha256": "757c251d82e67974cbc71be021433cf48335e265771bcd3d2c5aaeffd365ea59",
+      "timed_out": false,
+      "tool_calls": 4,
+      "tool_failures": 0,
+      "trace_task_id": "model-agent-repo-boltons-empty-multireplace-79df2f06",
+      "wall_seconds": 17.031
+    },
+    {
+      "attempt_started_record_sha256": "00763c2b04c753be44881e671be1b83089c230ac2dc84795b7f86aff5106bd2f",
+      "benchmark_id": "langgraph-review-v0.7.0-dev2",
+      "benchmark_task_id": "more-itertools-falsey-validator",
+      "completion_tokens": 430,
+      "log_path": "evaluation/results/langgraph-review-v0.7.0-dev2/logs/more-itertools-falsey-validator.log",
+      "log_sha256": "785924a0ee60ddbb10b1fc74a91bd9faf8a85d4b83a476e9286549ebaaac970a",
+      "manifest_sha256": "bf9dec4f05f8f80f3baa47701da278b69dc0b142706a4d4307a1a0dea37a82ef",
+      "model_calls": 4,
+      "previous_record_sha256": "00763c2b04c753be44881e671be1b83089c230ac2dc84795b7f86aff5106bd2f",
+      "process_returncode": 0,
+      "record_kind": "attempt_finished",
+      "record_sha256": "0fcb713e2a6cd06b65a981fdb4effc796ed9912caac2a80519513677f2fd9b40",
+      "recorded_at": "2026-10-26T15:49:35.571593+00:00",
+      "regression_passed": true,
+      "repository_sha256": "5e9a0e70fcf09eff6293de9459e5497b4d8bf2425388ecedbd677c76c0168bb5",
+      "sequence": 6,
+      "source": {
+        "buggy_commit": "1ea82a711c69f590054987b5cb194157f8ce8ac4",
+        "fixed_commit": "67fcf640477c78605580f5ee703a54c73c1e7a8a",
+        "issue_url": "https://github.com/more-itertools/more-itertools/pull/1308",
+        "repository_url": "https://github.com/more-itertools/more-itertools"
+      },
+      "split": "development",
+      "status": "awaiting_review",
+      "stop_reason": "candidate patch passed target and regression tests; human review required",
+      "success": true,
+      "target_test_passed": true,
+      "task_config_sha256": "245812df6c9523705eb3e1f53cc418ff69b1bb84dce656f294a6e51a7dfa5d52",
+      "timed_out": false,
+      "tool_calls": 7,
+      "tool_failures": 0,
+      "trace_task_id": "model-agent-repo-more-itertools-falsey-validator-4ac51cbf",
+      "wall_seconds": 16.797
+    },
+    {
+      "attempt_started_record_sha256": "117d1f69f9df1dd49087fa580475a54d72c4f921e7e9fc55206c5cc682cd6e2c",
+      "benchmark_id": "langgraph-review-v0.7.0-dev2",
+      "benchmark_task_id": "tqdm-sizeless-bool",
+      "completion_tokens": 854,
+      "log_path": "evaluation/results/langgraph-review-v0.7.0-dev2/logs/tqdm-sizeless-bool.log",
+      "log_sha256": "9f75f2e9850794a907bcfa467a9521d62af97c7ea5f8d373ba03ca3dcb75f1fa",
+      "manifest_sha256": "bf9dec4f05f8f80f3baa47701da278b69dc0b142706a4d4307a1a0dea37a82ef",
+      "model_calls": 5,
+      "previous_record_sha256": "117d1f69f9df1dd49087fa580475a54d72c4f921e7e9fc55206c5cc682cd6e2c",
+      "process_returncode": 0,
+      "record_kind": "attempt_finished",
+      "record_sha256": "a5b96803eaf0c4f62d425d693fb12fe4f90932a5c8fe7486b94501b788afdc0d",
+      "recorded_at": "2026-10-26T15:49:53.673046+00:00",
+      "regression_passed": false,
+      "repository_sha256": "030cd38f607eb99327d9a383dd5639944cec1bebbd0e3cdda590ec39d387fd92",
+      "sequence": 8,
+      "source": {
+        "buggy_commit": "c2599e3cd6087429f48bae34347ec5d2473c8392",
+        "fixed_commit": "73962a47026dd980ac0758820efc9c41cbf938e0",
+        "issue_url": null,
+        "repository_url": "https://github.com/tqdm/tqdm"
+      },
+      "split": "development",
+      "status": "needs_human",
+      "stop_reason": "candidate patch failed target test: TEST_FAILED",
+      "success": false,
+      "target_test_passed": false,
+      "task_config_sha256": "5c6c72a46126d06a463bb825125a3030ef199853d8344aac3386905078f39d41",
+      "timed_out": false,
+      "tool_calls": 7,
+      "tool_failures": 1,
+      "trace_task_id": "model-agent-repo-tqdm-sizeless-bool-cd5436b5",
+      "wall_seconds": 18.078
+    },
+    {
+      "attempt_started_record_sha256": "29325fe79e460e9a760f3501b9e005828ee9c88b5993adfc5920974cffd22967",
+      "benchmark_id": "langgraph-review-v0.7.0-dev2",
+      "benchmark_task_id": "httpie-host-header-case",
+      "completion_tokens": 384,
+      "log_path": "evaluation/results/langgraph-review-v0.7.0-dev2/logs/httpie-host-header-case.log",
+      "log_sha256": "f51244ad24cb67e1a89941d7ecea1c00f3f4462dcf6464e33d1dfb11199ba108",
+      "manifest_sha256": "bf9dec4f05f8f80f3baa47701da278b69dc0b142706a4d4307a1a0dea37a82ef",
+      "model_calls": 4,
+      "previous_record_sha256": "29325fe79e460e9a760f3501b9e005828ee9c88b5993adfc5920974cffd22967",
+      "process_returncode": 0,
+      "record_kind": "attempt_finished",
+      "record_sha256": "13e2ac5317bbf0458454a2b62d877b2003b273f9f419f0f4ed8ce08698d3bb22",
+      "recorded_at": "2026-10-26T15:50:09.584378+00:00",
+      "regression_passed": true,
+      "repository_sha256": "30a2572282c218cb1c747d7d74c25075ead293b093d878fc804c354b70d8e676",
+      "sequence": 10,
+      "source": {
+        "buggy_commit": "8c892edd4fe700a7ca5cc733dcb4817831d253e2",
+        "fixed_commit": "040d981f00c3f6830b2d0db3daf3c64c080e96e3",
+        "issue_url": null,
+        "repository_url": "https://github.com/httpie/cli"
+      },
+      "split": "development",
+      "status": "awaiting_review",
+      "stop_reason": "candidate patch passed target and regression tests; human review required",
+      "success": true,
+      "target_test_passed": true,
+      "task_config_sha256": "6694599b6854d727b9288f0b845ae8fc16fddecd408ed409c177cf55577de09f",
+      "timed_out": false,
+      "tool_calls": 5,
+      "tool_failures": 0,
+      "trace_task_id": "model-agent-repo-httpie-host-header-case-ec85413d",
+      "wall_seconds": 15.86
+    }
+  ],
+  "benchmark": {
+    "agent_version": "0.7.0-dev2",
+    "benchmark_id": "langgraph-review-v0.7.0-dev2",
+    "completion_cny_per_million_tokens": 0.0,
+    "manifest_sha256": "bf9dec4f05f8f80f3baa47701da278b69dc0b142706a4d4307a1a0dea37a82ef",
+    "model": "qwen3.8-flash",
+    "protocol": "pass@1",
+    "schema_version": 1,
+    "tasks": [
+      {
+        "repository_sha256": "ea3ab743793c3b84d53f093975a013a6eb9108477ebd35c85f236e2080cf6193",
+        "source": {
+          "buggy_commit": "976484a655df046aa6849f440a4f0cd44fc4918c",
+          "fixed_commit": "c2c410c1521a3b1eb3efef52f3b06c2e42f7b92b",
+          "issue_url": "https://github.com/python-humanize/humanize/pull/320",
+          "repository_url": "https://github.com/python-humanize/humanize"
+        },
+        "split": "development",
+        "task_config": "humanize-negative-fraction.json",
+        "task_config_sha256": "e085648cc1d813a5c9404dcb7cb541a24b22509d8e2a0be4005cd5683a57f5b6",
+        "task_id": "humanize-negative-fraction"
+      },
+      {
+        "repository_sha256": "8b55bc3c3b7d3a2ec81cb5aaa985fe50a106d1ad3e7f94093d25e52089e4c9c5",
+        "source": {
+          "buggy_commit": "0a3084e3058fd814684b1fc98343ec2e76d13ddc",
+          "fixed_commit": "435774ef8b10c1355bf77483a837945034011754",
+          "issue_url": null,
+          "repository_url": "https://github.com/mahmoud/boltons"
+        },
+        "split": "development",
+        "task_config": "boltons-empty-multireplace.json",
+        "task_config_sha256": "757c251d82e67974cbc71be021433cf48335e265771bcd3d2c5aaeffd365ea59",
+        "task_id": "boltons-empty-multireplace"
+      },
+      {
+        "repository_sha256": "5e9a0e70fcf09eff6293de9459e5497b4d8bf2425388ecedbd677c76c0168bb5",
+        "source": {
+          "buggy_commit": "1ea82a711c69f590054987b5cb194157f8ce8ac4",
+          "fixed_commit": "67fcf640477c78605580f5ee703a54c73c1e7a8a",
+          "issue_url": "https://github.com/more-itertools/more-itertools/pull/1308",
+          "repository_url": "https://github.com/more-itertools/more-itertools"
+        },
+        "split": "development",
+        "task_config": "more-itertools-falsey-validator.json",
+        "task_config_sha256": "245812df6c9523705eb3e1f53cc418ff69b1bb84dce656f294a6e51a7dfa5d52",
+        "task_id": "more-itertools-falsey-validator"
+      },
+      {
+        "repository_sha256": "030cd38f607eb99327d9a383dd5639944cec1bebbd0e3cdda590ec39d387fd92",
+        "source": {
+          "buggy_commit": "c2599e3cd6087429f48bae34347ec5d2473c8392",
+          "fixed_commit": "73962a47026dd980ac0758820efc9c41cbf938e0",
+          "issue_url": null,
+          "repository_url": "https://github.com/tqdm/tqdm"
+        },
+        "split": "development",
+        "task_config": "tqdm-sizeless-bool.json",
+        "task_config_sha256": "5c6c72a46126d06a463bb825125a3030ef199853d8344aac3386905078f39d41",
+        "task_id": "tqdm-sizeless-bool"
+      },
+      {
+        "repository_sha256": "30a2572282c218cb1c747d7d74c25075ead293b093d878fc804c354b70d8e676",
+        "source": {
+          "buggy_commit": "8c892edd4fe700a7ca5cc733dcb4817831d253e2",
+          "fixed_commit": "040d981f00c3f6830b2d0db3daf3c64c080e96e3",
+          "issue_url": null,
+          "repository_url": "https://github.com/httpie/cli"
+        },
+        "split": "development",
+        "task_config": "httpie-host-header-case.json",
+        "task_config_sha256": "6694599b6854d727b9288f0b845ae8fc16fddecd408ed409c177cf55577de09f",
+        "task_id": "httpie-host-header-case"
+      }
+    ]
+  },
+  "generated_at": "2026-10-26T15:50:09.599754+00:00",
+  "integrity": {
+    "claim": "tamper-evident after the terminal hash is published; not an immutable store",
+    "ledger_records_verified": 10,
+    "terminal_record_sha256": "13e2ac5317bbf0458454a2b62d877b2003b273f9f419f0f4ed8ce08698d3bb22"
+  },
+  "report_sha256": "8b77d9ac45d4290c75407ff86b2ba9d47a326aab6bd14a8d0cc79bc9f2c6c25f",
+  "schema_version": 1,
+  "summary": {
+    "attempted_tasks": 5,
+    "average_completion_tokens": 649.8,
+    "cost_scope": "unavailable: no completion-token price was frozen in the manifest",
+    "estimated_completion_cost_cny": null,
+    "expected_tasks": 5,
+    "failures": 2,
+    "human_handoffs": 2,
+    "incorrect_accepted_patches": 0,
+    "missing_task_ids": [],
+    "p50_wall_seconds": 16.797,
+    "p95_wall_seconds": 18.078,
+    "pass_at_1": 0.6,
+    "successes": 3,
+    "total_completion_tokens": 3249,
+    "wilson_95_percent": {
+      "lower": 0.2307,
+      "upper": 0.8824
+    }
+  }
+}

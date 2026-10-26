@@ -1,0 +1,79 @@
+{
+  "benchmark": {
+    "agent_version": "0.7.0-dev2",
+    "benchmark_id": "langgraph-review-v0.7.0-dev2",
+    "completion_cny_per_million_tokens": 0.0,
+    "manifest_sha256": "bf9dec4f05f8f80f3baa47701da278b69dc0b142706a4d4307a1a0dea37a82ef",
+    "model": "qwen3.8-flash",
+    "protocol": "pass@1",
+    "schema_version": 1,
+    "tasks": [
+      {
+        "repository_sha256": "ea3ab743793c3b84d53f093975a013a6eb9108477ebd35c85f236e2080cf6193",
+        "source": {
+          "buggy_commit": "976484a655df046aa6849f440a4f0cd44fc4918c",
+          "fixed_commit": "c2c410c1521a3b1eb3efef52f3b06c2e42f7b92b",
+          "issue_url": "https://github.com/python-humanize/humanize/pull/320",
+          "repository_url": "https://github.com/python-humanize/humanize"
+        },
+        "split": "development",
+        "task_config": "humanize-negative-fraction.json",
+        "task_config_sha256": "e085648cc1d813a5c9404dcb7cb541a24b22509d8e2a0be4005cd5683a57f5b6",
+        "task_id": "humanize-negative-fraction"
+      },
+      {
+        "repository_sha256": "8b55bc3c3b7d3a2ec81cb5aaa985fe50a106d1ad3e7f94093d25e52089e4c9c5",
+        "source": {
+          "buggy_commit": "0a3084e3058fd814684b1fc98343ec2e76d13ddc",
+          "fixed_commit": "435774ef8b10c1355bf77483a837945034011754",
+          "issue_url": null,
+          "repository_url": "https://github.com/mahmoud/boltons"
+        },
+        "split": "development",
+        "task_config": "boltons-empty-multireplace.json",
+        "task_config_sha256": "757c251d82e67974cbc71be021433cf48335e265771bcd3d2c5aaeffd365ea59",
+        "task_id": "boltons-empty-multireplace"
+      },
+      {
+        "repository_sha256": "5e9a0e70fcf09eff6293de9459e5497b4d8bf2425388ecedbd677c76c0168bb5",
+        "source": {
+          "buggy_commit": "1ea82a711c69f590054987b5cb194157f8ce8ac4",
+          "fixed_commit": "67fcf640477c78605580f5ee703a54c73c1e7a8a",
+          "issue_url": "https://github.com/more-itertools/more-itertools/pull/1308",
+          "repository_url": "https://github.com/more-itertools/more-itertools"
+        },
+        "split": "development",
+        "task_config": "more-itertools-falsey-validator.json",
+        "task_config_sha256": "245812df6c9523705eb3e1f53cc418ff69b1bb84dce656f294a6e51a7dfa5d52",
+        "task_id": "more-itertools-falsey-validator"
+      },
+      {
+        "repository_sha256": "030cd38f607eb99327d9a383dd5639944cec1bebbd0e3cdda590ec39d387fd92",
+        "source": {
+          "buggy_commit": "c2599e3cd6087429f48bae34347ec5d2473c8392",
+          "fixed_commit": "73962a47026dd980ac0758820efc9c41cbf938e0",
+          "issue_url": null,
+          "repository_url": "https://github.com/tqdm/tqdm"
+        },
+        "split": "development",
+        "task_config": "tqdm-sizeless-bool.json",
+        "task_config_sha256": "5c6c72a46126d06a463bb825125a3030ef199853d8344aac3386905078f39d41",
+        "task_id": "tqdm-sizeless-bool"
+      },
+      {
+        "repository_sha256": "30a2572282c218cb1c747d7d74c25075ead293b093d878fc804c354b70d8e676",
+        "source": {
+          "buggy_commit": "8c892edd4fe700a7ca5cc733dcb4817831d253e2",
+          "fixed_commit": "040d981f00c3f6830b2d0db3daf3c64c080e96e3",
+          "issue_url": null,
+          "repository_url": "https://github.com/httpie/cli"
+        },
+        "split": "development",
+        "task_config": "httpie-host-header-case.json",
+        "task_config_sha256": "6694599b6854d727b9288f0b845ae8fc16fddecd408ed409c177cf55577de09f",
+        "task_id": "httpie-host-header-case"
+      }
+    ]
+  },
+  "locked_at": "2026-10-26T15:48:47.071458+00:00"
+}

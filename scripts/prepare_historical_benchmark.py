@@ -68,6 +68,40 @@ if not hasattr(requests.compat, "is_py26"):
 '''
 
 
+HTTPIE_OFFLINE_ORACLE = '''"""Offline oracle for the historical lowercase Host-header regression."""
+
+from types import SimpleNamespace
+
+from requests.structures import CaseInsensitiveDict
+
+from httpie.models import HTTPRequest
+
+
+def _render(headers):
+    request = SimpleNamespace(
+        method="GET",
+        url="http://127.0.0.1:8765/get",
+        headers=CaseInsensitiveDict(headers),
+        body=None,
+    )
+    return HTTPRequest(request).headers
+
+
+def test_lowercase_host_is_not_duplicated():
+    rendered = _render({"host": "example.test"})
+
+    assert rendered.lower().count("host:") == 1
+    assert "host: example.test" in rendered.lower()
+
+
+def test_missing_host_uses_url_authority():
+    rendered = _render({"Accept": "application/json"})
+
+    assert rendered.lower().count("host:") == 1
+    assert "host: 127.0.0.1:8765" in rendered.lower()
+'''
+
+
 THEFUCK_PYTEST_COMPAT = '''"""Benchmark-only compatibility for the historical pytest Node API."""
 
 from _pytest.nodes import Node
@@ -245,6 +279,28 @@ CASES = (
         ),
         "tests/test_regressions.py",
         (("conftest.py", HTTPie_REQUESTS_COMPAT),),
+    ),
+    HistoricalCase(
+        "httpie-host-header-offline",
+        Archive(
+            "httpie-8c892ed",
+            "jakubroztocil",
+            "httpie",
+            "8c892edd4fe700a7ca5cc733dcb4817831d253e2",
+            "dea581dbdeb02cb6f15301f21a1b15752b8b632fcb31fdabcce101c5626f4532",
+        ),
+        Archive(
+            "httpie-040d981",
+            "jakubroztocil",
+            "httpie",
+            "040d981f00c3f6830b2d0db3daf3c64c080e96e3",
+            "5207068009e5419b66c48a3cc030165860ddd3da9bbf6ee1b61128ae74a2b779",
+        ),
+        "tests/test_regressions.py",
+        (
+            ("conftest.py", HTTPie_REQUESTS_COMPAT),
+            ("tests/test_tracerepair_host_header.py", HTTPIE_OFFLINE_ORACLE),
+        ),
     ),
     HistoricalCase(
         "youtube-dl-boolean-filter",
