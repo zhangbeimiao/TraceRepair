@@ -160,10 +160,10 @@ window.TRACEREPAIR_DEMO = {
     },
     {
       "version": "0.7.0-dev2",
-      "runs": 10,
-      "successes": 7,
-      "successRate": 0.7,
-      "averageTokens": 596.5
+      "runs": 13,
+      "successes": 8,
+      "successRate": 0.6154,
+      "averageTokens": 582.0
     },
     {
       "version": "legacy",
@@ -2020,6 +2020,71 @@ window.TRACEREPAIR_DEMO = {
     "frozenSummarySha256": "11522542f229632cb46a26f421b37629febaecbab56db62335cfae14bd5acefc",
     "scopeNote": "Five known development tasks measure the bounded semantic-review mechanism. No locked task was run, so this result does not establish broad repair accuracy or held-out generalisation.",
     "lockedAttempts": 0
+  },
+  "langgraphBlind": {
+    "benchmarkId": "langgraph-blind-v0.7.0-dev2",
+    "agentVersion": "0.7.0-dev2",
+    "model": "qwen3.8-flash",
+    "runs": 3,
+    "successes": 1,
+    "failures": 2,
+    "passAt1": 0.3333,
+    "humanHandoffs": 2,
+    "incorrectAcceptedPatches": 0,
+    "averageTokens": 533.67,
+    "p50Seconds": 14.718,
+    "p95Seconds": 16.265,
+    "wilson95": {
+      "lower": 0.0615,
+      "upper": 0.7923
+    },
+    "attempts": [
+      {
+        "task_id": "toolz-empty-interpose",
+        "split": "locked",
+        "success": true,
+        "status": "awaiting_review",
+        "stop_reason": "candidate patch passed target and regression tests; human review required",
+        "record_sha256": "8f7a19a7443c9b1a50a370128847fb6b015b2de001175a8d5371f2e7cfecab5f"
+      },
+      {
+        "task_id": "prettytable-horizontal-align",
+        "split": "locked",
+        "success": false,
+        "status": "needs_human",
+        "stop_reason": "candidate patch failed regression: TEST_FAILED",
+        "target_test_passed": true,
+        "regression_passed": false,
+        "candidate_sha256": "8d1818fc590bb379bfde69dd267dea24866a05d69750f790321ccc6f40e04a9c",
+        "record_sha256": "dc722f1731484bd57444d350818ebcb8a9c4524906de50b6fd64a98e51c73375"
+      },
+      {
+        "task_id": "glom-path-index-boundary",
+        "split": "locked",
+        "success": false,
+        "status": "needs_human",
+        "stop_reason": "planner stopped safely: model reason is invalid",
+        "candidate_sha256": "c8fcbb761934bc815a994458a14257bc7f0937dc66576eec8b08e1fa39000a56",
+        "candidate_applied": false,
+        "tests_started": false,
+        "record_sha256": "17ba3faac4a6182c121215e006a760f0fb4280524774025ed156743b8cb3188a"
+      }
+    ],
+    "locked": {
+      "attempts": 3,
+      "successes": 1,
+      "pass_at_1": 0.3333,
+      "new_repositories": true,
+      "one_shot": true,
+      "retried": false,
+      "all_outcomes_published": true
+    },
+    "manifestSha256": "fda36a88b38f7dca2e5b035a0736088daa8c0fe04db78ffd1a2294acbbf7f842",
+    "preflightSealSha256": "42fda4daa06d9261a452a78d7f9485c82ab85fbfcf3de42a6fe2ab4668b0251c",
+    "reportSha256": "001301c7cf90954d3d6e7485b46d1fcc6783e0c7d6f7499d85ce60a43dd4293e",
+    "terminalLedgerSha256": "17ba3faac4a6182c121215e006a760f0fb4280524774025ed156743b8cb3188a",
+    "frozenSummarySha256": "06d7561f09184cc9d5e8aefe250113b9970baed1b5b0ee4e0ca4f5700529f673",
+    "scopeNote": "Three previously unused repositories were preregistered, oracle-validated, and run once after the Agent, prompt, model, task inputs, and policy were sealed. The 1/3 result is genuine locked pass@1 evidence; its small sample does not establish broad repair accuracy."
   },
   "repositoryCohort": {
     "projectVersion": "0.6.1",

@@ -1,0 +1,17 @@
+--- a/glom/core.py
++++ b/glom/core.py
+@@ -735,10 +735,10 @@
+             step = 1
+             start = (i * 2) + 1 if i >= 0 else (i * 2) + len(cur_t_path)
+-            if start < 0 or start > len(cur_t_path):
++            if start < 0 or start >= len(cur_t_path):
+                 raise IndexError('Path index out of range')
+             stop = ((i + 1) * 2) + 1 if i >= 0 else ((i + 1) * 2) + len(cur_t_path)
+ 
+         new_t = TType()
+         new_path = cur_t_path[start:stop]
+         if step is not None and step != 1:
+             new_path = tuple(zip(new_path[::2], new_path[1::2]))[::step]
+             new_path = sum(new_path, ())
+         new_t.__ops__ = (cur_t_path[0],) + new_path
+         return Path(new_t)

@@ -10,6 +10,7 @@
   const summary = data.summary;
   const historical = data.historicalBenchmark;
   const langgraph = data.langgraphDevelopment;
+  const blind = data.langgraphBlind;
   const developmentAttempts = historical.attempts.filter((attempt) => attempt.split === "development");
   const lockedAttempts = historical.attempts.filter((attempt) => attempt.split === "locked");
   const countSuccesses = (attempts) => attempts.filter((attempt) => attempt.success).length;
@@ -44,6 +45,17 @@
       + `P50 ${langgraph.comparison.baseline_p50_wall_seconds}s → ${langgraph.p50Seconds}s。`,
   );
   setText("#langgraph-scope", langgraph.scopeNote);
+  setText(
+    "#langgraph-blind-result",
+    `${blind.successes}/${blind.runs} pass@1 · ${blind.humanHandoffs} 次安全转人工 · `
+      + `${blind.incorrectAcceptedPatches} 个错误补丁被接受。`,
+  );
+  setText(
+    "#langgraph-blind-integrity",
+    `每题一次，无事后重试 · report ${blind.reportSha256.slice(0, 12)}… · `
+      + `ledger ${blind.terminalLedgerSha256.slice(0, 12)}…`,
+  );
+  setText("#langgraph-blind-scope", blind.scopeNote);
   setText("#generated-at", `snapshot ${new Date(data.generatedAt).toLocaleString("zh-CN")}`);
   if (data.repositoryCohort) {
     const repository = data.repositoryCohort;

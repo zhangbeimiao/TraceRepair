@@ -12,6 +12,7 @@ htmlcov/
 __pycache__/
 *.py[cod]
 *.log
+!evaluation/results/langgraph-blind-v0.7.0-dev2/logs/*.log
 data/
 traces/
 workspaces/

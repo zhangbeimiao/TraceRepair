@@ -24,6 +24,7 @@ def load_demo_data(path: Path = DEFAULT_DATA) -> dict[str, Any]:
         "summary",
         "historicalBenchmark",
         "langgraphDevelopment",
+        "langgraphBlind",
         "traces",
         "failures",
         "recoveryScenarios",
@@ -67,6 +68,7 @@ def _render_evidence(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     historical = payload["historicalBenchmark"]
     langgraph = payload["langgraphDevelopment"]
+    blind = payload["langgraphBlind"]
     repository = payload.get("repositoryCohort") or {}
     held_out = payload.get("lockedRepositoryResult") or {}
     locked = historical["splits"]["locked"]
@@ -96,6 +98,14 @@ def _render_evidence(payload: dict[str, Any]) -> str:
             f"{langgraph['p50Seconds']}s",
             "  Development claim boundary      : 0 locked tasks; this is mechanism evidence, "
             "not an 80% general repair claim",
+            "  LangGraph locked blind result    : "
+            f"{blind['successes']}/{blind['runs']} passed; "
+            f"{blind['humanHandoffs']} safe handoffs; "
+            f"{blind['incorrectAcceptedPatches']} incorrect patches accepted",
+            "  Blind protocol                   : three new repositories; one attempt each; "
+            "no post-hoc retry; all outcomes published",
+            "  Blind safe stops                 : regression failure + invalid structured "
+            "review; neither candidate was accepted",
             f"  EventRelay controlled regression: {summary['successes']}/{summary['runs']} passed",
             "  Public configured repository    : "
             f"{repository.get('successes', '-')}/{repository.get('runs', '-')} passed, "

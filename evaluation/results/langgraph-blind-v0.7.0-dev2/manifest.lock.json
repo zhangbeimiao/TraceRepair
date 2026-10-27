@@ -1,0 +1,53 @@
+{
+  "benchmark": {
+    "agent_version": "0.7.0-dev2",
+    "benchmark_id": "langgraph-blind-v0.7.0-dev2",
+    "completion_cny_per_million_tokens": 0.0,
+    "manifest_sha256": "fda36a88b38f7dca2e5b035a0736088daa8c0fe04db78ffd1a2294acbbf7f842",
+    "model": "qwen3.8-flash",
+    "protocol": "pass@1",
+    "schema_version": 1,
+    "tasks": [
+      {
+        "repository_sha256": "9623d8965b614fbe735f0403a73b60954c443588d0dc78bcb3e4324f92dfd512",
+        "source": {
+          "buggy_commit": "55ce42dc3b6f786ed9d4e38633cc5cfe3622a526",
+          "fixed_commit": "d2eba0374a452c2b18fe188b04527e22bda3548c",
+          "issue_url": "https://github.com/pytoolz/toolz/pull/635",
+          "repository_url": "https://github.com/pytoolz/toolz"
+        },
+        "split": "locked",
+        "task_config": "toolz-empty-interpose.json",
+        "task_config_sha256": "84aac82af5f5846d14f5bed863c25b2dad17bf5a7f4d094a39e3aedf8f92c1e9",
+        "task_id": "toolz-empty-interpose"
+      },
+      {
+        "repository_sha256": "97376474744e3a344508a480e7ed7c7743cbe5a51afdedf6cdfe1d8ad55b01ac",
+        "source": {
+          "buggy_commit": "37a02661a7fab52d4d2db613ffeda44ea928ae60",
+          "fixed_commit": "6ba75d41436d4400624c3e2f32727e127016b8c6",
+          "issue_url": "https://github.com/prettytable/prettytable/pull/445",
+          "repository_url": "https://github.com/prettytable/prettytable"
+        },
+        "split": "locked",
+        "task_config": "prettytable-horizontal-align.json",
+        "task_config_sha256": "282634a594537525366723d0a4f53c7a36089e34e9f4912f042c49748f519a1c",
+        "task_id": "prettytable-horizontal-align"
+      },
+      {
+        "repository_sha256": "4938b6edf50cef55fcfd7b066c3eef378418de9c3d41721b26f1e0bd7e6165ef",
+        "source": {
+          "buggy_commit": "e515fb33c7af491c6a20b2618591736361bb1d08",
+          "fixed_commit": "6fd41340f30519ddc64a546ad2703dfe53f12356",
+          "issue_url": "https://github.com/mahmoud/glom/issues/299",
+          "repository_url": "https://github.com/mahmoud/glom"
+        },
+        "split": "locked",
+        "task_config": "glom-path-index-boundary.json",
+        "task_config_sha256": "ba09e46593b7c97b3cbb4296ed5926629dd9e373aeec8bad72a1d2effbddb206",
+        "task_id": "glom-path-index-boundary"
+      }
+    ]
+  },
+  "locked_at": "2026-10-27T07:51:11.200582+00:00"
+}

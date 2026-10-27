@@ -10,6 +10,7 @@ from tracerepair.benchmark_suite import BenchmarkManifestError
 ROOT = Path(__file__).resolve().parents[1]
 BENCHMARK = "historical-python-v1.1.3"
 LANGGRAPH_DEVELOPMENT = "langgraph-review-offline-v0.7.0-dev2"
+LANGGRAPH_BLIND = "langgraph-blind-v0.7.0-dev2"
 
 
 def test_published_v113_evidence_verifies_without_execution() -> None:
@@ -29,6 +30,16 @@ def test_langgraph_development_evidence_verifies_without_execution() -> None:
     assert result["successes"] == 4
     assert result["pass_at_1"] == 0.8
     assert result["ledger_records"] == 10
+
+
+def test_langgraph_blind_evidence_verifies_without_execution() -> None:
+    result = verify_evidence(ROOT, benchmark_id=LANGGRAPH_BLIND)
+
+    assert result["release_agent_version"] == "0.7.0-dev2"
+    assert result["tasks"] == 3
+    assert result["successes"] == 1
+    assert result["pass_at_1"] == 0.3333
+    assert result["ledger_records"] == 6
 
 
 def test_modified_ledger_is_rejected(tmp_path: Path) -> None:

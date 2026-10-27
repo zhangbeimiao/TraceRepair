@@ -48,6 +48,17 @@ def test_public_demo_contains_verified_patches_and_frozen_failures() -> None:
     assert langgraph["lockedAttempts"] == 0
     assert langgraph["comparison"]["baseline_pass_at_1"] == 0.4
     assert langgraph["failure"]["final_status"] == "needs_human"
+    blind = payload["langgraphBlind"]
+    assert blind["benchmarkId"] == "langgraph-blind-v0.7.0-dev2"
+    assert blind["agentVersion"] == "0.7.0-dev2"
+    assert blind["runs"] == 3
+    assert blind["successes"] == 1
+    assert blind["failures"] == 2
+    assert blind["humanHandoffs"] == 2
+    assert blind["incorrectAcceptedPatches"] == 0
+    assert blind["locked"]["one_shot"] is True
+    assert blind["locked"]["retried"] is False
+    assert len(blind["attempts"]) == 3
     assert len(payload["traces"]) == 13
     assert len(payload["failures"]) == 3
     assert len(payload["recoveryScenarios"]) == 2
@@ -117,6 +128,9 @@ def test_demo_page_exposes_diff_and_failure_controls() -> None:
         "langgraph-comparison",
         "langgraph-tradeoff",
         "langgraph-scope",
+        "langgraph-blind-result",
+        "langgraph-blind-integrity",
+        "langgraph-blind-scope",
     ):
         assert html.count(f'id="{element_id}"') == 1
         assert f'#{element_id}' in script
@@ -126,3 +140,4 @@ def test_demo_page_exposes_diff_and_failure_controls() -> None:
     assert "#verify-${name}" in script
     assert "historicalBenchmark" in script
     assert "langgraphDevelopment" in script
+    assert "langgraphBlind" in script

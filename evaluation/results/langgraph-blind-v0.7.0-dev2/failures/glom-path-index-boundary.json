@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "langgraph-blind-v0.7.0-dev2",
+  "agent_version": "0.7.0-dev2",
+  "task_id": "glom-path-index-boundary",
+  "trace_task_id": "model-agent-repo-glom-path-index-boundary-7b5bfba8",
+  "split": "locked",
+  "draft_candidate": {
+    "path": "failures/glom-path-index-boundary.diff",
+    "sha256": "c8fcbb761934bc815a994458a14257bc7f0937dc66576eec8b08e1fa39000a56",
+    "bytes": 721,
+    "generation_policy_accepted": true,
+    "applied_to_disposable_workspace": false
+  },
+  "semantic_review": {
+    "structured_output_valid": false,
+    "parse_error": "model reason is invalid",
+    "response_sha256": "643a3d40a270ea7946ed906848ee24cb09dcf42df3541f4735ca58d299e112a7",
+    "policy_accepted": false,
+    "execution_authority": false
+  },
+  "target_test_started": false,
+  "regression_started": false,
+  "final_status": "needs_human",
+  "stop_reason": "planner stopped safely: model reason is invalid",
+  "record_sha256": "17ba3faac4a6182c121215e006a760f0fb4280524774025ed156743b8cb3188a",
+  "claim_boundary": "Previously unused locked repository; one attempt, no retry, draft was never applied."
+}

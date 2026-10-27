@@ -1,0 +1,8 @@
+End-to-end repair run completed.
+Agent version: 0.7.0-dev2; task: repo-prettytable-horizontal-align (prettytable-horizontal-align)
+Diagnosis turns: 2/3
+Model usage: calls=4/5, output_tokens=440/3072
+Verification action: run_regression
+Final task status: needs_human
+Detail: TEST_FAILED
+Trace database: data/model-agent.sqlite3 (task model-agent-repo-prettytable-horizontal-align-f15a0ea7)

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "langgraph-blind-v0.7.0-dev2",
+  "agent_version": "0.7.0-dev2",
+  "task_id": "prettytable-horizontal-align",
+  "trace_task_id": "model-agent-repo-prettytable-horizontal-align-f15a0ea7",
+  "split": "locked",
+  "candidate": {
+    "path": "failures/prettytable-horizontal-align.diff",
+    "sha256": "8d1818fc590bb379bfde69dd267dea24866a05d69750f790321ccc6f40e04a9c",
+    "bytes": 553,
+    "policy_accepted": true,
+    "applied_to_disposable_workspace": true,
+    "relocation_mode": "bounded_exact"
+  },
+  "semantic_review": {
+    "draft_sha256": "8d1818fc590bb379bfde69dd267dea24866a05d69750f790321ccc6f40e04a9c",
+    "reviewed_sha256": "8d1818fc590bb379bfde69dd267dea24866a05d69750f790321ccc6f40e04a9c",
+    "changed": false,
+    "execution_authority": false
+  },
+  "target_test": {
+    "selector": "tests/test_tracerepair_horizontal_align.py::test_horizontal_align_getter_returns_configured_character",
+    "passed": true,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_ms": 1125,
+    "stdout_sha256": "0d70d5e3025d41820ee8d7865e5ffaa062debd9f4fd30ca4b26f7820dfb180f9",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "regression_test": {
+    "selector": "tests/test_tracerepair_horizontal_align.py",
+    "passed": false,
+    "exit_code": 1,
+    "timed_out": false,
+    "duration_ms": 515,
+    "error_code": "TEST_FAILED",
+    "stdout_sha256": "15854bd9c8345861ce4a7e6ed12003b057714fd9106333748c84c0e22a60c52d",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "final_status": "needs_human",
+  "stop_reason": "candidate patch failed regression: TEST_FAILED",
+  "record_sha256": "dc722f1731484bd57444d350818ebcb8a9c4524906de50b6fd64a98e51c73375",
+  "claim_boundary": "Previously unused locked repository; one attempt, no retry, candidate not accepted."
+}

@@ -24,6 +24,7 @@ HISTORICAL_BENCHMARK_ID = "historical-python-v1.1.3"
 FROZEN_HISTORICAL_AGENT_VERSION = "0.6.0"
 LANGGRAPH_DEVELOPMENT_ID = "langgraph-review-offline-v0.7.0-dev2"
 LANGGRAPH_DEVELOPMENT_AGENT_VERSION = "0.7.0-dev2"
+LANGGRAPH_BLIND_ID = "langgraph-blind-v0.7.0-dev2"
 
 
 def read_json(path: Path) -> object:
@@ -146,6 +147,47 @@ def main() -> None:
         "frozenSummarySha256": expected_langgraph_sha,
         "scopeNote": langgraph.get("scope_note"),
         "lockedAttempts": locked_split.get("attempts"),
+    }
+    blind_path = ROOT / "evaluation" / "frozen" / f"{LANGGRAPH_BLIND_ID}.json"
+    blind_checksum_path = blind_path.with_suffix(".json.sha256")
+    blind = read_json(blind_path)
+    if not isinstance(blind, dict):
+        raise ValueError("LangGraph locked evidence must be a JSON object")
+    expected_blind_sha = blind_checksum_path.read_text(encoding="utf-8").split()[0]
+    if sha256_file(blind_path) != expected_blind_sha:
+        raise ValueError("LangGraph locked evidence checksum mismatch")
+    blind_summary = blind.get("summary")
+    blind_splits = blind.get("splits")
+    blind_attempts = blind.get("attempts")
+    if not isinstance(blind_summary, dict) or not isinstance(blind_splits, dict):
+        raise ValueError("LangGraph locked evidence is incomplete")
+    if not isinstance(blind_attempts, list):
+        raise ValueError("LangGraph locked attempts are missing")
+    blind_locked = blind_splits.get("locked")
+    if not isinstance(blind_locked, dict) or blind_locked.get("attempts") != 3:
+        raise ValueError("LangGraph locked evidence must contain three attempts")
+    langgraph_blind = {
+        "benchmarkId": blind.get("benchmark_id"),
+        "agentVersion": blind.get("release_agent_version"),
+        "model": blind.get("model"),
+        "runs": blind_summary.get("attempted_tasks"),
+        "successes": blind_summary.get("successes"),
+        "failures": blind_summary.get("failures"),
+        "passAt1": blind_summary.get("pass_at_1"),
+        "humanHandoffs": blind_summary.get("human_handoffs"),
+        "incorrectAcceptedPatches": blind_summary.get("incorrect_accepted_patches"),
+        "averageTokens": blind_summary.get("average_completion_tokens"),
+        "p50Seconds": blind_summary.get("p50_wall_seconds"),
+        "p95Seconds": blind_summary.get("p95_wall_seconds"),
+        "wilson95": blind_summary.get("wilson_95_percent"),
+        "attempts": blind_attempts,
+        "locked": blind_locked,
+        "manifestSha256": blind.get("manifest_sha256"),
+        "preflightSealSha256": blind.get("preflight_seal_sha256"),
+        "reportSha256": blind.get("report_sha256"),
+        "terminalLedgerSha256": blind.get("terminal_ledger_sha256"),
+        "frozenSummarySha256": expected_blind_sha,
+        "scopeNote": blind.get("scope_note"),
     }
     catalog_payload = read_json(ROOT / "evaluation" / "cases.json")
     if not isinstance(catalog_payload, list):
@@ -361,6 +403,7 @@ def main() -> None:
         "recoveryScenarios": recovery_manifest["scenarios"],
         "historicalBenchmark": historical_benchmark,
         "langgraphDevelopment": langgraph_development,
+        "langgraphBlind": langgraph_blind,
         "repositoryCohort": repository_cohort,
         "lockedRepositoryResult": locked_repository_result,
     }
