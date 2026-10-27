@@ -1,0 +1,15 @@
+{
+  "$schema": "../../docs/repository-task.schema.json",
+  "schema_version": 1,
+  "name": "prettytable-horizontal-align",
+  "repository_root": "../repositories/prettytable-horizontal-align",
+  "issue": "After setting horizontal_align_char to a custom character, reading the property should return that configured value.",
+  "source_allowlist": ["src/prettytable"],
+  "target_test": "tests/test_tracerepair_horizontal_align.py::test_horizontal_align_getter_returns_configured_character",
+  "regression_suite": "tests/test_tracerepair_horizontal_align.py",
+  "diagnostic_queries": ["def horizontal_align_char", "_horizontal_align_char"],
+  "pythonpath": ["src"],
+  "timeout_seconds": 120,
+  "max_repository_bytes": 31457280,
+  "max_repository_files": 2000
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "../../docs/benchmark-manifest.schema.json",
+  "schema_version": 1,
+  "benchmark_id": "langgraph-blind-v0.7.0-dev2",
+  "agent_version": "0.7.0-dev2",
+  "model": "qwen3.8-flash",
+  "protocol": "pass@1",
+  "tasks": [
+    {
+      "id": "toolz-empty-interpose",
+      "split": "locked",
+      "task_config": "../tasks/toolz-empty-interpose.json",
+      "source": {
+        "repository_url": "https://github.com/pytoolz/toolz",
+        "buggy_commit": "55ce42dc3b6f786ed9d4e38633cc5cfe3622a526",
+        "fixed_commit": "d2eba0374a452c2b18fe188b04527e22bda3548c",
+        "issue_url": "https://github.com/pytoolz/toolz/pull/635"
+      }
+    },
+    {
+      "id": "prettytable-horizontal-align",
+      "split": "locked",
+      "task_config": "../tasks/prettytable-horizontal-align.json",
+      "source": {
+        "repository_url": "https://github.com/prettytable/prettytable",
+        "buggy_commit": "37a02661a7fab52d4d2db613ffeda44ea928ae60",
+        "fixed_commit": "6ba75d41436d4400624c3e2f32727e127016b8c6",
+        "issue_url": "https://github.com/prettytable/prettytable/pull/445"
+      }
+    },
+    {
+      "id": "glom-path-index-boundary",
+      "split": "locked",
+      "task_config": "../tasks/glom-path-index-boundary.json",
+      "source": {
+        "repository_url": "https://github.com/mahmoud/glom",
+        "buggy_commit": "e515fb33c7af491c6a20b2618591736361bb1d08",
+        "fixed_commit": "6fd41340f30519ddc64a546ad2703dfe53f12356",
+        "issue_url": "https://github.com/mahmoud/glom/issues/299"
+      }
+    }
+  ]
+}

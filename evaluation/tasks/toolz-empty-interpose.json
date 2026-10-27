@@ -1,0 +1,15 @@
+{
+  "$schema": "../../docs/repository-task.schema.json",
+  "schema_version": 1,
+  "name": "toolz-empty-interpose",
+  "repository_root": "../repositories/toolz-empty-interpose",
+  "issue": "interpose() should return an empty iterator for an empty input sequence instead of raising StopIteration.",
+  "source_allowlist": ["toolz"],
+  "target_test": "tests/test_tracerepair_interpose.py::test_empty_sequence_returns_empty_iterator",
+  "regression_suite": "toolz/tests/test_itertoolz.py",
+  "diagnostic_queries": ["def interpose", "inposed"],
+  "pythonpath": ["."],
+  "timeout_seconds": 120,
+  "max_repository_bytes": 31457280,
+  "max_repository_files": 2000
+}

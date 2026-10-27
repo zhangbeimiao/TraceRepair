@@ -3,9 +3,17 @@ from pathlib import Path
 
 import pytest
 
-from scripts.prepare_historical_benchmark import HTTPIE_OFFLINE_ORACLE
+from scripts.prepare_historical_benchmark import (
+    GLOM_PATH_ORACLE,
+    HTTPIE_OFFLINE_ORACLE,
+    PRETTYTABLE_ALIGN_ORACLE,
+    TOOLZ_INTERPOSE_ORACLE,
+)
 from tracerepair.oracle_validation import (
+    _GLOM_PATH_ORACLE,
     _HTTPIE_OFFLINE_ORACLE,
+    _PRETTYTABLE_ALIGN_ORACLE,
+    _TOOLZ_INTERPOSE_ORACLE,
     OracleValidationError,
     validate_oracle_pair,
 )
@@ -89,3 +97,9 @@ def test_httpie_offline_oracle_is_identical_in_preparation_and_validation() -> N
     assert HTTPIE_OFFLINE_ORACLE == _HTTPIE_OFFLINE_ORACLE
     assert "socket" not in HTTPIE_OFFLINE_ORACLE
     assert "httpbin.org" not in HTTPIE_OFFLINE_ORACLE
+
+
+def test_blind_oracles_are_identical_in_preparation_and_validation() -> None:
+    assert TOOLZ_INTERPOSE_ORACLE == _TOOLZ_INTERPOSE_ORACLE
+    assert PRETTYTABLE_ALIGN_ORACLE == _PRETTYTABLE_ALIGN_ORACLE
+    assert GLOM_PATH_ORACLE == _GLOM_PATH_ORACLE

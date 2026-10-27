@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "status": "sealed_before_execution",
+  "sealed_at": "2026-10-27T14:48:51+08:00",
+  "runtime_parent_commit": "023cbed417e89caf890530c0c9ed1e88eb880e9e",
+  "protocol": {
+    "name": "pass@1",
+    "split": "locked",
+    "task_count": 3,
+    "attempts_per_task": 1,
+    "retries_after_result": false,
+    "publish_all_outcomes": true,
+    "provider_requests_before_seal": 0
+  },
+  "benchmark": {
+    "id": "langgraph-blind-v0.7.0-dev2",
+    "manifest_path": "evaluation/benchmarks/langgraph-blind-v0.7.0-dev2.json",
+    "manifest_sha256": "fda36a88b38f7dca2e5b035a0736088daa8c0fe04db78ffd1a2294acbbf7f842"
+  },
+  "agent": {
+    "version": "0.7.0-dev2",
+    "model": "qwen3.8-flash",
+    "config_path": "evaluation/configs/agent-v0.7.0-dev2.json",
+    "config_sha256": "eddf732c4a2d6d4478e27b46ead8a163e7ad82c906a0074c260fd7ba4e4c05c8",
+    "prompt_source": "src/tracerepair/model_planner.py",
+    "prompt_source_sha256": "2c5045fffa66df56fbe0a2fb344468fc941623775e122183790dfa26f0258aa9",
+    "version_source_sha256": "83f89a77c3d9a595c477ce8db7e360a684e4fe0cf17a948dc74ad10f1bd1f192",
+    "langgraph_end_to_end_sha256": "1810dce945df648bcfc092178edc0f03fe2c4dd23072561ac9b8ce94f1800c15",
+    "langgraph_workflow_sha256": "6d28dd1482fda3cc79d88afd4176ad9c7802460b12d740903c66404a34c65e44",
+    "benchmark_runner_sha256": "e3230d48661056018353371a927de7b30056ab8385709704aac9d42243689e26"
+  },
+  "oracle": {
+    "preflight_passed": true,
+    "buggy_targets_failed_with_exit_code_1": 3,
+    "fixed_targets_passed": 3,
+    "fixed_regressions_passed": 3,
+    "preparation_source_sha256": "875099d21981febdde85962ed561918c85075a6e0d28843c9d8341e6311909c9",
+    "validation_source_sha256": "409c50bbd3ef67da0872d43431d758f4949aef875a1a7cc41169e615dfa8a20e"
+  },
+  "tasks": [
+    {
+      "id": "toolz-empty-interpose",
+      "repository_url": "https://github.com/pytoolz/toolz",
+      "buggy_commit": "55ce42dc3b6f786ed9d4e38633cc5cfe3622a526",
+      "fixed_commit": "d2eba0374a452c2b18fe188b04527e22bda3548c",
+      "task_config_sha256": "84aac82af5f5846d14f5bed863c25b2dad17bf5a7f4d094a39e3aedf8f92c1e9",
+      "repository_sha256": "9623d8965b614fbe735f0403a73b60954c443588d0dc78bcb3e4324f92dfd512",
+      "buggy_archive_sha256": "003e33bc86212b761608f13023adae83ca84ec33f7c5a0b741e5c0573aa9d4e8",
+      "fixed_archive_sha256": "b647accf9b79fb4191c69e536411743ae1e3933b0614b480a8d17d1b4803d55e"
+    },
+    {
+      "id": "prettytable-horizontal-align",
+      "repository_url": "https://github.com/prettytable/prettytable",
+      "buggy_commit": "37a02661a7fab52d4d2db613ffeda44ea928ae60",
+      "fixed_commit": "6ba75d41436d4400624c3e2f32727e127016b8c6",
+      "task_config_sha256": "282634a594537525366723d0a4f53c7a36089e34e9f4912f042c49748f519a1c",
+      "repository_sha256": "97376474744e3a344508a480e7ed7c7743cbe5a51afdedf6cdfe1d8ad55b01ac",
+      "buggy_archive_sha256": "3bba4b6cc1a54c37bbd86cba8953033a0a3f1aeaf13497a74b96dc78c8afe515",
+      "fixed_archive_sha256": "53a4797735581b2c5060db8b4f5349e200c68b88e8c3efd30b748c93c30bf263"
+    },
+    {
+      "id": "glom-path-index-boundary",
+      "repository_url": "https://github.com/mahmoud/glom",
+      "buggy_commit": "e515fb33c7af491c6a20b2618591736361bb1d08",
+      "fixed_commit": "6fd41340f30519ddc64a546ad2703dfe53f12356",
+      "task_config_sha256": "ba09e46593b7c97b3cbb4296ed5926629dd9e373aeec8bad72a1d2effbddb206",
+      "repository_sha256": "4938b6edf50cef55fcfd7b066c3eef378418de9c3d41721b26f1e0bd7e6165ef",
+      "buggy_archive_sha256": "6a4f55e82706161dc648825e9b189e134f8990d59439f66c60553bc860e8fb53",
+      "fixed_archive_sha256": "369ed1500d35545807d549de9d3ec142ed70da6967947ea9694c9fd53ab21fe8"
+    }
+  ]
+}

@@ -1,13 +1,18 @@
-# Dependencies imported by the five frozen historical test modules.
+# Dependencies imported by frozen historical benchmark test modules.
 # The repository snapshots themselves are loaded through PYTHONPATH and are not installed.
+attrs>=19,<26
+boltons>=20,<26
 colorama>=0.4,<1
 click>=7,<9
 decorator>=5,<6
+face>=20,<26
 future>=0.18,<2
 mock>=5,<6
 nose>=1.3.7,<2
 psutil>=5,<8
 pyte>=0.8,<1
 pytest-httpbin>=2,<3
+pytest-lazy-fixtures>=1,<2
 python_toolbox>=0.9,<1
 six>=1.16,<2
+wcwidth>=0.3.5,<1

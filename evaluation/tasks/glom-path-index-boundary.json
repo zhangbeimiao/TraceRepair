@@ -1,0 +1,15 @@
+{
+  "$schema": "../../docs/repository-task.schema.json",
+  "schema_version": 1,
+  "name": "glom-path-index-boundary",
+  "repository_root": "../repositories/glom-path-index-boundary",
+  "issue": "Indexing a Path at an index exactly equal to its length should raise IndexError instead of producing an invalid Path segment.",
+  "source_allowlist": ["glom"],
+  "target_test": "glom/test/test_tracerepair_path_boundary.py::test_index_equal_to_path_length_raises_index_error",
+  "regression_suite": "glom/test/test_path_and_t.py",
+  "diagnostic_queries": ["def __getitem__", "Path index out of range"],
+  "pythonpath": ["."],
+  "timeout_seconds": 120,
+  "max_repository_bytes": 31457280,
+  "max_repository_files": 2000
+}

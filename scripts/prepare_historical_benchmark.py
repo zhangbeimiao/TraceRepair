@@ -102,6 +102,51 @@ def test_missing_host_uses_url_authority():
 '''
 
 
+TOOLZ_INTERPOSE_ORACLE = '''"""Offline oracle for the historical empty-interpose regression."""
+
+from toolz.itertoolz import interpose
+
+
+def test_empty_sequence_returns_empty_iterator():
+    assert list(interpose("separator", [])) == []
+'''
+
+
+PRETTYTABLE_ALIGN_ORACLE = '''"""Offline oracle for the historical alignment getter regression."""
+
+from prettytable import PrettyTable
+
+
+def test_horizontal_align_getter_returns_configured_character():
+    table = PrettyTable()
+    table.horizontal_align_char = ":"
+
+    assert table.horizontal_align_char == ":"
+
+
+def test_default_horizontal_align_follows_junction_character():
+    table = PrettyTable()
+    table.junction_char = "#"
+
+    assert table.horizontal_align_char == "#"
+'''
+
+
+GLOM_PATH_ORACLE = '''"""Offline oracle for the historical Path index boundary regression."""
+
+import pytest
+
+from glom import Path
+
+
+def test_index_equal_to_path_length_raises_index_error():
+    path = Path("a", "b")
+
+    with pytest.raises(IndexError):
+        path[2]
+'''
+
+
 THEFUCK_PYTEST_COMPAT = '''"""Benchmark-only compatibility for the historical pytest Node API."""
 
 from _pytest.nodes import Node
@@ -319,6 +364,70 @@ CASES = (
             "33c711a4c3378e21304f567c4e31c0c4875f84fd51f6ede701c26f061a6cf063",
         ),
         "test/test_utils.py",
+    ),
+    HistoricalCase(
+        "toolz-empty-interpose",
+        Archive(
+            "toolz-55ce42d",
+            "pytoolz",
+            "toolz",
+            "55ce42dc3b6f786ed9d4e38633cc5cfe3622a526",
+            "003e33bc86212b761608f13023adae83ca84ec33f7c5a0b741e5c0573aa9d4e8",
+        ),
+        Archive(
+            "toolz-d2eba03",
+            "pytoolz",
+            "toolz",
+            "d2eba0374a452c2b18fe188b04527e22bda3548c",
+            "b647accf9b79fb4191c69e536411743ae1e3933b0614b480a8d17d1b4803d55e",
+        ),
+        "toolz/tests/test_itertoolz.py",
+        (("tests/test_tracerepair_interpose.py", TOOLZ_INTERPOSE_ORACLE),),
+    ),
+    HistoricalCase(
+        "prettytable-horizontal-align",
+        Archive(
+            "prettytable-37a0266",
+            "prettytable",
+            "prettytable",
+            "37a02661a7fab52d4d2db613ffeda44ea928ae60",
+            "3bba4b6cc1a54c37bbd86cba8953033a0a3f1aeaf13497a74b96dc78c8afe515",
+        ),
+        Archive(
+            "prettytable-6ba75d4",
+            "prettytable",
+            "prettytable",
+            "6ba75d41436d4400624c3e2f32727e127016b8c6",
+            "53a4797735581b2c5060db8b4f5349e200c68b88e8c3efd30b748c93c30bf263",
+        ),
+        "tests/test_prettytable.py",
+        (
+            ("tests/test_tracerepair_horizontal_align.py", PRETTYTABLE_ALIGN_ORACLE),
+            (
+                "src/prettytable/_version.py",
+                '"""Deterministic version stub for the source-archive benchmark fixture."""\n\n'
+                '__version__ = "0.0.0"\n',
+            ),
+        ),
+    ),
+    HistoricalCase(
+        "glom-path-index-boundary",
+        Archive(
+            "glom-e515fb3",
+            "mahmoud",
+            "glom",
+            "e515fb33c7af491c6a20b2618591736361bb1d08",
+            "6a4f55e82706161dc648825e9b189e134f8990d59439f66c60553bc860e8fb53",
+        ),
+        Archive(
+            "glom-6fd4134",
+            "mahmoud",
+            "glom",
+            "6fd41340f30519ddc64a546ad2703dfe53f12356",
+            "369ed1500d35545807d549de9d3ec142ed70da6967947ea9694c9fd53ab21fe8",
+        ),
+        "glom/test/test_path_and_t.py",
+        (("glom/test/test_tracerepair_path_boundary.py", GLOM_PATH_ORACLE),),
     ),
 )
 

@@ -60,6 +60,18 @@ _FIXED_ARCHIVES = {
         "youtube-dl-1cc47c6.zip",
         "33c711a4c3378e21304f567c4e31c0c4875f84fd51f6ede701c26f061a6cf063",
     ),
+    "d2eba0374a452c2b18fe188b04527e22bda3548c": (
+        "toolz-d2eba03.zip",
+        "b647accf9b79fb4191c69e536411743ae1e3933b0614b480a8d17d1b4803d55e",
+    ),
+    "6ba75d41436d4400624c3e2f32727e127016b8c6": (
+        "prettytable-6ba75d4.zip",
+        "53a4797735581b2c5060db8b4f5349e200c68b88e8c3efd30b748c93c30bf263",
+    ),
+    "6fd41340f30519ddc64a546ad2703dfe53f12356": (
+        "glom-6fd4134.zip",
+        "369ed1500d35545807d549de9d3ec142ed70da6967947ea9694c9fd53ab21fe8",
+    ),
 }
 
 
@@ -154,6 +166,51 @@ from _pytest.nodes import Node
 
 if not hasattr(Node, "get_marker"):
     Node.get_marker = Node.get_closest_marker
+'''
+
+
+_TOOLZ_INTERPOSE_ORACLE = '''"""Offline oracle for the historical empty-interpose regression."""
+
+from toolz.itertoolz import interpose
+
+
+def test_empty_sequence_returns_empty_iterator():
+    assert list(interpose("separator", [])) == []
+'''
+
+
+_PRETTYTABLE_ALIGN_ORACLE = '''"""Offline oracle for the historical alignment getter regression."""
+
+from prettytable import PrettyTable
+
+
+def test_horizontal_align_getter_returns_configured_character():
+    table = PrettyTable()
+    table.horizontal_align_char = ":"
+
+    assert table.horizontal_align_char == ":"
+
+
+def test_default_horizontal_align_follows_junction_character():
+    table = PrettyTable()
+    table.junction_char = "#"
+
+    assert table.horizontal_align_char == "#"
+'''
+
+
+_GLOM_PATH_ORACLE = '''"""Offline oracle for the historical Path index boundary regression."""
+
+import pytest
+
+from glom import Path
+
+
+def test_index_equal_to_path_length_raises_index_error():
+    path = Path("a", "b")
+
+    with pytest.raises(IndexError):
+        path[2]
 '''
 
 
@@ -293,6 +350,25 @@ def _write_generated_files(task_id: str, root: Path) -> None:
         (root / "conftest.py").write_text(
             _THEFUCK_PYTEST_COMPAT, encoding="utf-8", newline="\n"
         )
+    elif task_id == "toolz-empty-interpose":
+        target = root / "tests" / "test_tracerepair_interpose.py"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(_TOOLZ_INTERPOSE_ORACLE, encoding="utf-8", newline="\n")
+    elif task_id == "prettytable-horizontal-align":
+        target = root / "tests" / "test_tracerepair_horizontal_align.py"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(_PRETTYTABLE_ALIGN_ORACLE, encoding="utf-8", newline="\n")
+        version = root / "src" / "prettytable" / "_version.py"
+        version.write_text(
+            '"""Deterministic version stub for the source-archive benchmark fixture."""\n\n'
+            '__version__ = "0.0.0"\n',
+            encoding="utf-8",
+            newline="\n",
+        )
+    elif task_id == "glom-path-index-boundary":
+        target = root / "glom" / "test" / "test_tracerepair_path_boundary.py"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(_GLOM_PATH_ORACLE, encoding="utf-8", newline="\n")
 
 
 def _file_sha256(path: Path) -> str:
