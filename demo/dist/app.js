@@ -9,6 +9,7 @@
   const setText = (selector, value) => { $(selector).textContent = value; };
   const summary = data.summary;
   const historical = data.historicalBenchmark;
+  const langgraph = data.langgraphDevelopment;
   const developmentAttempts = historical.attempts.filter((attempt) => attempt.split === "development");
   const lockedAttempts = historical.attempts.filter((attempt) => attempt.split === "locked");
   const countSuccesses = (attempts) => attempts.filter((attempt) => attempt.success).length;
@@ -29,6 +30,20 @@
       + `terminal ledger sha256 ${historical.terminalLedgerSha256.slice(0, 12)}…`,
   );
   setText("#historical-scope", historical.scopeNote);
+  setText(
+    "#langgraph-comparison",
+    `${langgraph.comparison.baselineAgentVersion || langgraph.comparison.baseline_agent_version} `
+      + `${Math.round(langgraph.comparison.baseline_pass_at_1 * 5)}/5 → `
+      + `${langgraph.agentVersion} ${langgraph.successes}/${langgraph.runs}; `
+      + "使用相同五个已知开发任务。",
+  );
+  setText(
+    "#langgraph-tradeoff",
+    `错误接受补丁 ${langgraph.incorrectAcceptedPatches} · `
+      + `平均 Tokens ${langgraph.comparison.baseline_average_completion_tokens} → ${langgraph.averageTokens} · `
+      + `P50 ${langgraph.comparison.baseline_p50_wall_seconds}s → ${langgraph.p50Seconds}s。`,
+  );
+  setText("#langgraph-scope", langgraph.scopeNote);
   setText("#generated-at", `snapshot ${new Date(data.generatedAt).toLocaleString("zh-CN")}`);
   if (data.repositoryCohort) {
     const repository = data.repositoryCohort;

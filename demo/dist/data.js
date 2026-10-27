@@ -152,6 +152,20 @@ window.TRACEREPAIR_DEMO = {
       "averageTokens": 268.67
     },
     {
+      "version": "0.7.0-dev1",
+      "runs": 5,
+      "successes": 2,
+      "successRate": 0.4,
+      "averageTokens": 315.6
+    },
+    {
+      "version": "0.7.0-dev2",
+      "runs": 10,
+      "successes": 7,
+      "successRate": 0.7,
+      "averageTokens": 596.5
+    },
+    {
       "version": "legacy",
       "runs": 7,
       "successes": 3,
@@ -1932,6 +1946,80 @@ window.TRACEREPAIR_DEMO = {
     "terminalLedgerSha256": "a22b116185f95f74dd8980460764d2fb4433714233823b1b9e1fe38c073b1b3a",
     "frozenSummarySha256": "4c978aa6dd5a5e7ee882d02dfccfae594d1b655f8992f5f6f86ea110f54cec7f",
     "scopeNote": "Five historical tasks validate the bounded mechanism and two one-shot locked transfers; this sample does not establish broad code-repair accuracy."
+  },
+  "langgraphDevelopment": {
+    "benchmarkId": "langgraph-review-offline-v0.7.0-dev2",
+    "agentVersion": "0.7.0-dev2",
+    "model": "qwen3.8-flash",
+    "runs": 5,
+    "successes": 4,
+    "failures": 1,
+    "passAt1": 0.8,
+    "humanHandoffs": 1,
+    "incorrectAcceptedPatches": 0,
+    "averageTokens": 543.2,
+    "p50Seconds": 14.329,
+    "p95Seconds": 18.391,
+    "wilson95": {
+      "lower": 0.3755,
+      "upper": 0.9638
+    },
+    "comparison": {
+      "baseline_benchmark_id": "langgraph-migration-v0.7.0-dev1",
+      "same_task_identities": true,
+      "baseline_agent_version": "0.7.0-dev1",
+      "baseline_pass_at_1": 0.4,
+      "current_pass_at_1": 0.8,
+      "pass_at_1_delta": 0.4,
+      "baseline_average_completion_tokens": 315.6,
+      "current_average_completion_tokens": 543.2,
+      "average_completion_tokens_delta": 227.6,
+      "baseline_p50_wall_seconds": 9.985,
+      "current_p50_wall_seconds": 14.329,
+      "p50_wall_seconds_delta": 4.344
+    },
+    "failure": {
+      "schema_version": 1,
+      "benchmark_id": "langgraph-review-offline-v0.7.0-dev2",
+      "agent_version": "0.7.0-dev2",
+      "task_id": "tqdm-sizeless-bool",
+      "trace_task_id": "model-agent-repo-tqdm-sizeless-bool-74ea06a7",
+      "split": "development",
+      "candidate": {
+        "path": "failures/tqdm-sizeless-bool.diff",
+        "sha256": "8e3c4799b2e9f36475d0dbba52082ce1382930477894347938a7be309f0b5846",
+        "bytes": 517,
+        "policy_accepted": true,
+        "applied_to_disposable_workspace": true,
+        "relocation_mode": "bounded_exact"
+      },
+      "semantic_review": {
+        "draft_sha256": "8e3c4799b2e9f36475d0dbba52082ce1382930477894347938a7be309f0b5846",
+        "reviewed_sha256": "8e3c4799b2e9f36475d0dbba52082ce1382930477894347938a7be309f0b5846",
+        "changed": false,
+        "execution_authority": false
+      },
+      "target_test": {
+        "selector": "tqdm/tests/tests_tqdm.py::test_bool",
+        "passed": false,
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_ms": 702,
+        "error_code": "TEST_FAILED",
+        "stdout_sha256": "eb6637f569f918b9817bcf103eebd03507330e8714e19b35d0ccee666006a42c",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "regression_started": false,
+      "final_status": "needs_human",
+      "stop_reason": "candidate patch failed target test: TEST_FAILED",
+      "record_sha256": "19e15551c17a444954cdb9a6f681fa3e1d475e6b908993be88c05b73b717e834",
+      "claim_boundary": "Known development task; preserved safe-stop evidence, not a held-out result."
+    },
+    "reportSha256": "21f6483aa613aa8f875f2eda4cb3d095cbcd8303349027799ec4fe7d10b46c53",
+    "terminalLedgerSha256": "9811b87f769acb6b8b9210f60653f7f46d5cb975d5f196da02a6627d90dc83cd",
+    "frozenSummarySha256": "11522542f229632cb46a26f421b37629febaecbab56db62335cfae14bd5acefc",
+    "scopeNote": "Five known development tasks measure the bounded semantic-review mechanism. No locked task was run, so this result does not establish broad repair accuracy or held-out generalisation.",
+    "lockedAttempts": 0
   },
   "repositoryCohort": {
     "projectVersion": "0.6.1",

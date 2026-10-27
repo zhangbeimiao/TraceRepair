@@ -105,6 +105,10 @@ VM sandbox.
   repositories; development was 2/3 and the one-shot locked split was 1/2.
   Both failures stopped at the target-test gate, and no incorrect patch was
   accepted.
+- LangGraph development comparison: on the same five known tasks, `0.7.0-dev1`
+  completed 2/5 and the bounded-review `0.7.0-dev2` completed 4/5. The remaining
+  candidate failed its target test; no incorrect patch was accepted. This is
+  mechanism evidence with zero locked tasks, not a generalisation claim.
 - EventRelay controlled benchmark: 13/13 successful frozen runs.
 - Public configured repository: 5/5 repeat runs, 179.6 average output tokens.
 - Held-out trusted repository: 1/1 strict one-shot run, 234 output tokens,

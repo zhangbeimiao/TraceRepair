@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "release_agent_version": "0.7.0-dev2",
+  "evaluated_runtime_agent_version": "0.7.0-dev2",
+  "status": "frozen_development_evidence",
+  "frozen_at": "2026-10-27T13:46:39+08:00",
+  "implementation_commit": "794d8aa",
+  "configuration": {
+    "path": "evaluation/configs/agent-v0.7.0-dev2.json",
+    "sha256": "eddf732c4a2d6d4478e27b46ead8a163e7ad82c906a0074c260fd7ba4e4c05c8"
+  },
+  "benchmark": {
+    "id": "langgraph-review-offline-v0.7.0-dev2",
+    "manifest_sha256": "cddec5a03d13634ad6757817da3fac0aec302e02b183f87f26fd2c0954e46d73",
+    "protocol": "pass@1",
+    "development_attempts": 5,
+    "development_successes": 4,
+    "development_pass_at_1": 0.8,
+    "incorrect_accepted_patches": 0,
+    "terminal_ledger_sha256": "9811b87f769acb6b8b9210f60653f7f46d5cb975d5f196da02a6627d90dc83cd",
+    "report_file_sha256": "21f6483aa613aa8f875f2eda4cb3d095cbcd8303349027799ec4fe7d10b46c53"
+  },
+  "claim_scope": {
+    "known_development_tasks": true,
+    "held_out_or_locked": false,
+    "supports_generalisation_claim": false,
+    "purpose": "Measure the bounded semantic-review mechanism on the same task identities as 0.7.0-dev1."
+  },
+  "unchanged_gates": [
+    "tool_allowlist",
+    "source_path_allowlist",
+    "one_patch_attempt",
+    "exact_or_bounded_exact_diff_validation",
+    "target_test",
+    "regression_test",
+    "human_review"
+  ]
+}

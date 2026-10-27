@@ -45,6 +45,19 @@ new benchmark id `langgraph-review-offline-v0.7.0-dev2`; no predecessor attempt 
 The five tasks are known development tasks, so this benchmark measures whether the review mechanism
 addresses observed failure modes. It is not a fresh generalization claim.
 
+## Frozen development result
+
+The deterministic offline cohort completed at `4/5 pass@1`, compared with `2/5` for
+`0.7.0-dev1` on the same task identities. Incorrect accepted patches remained at zero. Average
+completion tokens increased from `315.6` to `543.2`, and P50 wall time increased from `9.985s`
+to `14.329s`.
+
+The remaining `tqdm-sizeless-bool` candidate was returned unchanged by the reviewer, applied only
+to the disposable workspace, and rejected by its target test. Its exact Diff, trace digests and
+stop reason are preserved in the benchmark result directory. See
+[`langgraph-dev1-vs-dev2.md`](langgraph-dev1-vs-dev2.md) for the bounded comparison and claim
+limits.
+
 An earlier development run under `langgraph-review-v0.7.0-dev2` is retained for audit, but its HTTPie
 oracle called `httpbin.org` and was found to be network-dependent on a later preflight. It is therefore
 superseded for comparison purposes, not deleted or silently rewritten.

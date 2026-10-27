@@ -22,6 +22,8 @@ LOCKED_CASES = {"02", "04", "06", "08", "09"}
 CONTROLLED_AGENT_VERSION = "0.4.0-dev1"
 HISTORICAL_BENCHMARK_ID = "historical-python-v1.1.3"
 FROZEN_HISTORICAL_AGENT_VERSION = "0.6.0"
+LANGGRAPH_DEVELOPMENT_ID = "langgraph-review-offline-v0.7.0-dev2"
+LANGGRAPH_DEVELOPMENT_AGENT_VERSION = "0.7.0-dev2"
 
 
 def read_json(path: Path) -> object:
@@ -88,6 +90,62 @@ def main() -> None:
         "terminalLedgerSha256": historical.get("terminal_ledger_sha256"),
         "frozenSummarySha256": expected_historical_sha,
         "scopeNote": historical.get("scope_note"),
+    }
+    langgraph_path = (
+        ROOT / "evaluation" / "frozen" / f"{LANGGRAPH_DEVELOPMENT_ID}.json"
+    )
+    langgraph_checksum_path = langgraph_path.with_suffix(".json.sha256")
+    langgraph = read_json(langgraph_path)
+    if not isinstance(langgraph, dict):
+        raise ValueError("LangGraph development evidence must be a JSON object")
+    expected_langgraph_sha = langgraph_checksum_path.read_text(encoding="utf-8").split()[0]
+    if sha256_file(langgraph_path) != expected_langgraph_sha:
+        raise ValueError("LangGraph development evidence checksum mismatch")
+    if langgraph.get("release_agent_version") != LANGGRAPH_DEVELOPMENT_AGENT_VERSION:
+        raise ValueError("LangGraph development Agent version changed unexpectedly")
+    langgraph_summary = langgraph.get("summary")
+    langgraph_comparison = langgraph.get("comparison")
+    langgraph_splits = langgraph.get("splits")
+    if not all(
+        isinstance(value, dict)
+        for value in (langgraph_summary, langgraph_comparison, langgraph_splits)
+    ):
+        raise ValueError("LangGraph development evidence is incomplete")
+    locked_split = langgraph_splits.get("locked")
+    if not isinstance(locked_split, dict) or locked_split.get("attempts") != 0:
+        raise ValueError("LangGraph development evidence must not imply a locked result")
+    failure_path = (
+        ROOT
+        / "evaluation"
+        / "results"
+        / LANGGRAPH_DEVELOPMENT_ID
+        / "failures"
+        / "tqdm-sizeless-bool.json"
+    )
+    langgraph_failure = read_json(failure_path)
+    if not isinstance(langgraph_failure, dict):
+        raise ValueError("LangGraph failure evidence must be a JSON object")
+    langgraph_development = {
+        "benchmarkId": langgraph.get("benchmark_id"),
+        "agentVersion": langgraph.get("release_agent_version"),
+        "model": langgraph.get("model"),
+        "runs": langgraph_summary.get("attempted_tasks"),
+        "successes": langgraph_summary.get("successes"),
+        "failures": langgraph_summary.get("failures"),
+        "passAt1": langgraph_summary.get("pass_at_1"),
+        "humanHandoffs": langgraph_summary.get("human_handoffs"),
+        "incorrectAcceptedPatches": langgraph_summary.get("incorrect_accepted_patches"),
+        "averageTokens": langgraph_summary.get("average_completion_tokens"),
+        "p50Seconds": langgraph_summary.get("p50_wall_seconds"),
+        "p95Seconds": langgraph_summary.get("p95_wall_seconds"),
+        "wilson95": langgraph_summary.get("wilson_95_percent"),
+        "comparison": langgraph_comparison,
+        "failure": langgraph_failure,
+        "reportSha256": langgraph.get("report_sha256"),
+        "terminalLedgerSha256": langgraph.get("terminal_ledger_sha256"),
+        "frozenSummarySha256": expected_langgraph_sha,
+        "scopeNote": langgraph.get("scope_note"),
+        "lockedAttempts": locked_split.get("attempts"),
     }
     catalog_payload = read_json(ROOT / "evaluation" / "cases.json")
     if not isinstance(catalog_payload, list):
@@ -302,6 +360,7 @@ def main() -> None:
         "failures": failures,
         "recoveryScenarios": recovery_manifest["scenarios"],
         "historicalBenchmark": historical_benchmark,
+        "langgraphDevelopment": langgraph_development,
         "repositoryCohort": repository_cohort,
         "lockedRepositoryResult": locked_repository_result,
     }

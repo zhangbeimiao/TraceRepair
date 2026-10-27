@@ -23,6 +23,7 @@ def load_demo_data(path: Path = DEFAULT_DATA) -> dict[str, Any]:
     for key in (
         "summary",
         "historicalBenchmark",
+        "langgraphDevelopment",
         "traces",
         "failures",
         "recoveryScenarios",
@@ -65,6 +66,7 @@ def render_showcase(
 def _render_evidence(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     historical = payload["historicalBenchmark"]
+    langgraph = payload["langgraphDevelopment"]
     repository = payload.get("repositoryCohort") or {}
     held_out = payload.get("lockedRepositoryResult") or {}
     locked = historical["splits"]["locked"]
@@ -82,6 +84,18 @@ def _render_evidence(payload: dict[str, Any]) -> str:
             "no post-hoc retry",
             "  Safe-stop evidence              : two policy-valid candidates failed their "
             "target tests and were not accepted",
+            "  LangGraph development evidence  : "
+            f"{langgraph['comparison']['baseline_agent_version']} "
+            f"{int(langgraph['comparison']['baseline_pass_at_1'] * 5)}/5 -> "
+            f"{langgraph['agentVersion']} {langgraph['successes']}/{langgraph['runs']}; "
+            "same five known tasks",
+            "  Review trade-off                : "
+            f"avg tokens {langgraph['comparison']['baseline_average_completion_tokens']} -> "
+            f"{langgraph['averageTokens']}; P50 "
+            f"{langgraph['comparison']['baseline_p50_wall_seconds']}s -> "
+            f"{langgraph['p50Seconds']}s",
+            "  Development claim boundary      : 0 locked tasks; this is mechanism evidence, "
+            "not an 80% general repair claim",
             f"  EventRelay controlled regression: {summary['successes']}/{summary['runs']} passed",
             "  Public configured repository    : "
             f"{repository.get('successes', '-')}/{repository.get('runs', '-')} passed, "

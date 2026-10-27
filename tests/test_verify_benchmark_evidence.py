@@ -9,6 +9,7 @@ from tracerepair.benchmark_suite import BenchmarkManifestError
 
 ROOT = Path(__file__).resolve().parents[1]
 BENCHMARK = "historical-python-v1.1.3"
+LANGGRAPH_DEVELOPMENT = "langgraph-review-offline-v0.7.0-dev2"
 
 
 def test_published_v113_evidence_verifies_without_execution() -> None:
@@ -17,6 +18,16 @@ def test_published_v113_evidence_verifies_without_execution() -> None:
     assert result["release_agent_version"] == "0.6.0"
     assert result["tasks"] == 5
     assert result["successes"] == 3
+    assert result["ledger_records"] == 10
+
+
+def test_langgraph_development_evidence_verifies_without_execution() -> None:
+    result = verify_evidence(ROOT, benchmark_id=LANGGRAPH_DEVELOPMENT)
+
+    assert result["release_agent_version"] == "0.7.0-dev2"
+    assert result["tasks"] == 5
+    assert result["successes"] == 4
+    assert result["pass_at_1"] == 0.8
     assert result["ledger_records"] == 10
 
 

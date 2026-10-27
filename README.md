@@ -28,9 +28,9 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 
 当前冻结 Agent 为 `0.6.0`（评测运行时 `0.6.0-dev4`）。在五个来自不同开源仓库历史提交的 Bug 上，严格 `pass@1` 结果为 **3/5**：开发集 `2/3`，配置冻结后的锁定集 `1/2`，锁定任务每题只运行一次。两个失败候选都被目标测试拦截并转人工，**错误接受补丁数为 0**。样本量仍小，因此这里只证明受控闭环、一次性锁定迁移和安全停止能力，不宣称任意仓库修复准确率。
 
-当前开发中的 `0.7.0-dev2` 使用完整 LangGraph 端到端编排，并在补丁生成与应用之间新增一次受限语义复核：`generate_patch → review_patch → apply_patch`。复核器只能返回修订后的 unified diff 或交给人工，没有工具、文件写入、Shell、测试和状态修改权限。LangGraph 未配置 checkpointer；SQLite 仍是任务状态、预算、Trace 与恢复 Checkpoint 的唯一持久化源。该版本尚未评测冻结，不能继承或覆盖下方 `0.6.0` 的评测结论。
+`0.7.0-dev2` 使用完整 LangGraph 端到端编排，并在补丁生成与应用之间新增一次受限语义复核：`generate_patch → review_patch → apply_patch`。复核器只能返回修订后的 unified diff 或交给人工，没有工具、文件写入、Shell、测试和状态修改权限。LangGraph 未配置 checkpointer；SQLite 仍是任务状态、预算、Trace 与恢复 Checkpoint 的唯一持久化源。该版本已冻结五个**已知开发任务**的 `4/5 pass@1` 机制证据，但尚未运行全新锁定集，因此不能继承 `0.6.0` 的盲测结论，也不能宣称 80% 泛化修复率。
 
-前一开发版 `0.7.0-dev1` 在五个**已知开发任务**上的独立 pass@1 回归结果为 `2/5`：2 个候选通过目标测试和回归，3 个语义错误候选被目标测试安全拒绝，错误接受补丁数为 0。该结果继续冻结不动；完整账本、候选 Diff 与失败分析位于 `evaluation/results/langgraph-migration-v0.7.0-dev1/`。`0.7.0-dev2` 使用新 manifest `langgraph-review-offline-v0.7.0-dev2` 重新评测，其中 HTTPie oracle 已改为不访问外网的确定性测试。
+前一开发版 `0.7.0-dev1` 在相同五个任务上的结果为 `2/5`。加入语义复核后，`0.7.0-dev2` 提升到 `4/5`，错误接受补丁仍为 0；代价是平均输出 Token 从 `315.6` 增至 `543.2`，P50 时延从 `9.985s` 增至 `14.329s`。剩余的 tqdm 候选通过补丁策略但未通过目标测试，已连同原始 Diff 和失败摘要永久保留。完整对比见 [`docs/langgraph-dev1-vs-dev2.md`](docs/langgraph-dev1-vs-dev2.md)。
 
 ## 评测结果
 
@@ -38,8 +38,12 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 
 | 协议 | Agent | 真实历史 Bug | pass@1 | 安全拒绝 | 错误接受补丁 | 平均输出 Tokens |
 |---|---|---:|---:|---:|---:|---:|
+| 已知开发任务、语义复核机制评测 | `0.7.0-dev2` | 5 | **4/5（80%）** | 1 | **0** | 543.20 |
+| 相同开发任务、迁移基线 | `0.7.0-dev1` | 5 | **2/5（40%）** | 3 | **0** | 315.60 |
 | 冻结配置、pass@1 | `0.6.0` | 5 | **3/5（60%）** | 2 | **0** | 273.80 |
 | 历史基线（不同题集） | `0.5.0` | 3 | **2/3（66.67%）** | 1 | **0** | 268.67 |
+
+前两行只比较同一组已知开发任务上的机制变化，不是锁定盲测。`0.6.0` 仍是当前包含仓库隔离 locked one-shot 证据的稳定结果。
 
 - Development：PySnooper、tqdm、TheFuck，`2/3`；只有这三题用于调整 `0.6.0`。
 - Locked one-shot：HTTPie、youtube-dl，`1/2`；冻结配置后各运行一次，没有失败重试或事后调参。
@@ -49,6 +53,12 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 
 冻结证据：
 
+- `evaluation/benchmarks/langgraph-review-offline-v0.7.0-dev2.json`
+- `evaluation/frozen/agent-v0.7.0-dev2.json`
+- `evaluation/frozen/langgraph-review-offline-v0.7.0-dev2.json`
+- `evaluation/frozen/langgraph-review-offline-v0.7.0-dev2.json.sha256`
+- `evaluation/results/langgraph-review-offline-v0.7.0-dev2/DEVELOPMENT_FINDINGS.md`
+- `evaluation/results/langgraph-review-offline-v0.7.0-dev2/failures/tqdm-sizeless-bool.diff`
 - `evaluation/benchmarks/historical-python-v1.1.3.json`
 - `evaluation/frozen/agent-v0.6.0.json`
 - `evaluation/results/historical-python-v1.1.3/report.json`
@@ -82,7 +92,7 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 
 ## 30 秒介绍
 
-用户提交 Issue 和失败测试后，Agent 在最多三轮诊断中选择受限的代码搜索与读取工具，生成候选 unified diff，并由无执行权限的语义复核节点选择原样保留、修订或交给人工。最终 Diff 必须依次通过路径与变更量策略、目标测试和完整回归测试；全部通过后仍只进入 `awaiting_review`。所有模型决策、工具生命周期、状态迁移和 checkpoint 都持久化到 SQLite。冻结的五仓库历史 Bug 评测为 **3/5 pass@1，另 2 次被目标测试安全拦截，0 个错误补丁被接受**；新增复核节点的效果尚待独立评测。
+用户提交 Issue 和失败测试后，Agent 在最多三轮诊断中选择受限的代码搜索与读取工具，生成候选 unified diff，并由无执行权限的语义复核节点选择原样保留、修订或交给人工。最终 Diff 必须依次通过路径与变更量策略、目标测试和完整回归测试；全部通过后仍只进入 `awaiting_review`。所有模型决策、工具生命周期、状态迁移和 checkpoint 都持久化到 SQLite。稳定版 `0.6.0` 的五仓库历史评测为 **3/5 pass@1**；LangGraph `0.7.0-dev2` 在五个已知开发任务上由 **2/5 提升到 4/5**，剩余错误候选被目标测试拦截。后者仍需全新锁定仓库验证。
 
 ## 架构
 

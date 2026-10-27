@@ -37,6 +37,17 @@ def test_public_demo_contains_verified_patches_and_frozen_failures() -> None:
         for attempt in historical["failureAttempts"]
     )
     assert len(historical["frozenSummarySha256"]) == 64
+    langgraph = payload["langgraphDevelopment"]
+    assert langgraph["benchmarkId"] == "langgraph-review-offline-v0.7.0-dev2"
+    assert langgraph["agentVersion"] == "0.7.0-dev2"
+    assert langgraph["runs"] == 5
+    assert langgraph["successes"] == 4
+    assert langgraph["failures"] == 1
+    assert langgraph["passAt1"] == 0.8
+    assert langgraph["incorrectAcceptedPatches"] == 0
+    assert langgraph["lockedAttempts"] == 0
+    assert langgraph["comparison"]["baseline_pass_at_1"] == 0.4
+    assert langgraph["failure"]["final_status"] == "needs_human"
     assert len(payload["traces"]) == 13
     assert len(payload["failures"]) == 3
     assert len(payload["recoveryScenarios"]) == 2
@@ -103,6 +114,9 @@ def test_demo_page_exposes_diff_and_failure_controls() -> None:
         "historical-stop-reason",
         "historical-integrity",
         "historical-scope",
+        "langgraph-comparison",
+        "langgraph-tradeoff",
+        "langgraph-scope",
     ):
         assert html.count(f'id="{element_id}"') == 1
         assert f'#{element_id}' in script
@@ -111,3 +125,4 @@ def test_demo_page_exposes_diff_and_failure_controls() -> None:
         assert f'id="verify-{gate}"' in html
     assert "#verify-${name}" in script
     assert "historicalBenchmark" in script
+    assert "langgraphDevelopment" in script
