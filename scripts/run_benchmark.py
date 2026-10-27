@@ -59,7 +59,10 @@ def main() -> None:
 
     try:
         manifest = BenchmarkManifest.load(arguments.manifest)
-        _validate_runtime(manifest)
+        # Oracle-only dry runs do not execute an Agent and must remain able to
+        # verify historical manifests after the active runtime version moves on.
+        if not arguments.dry_run:
+            _validate_runtime(manifest)
         selected = tuple(
             task
             for task in manifest.tasks
