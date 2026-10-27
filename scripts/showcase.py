@@ -102,10 +102,10 @@ def _render_evidence(payload: dict[str, Any]) -> str:
             f"{blind['successes']}/{blind['runs']} passed; "
             f"{blind['humanHandoffs']} safe handoffs; "
             f"{blind['incorrectAcceptedPatches']} incorrect patches accepted",
-            "  Blind protocol                   : three new repositories; one attempt each; "
-            "no post-hoc retry; all outcomes published",
-            "  Blind safe stops                 : regression failure + invalid structured "
-            "review; neither candidate was accepted",
+            "  Blind protocol                   : six new repositories in two pre-sealed "
+            "cohorts; one attempt each; no post-hoc retry",
+            "  Blind safe stops                 : one regression failure + three invalid "
+            "structured outputs; no incorrect patch accepted",
             f"  EventRelay controlled regression: {summary['successes']}/{summary['runs']} passed",
             "  Public configured repository    : "
             f"{repository.get('successes', '-')}/{repository.get('runs', '-')} passed, "
@@ -116,8 +116,10 @@ def _render_evidence(payload: dict[str, Any]) -> str:
             f"tokens={held_out.get('tokens', '-')}, calls={held_out.get('modelCalls', '-')}, "
             f"tools={held_out.get('toolCalls', '-')}, "
             f"retried={str(held_out.get('retried', '-')).lower()}",
-            "  Claim boundary                   : five real historical bugs validate the bounded "
+            "  Stable baseline boundary         : five real historical bugs validate the bounded "
             "workflow; they do not establish broad repair accuracy",
+            "  Blind claim boundary             : six new repositories improve transfer evidence; "
+            "they still do not establish a universal repair rate",
             "  Versioning rule                  : any patch-location policy change requires a new "
             "agent version and a new frozen benchmark",
         )

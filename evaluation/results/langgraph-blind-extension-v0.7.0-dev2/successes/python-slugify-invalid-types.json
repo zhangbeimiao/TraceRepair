@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "langgraph-blind-extension-v0.7.0-dev2",
+  "agent_version": "0.7.0-dev2",
+  "task_id": "python-slugify-invalid-types",
+  "trace_task_id": "model-agent-repo-python-slugify-invalid-types-a56c6e2a",
+  "split": "locked",
+  "candidate": {
+    "path": "successes/python-slugify-invalid-types.diff",
+    "trace_sha256": "a2483b532066bfb7e0603b031e0b16072ae4d92da6b012e177d996694d533aa5",
+    "trace_bytes": 761,
+    "published_sha256": "ae6c8e1c0943dae5d4c0e16343d57c0247da8a6e43e613d77c14dddff89ddcd8",
+    "published_bytes": 762,
+    "publication_normalization": "UTF-8 terminal newline added; Diff content unchanged",
+    "semantic_review_changed_candidate": false,
+    "applied_to_disposable_workspace": true
+  },
+  "target_test": {
+    "selector": "test.py::TestSlugify::test_max_length_rejects_bool",
+    "passed": true,
+    "exit_code": 0,
+    "duration_ms": 437,
+    "stdout_sha256": "20f94a1820caf76f0cefa2e6ffd1e7b2f9c2180c89990206120fe6765c21c091",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "regression_test": {
+    "selector": "test.py",
+    "passed": true,
+    "exit_code": 0,
+    "duration_ms": 577,
+    "stdout_sha256": "d866c5fadb9ecf20f92079e43e4a42334b0cf09ecaa46b6ddfcc32e8322ee6ab",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "final_status": "awaiting_review",
+  "stop_reason": "candidate patch passed target and regression tests; human review required",
+  "record_sha256": "ee7b6e4f84c148faf842922ad1295067012105ae38260b2b7e8dd7cf54da0715",
+  "claim_boundary": "Previously unused locked repository; one attempt, no retry, no automatic merge."
+}

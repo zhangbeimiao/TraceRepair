@@ -1,0 +1,53 @@
+{
+  "benchmark": {
+    "agent_version": "0.7.0-dev2",
+    "benchmark_id": "langgraph-blind-extension-v0.7.0-dev2",
+    "completion_cny_per_million_tokens": 0.0,
+    "manifest_sha256": "cc0dce72e5e963d634223016477c12188a4a84eee71ba7bd77cc490b72322a2e",
+    "model": "qwen3.8-flash",
+    "protocol": "pass@1",
+    "schema_version": 1,
+    "tasks": [
+      {
+        "repository_sha256": "8b5b632e4204e35749c1baa70a4c43d8941e731483a5975f0e8b7f7aa63844dd",
+        "source": {
+          "buggy_commit": "110fe5d03e7b4b8f5c5ec97533c94254cdf8733f",
+          "fixed_commit": "ffe21c44d3f7de9c7a89870c8cf1fd7aa583a2ae",
+          "issue_url": "https://github.com/tkem/cachetools/pull/431",
+          "repository_url": "https://github.com/tkem/cachetools"
+        },
+        "split": "locked",
+        "task_config": "cachetools-falsey-getsizeof.json",
+        "task_config_sha256": "c54f23b238301db69148eabec772948c1ce7d2195eee2847cd12d77e4d4a256d",
+        "task_id": "cachetools-falsey-getsizeof"
+      },
+      {
+        "repository_sha256": "4aa06e81be13276b15b807504dc3b1a823e4e3a8e3b0166c31defada7352826e",
+        "source": {
+          "buggy_commit": "fee5aa338d3bd7a9e36c269e33b496a7848edc44",
+          "fixed_commit": "bc388221e3b48a0d33fc64090acb3985ba955fdf",
+          "issue_url": "https://github.com/un33k/python-slugify/pull/196",
+          "repository_url": "https://github.com/un33k/python-slugify"
+        },
+        "split": "locked",
+        "task_config": "python-slugify-invalid-types.json",
+        "task_config_sha256": "3cf9400415df89e8f5e9a1b56f8a4beb91fe2968b44447f97d2faf5b6ae8c711",
+        "task_id": "python-slugify-invalid-types"
+      },
+      {
+        "repository_sha256": "0abc357a547edc5b88d22bb4afc5efed3875f4f142a2f4f508eccb9f21f67127",
+        "source": {
+          "buggy_commit": "420c8fb44eeadb537cae69d2fee3796e808558dd",
+          "fixed_commit": "f58ca3e81424a35626c8a475eb59ab95589008ce",
+          "issue_url": "https://github.com/pallets/click/pull/3805",
+          "repository_url": "https://github.com/pallets/click"
+        },
+        "split": "locked",
+        "task_config": "click-sentinel-copy.json",
+        "task_config_sha256": "362ddd13c82a8a78a65659111dde3c511854d2626b4033cdc6c7409bcc38a276",
+        "task_id": "click-sentinel-copy"
+      }
+    ]
+  },
+  "locked_at": "2026-10-27T15:05:57.008014+00:00"
+}

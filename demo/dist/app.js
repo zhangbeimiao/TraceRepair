@@ -52,8 +52,8 @@
   );
   setText(
     "#langgraph-blind-integrity",
-    `每题一次，无事后重试 · report ${blind.reportSha256.slice(0, 12)}… · `
-      + `ledger ${blind.terminalLedgerSha256.slice(0, 12)}…`,
+    `每题一次，无事后重试 · ${blind.independentHashChains} 条独立哈希链 · `
+      + `evidence ${blind.evidenceIndexSha256.slice(0, 12)}…`,
   );
   setText("#langgraph-blind-scope", blind.scopeNote);
   setText("#generated-at", `snapshot ${new Date(data.generatedAt).toLocaleString("zh-CN")}`);

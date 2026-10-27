@@ -20,8 +20,9 @@ def test_offline_showcase_replays_all_evidence_without_private_metadata() -> Non
     assert "After resume : run_tests -> run_regression" in output
     assert "repository writes: 0" in output
     assert "new agent version and a new frozen benchmark" in output
-    assert "LangGraph locked blind result    : 1/3 passed; 2 safe handoffs" in output
-    assert "three new repositories; one attempt each" in output
+    assert "LangGraph locked blind result    : 2/6 passed; 4 safe handoffs" in output
+    assert "six new repositories in two pre-sealed" in output
+    assert "three invalid structured outputs" in output
     assert "ledgerlite" not in output.lower()
 
 

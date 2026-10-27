@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "langgraph-blind-extension-v0.7.0-dev2",
+  "agent_version": "0.7.0-dev2",
+  "task_id": "click-sentinel-copy",
+  "trace_task_id": "model-agent-repo-click-sentinel-copy-4e5cd7ae",
+  "split": "locked",
+  "diagnosis": {
+    "tools_completed": ["search_code", "read_file"],
+    "source_path": "src/click/_utils.py"
+  },
+  "model_response": {
+    "structured_output_valid": false,
+    "parse_error": "model reason is invalid",
+    "response_sha256": "f5399db8e40d2dc181b9ffffbff018e55af11130a317a353228f744d8474c080",
+    "policy_accepted": false,
+    "execution_authority": false
+  },
+  "candidate_diff_present": false,
+  "candidate_applied": false,
+  "target_test_started": false,
+  "regression_started": false,
+  "final_status": "needs_human",
+  "stop_reason": "planner stopped safely: model reason is invalid",
+  "record_sha256": "50bb8391f922a98d1ceb31cf3aeaf4882a695a7317838c1fd92da084749f9b52",
+  "claim_boundary": "Previously unused locked repository; one attempt, no retry, invalid structured output created no executable candidate."
+}

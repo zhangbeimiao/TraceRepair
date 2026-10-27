@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "langgraph-blind-extension-v0.7.0-dev2",
+  "agent_version": "0.7.0-dev2",
+  "task_id": "cachetools-falsey-getsizeof",
+  "trace_task_id": "model-agent-repo-cachetools-falsey-getsizeof-9ece5369",
+  "split": "locked",
+  "diagnosis": {
+    "tools_completed": ["search_code", "read_file"],
+    "source_path": "src/cachetools/__init__.py"
+  },
+  "model_response": {
+    "structured_output_valid": false,
+    "parse_error": "model reason is invalid",
+    "response_sha256": "3783ebe0061981d67e04f884b616c4dfae062a5453d23c2d607a01b7beac0498",
+    "policy_accepted": false,
+    "execution_authority": false
+  },
+  "candidate_diff_present": false,
+  "candidate_applied": false,
+  "target_test_started": false,
+  "regression_started": false,
+  "final_status": "needs_human",
+  "stop_reason": "planner stopped safely: model reason is invalid",
+  "record_sha256": "aa766d320a79f8b053a6466830ab75c38a0102a88ac59012d62cf7dcee7c9911",
+  "claim_boundary": "Previously unused locked repository; one attempt, no retry, invalid structured output created no executable candidate."
+}

@@ -24,7 +24,11 @@ HISTORICAL_BENCHMARK_ID = "historical-python-v1.1.3"
 FROZEN_HISTORICAL_AGENT_VERSION = "0.6.0"
 LANGGRAPH_DEVELOPMENT_ID = "langgraph-review-offline-v0.7.0-dev2"
 LANGGRAPH_DEVELOPMENT_AGENT_VERSION = "0.7.0-dev2"
-LANGGRAPH_BLIND_ID = "langgraph-blind-v0.7.0-dev2"
+LANGGRAPH_BLIND_COHORT_IDS = (
+    "langgraph-blind-v0.7.0-dev2",
+    "langgraph-blind-extension-v0.7.0-dev2",
+)
+LANGGRAPH_BLIND_AGGREGATE_ID = "langgraph-blind-six-repository-v0.7.0-dev2"
 
 
 def read_json(path: Path) -> object:
@@ -148,29 +152,68 @@ def main() -> None:
         "scopeNote": langgraph.get("scope_note"),
         "lockedAttempts": locked_split.get("attempts"),
     }
-    blind_path = ROOT / "evaluation" / "frozen" / f"{LANGGRAPH_BLIND_ID}.json"
-    blind_checksum_path = blind_path.with_suffix(".json.sha256")
-    blind = read_json(blind_path)
-    if not isinstance(blind, dict):
-        raise ValueError("LangGraph locked evidence must be a JSON object")
-    expected_blind_sha = blind_checksum_path.read_text(encoding="utf-8").split()[0]
-    if sha256_file(blind_path) != expected_blind_sha:
-        raise ValueError("LangGraph locked evidence checksum mismatch")
-    blind_summary = blind.get("summary")
-    blind_splits = blind.get("splits")
-    blind_attempts = blind.get("attempts")
-    if not isinstance(blind_summary, dict) or not isinstance(blind_splits, dict):
-        raise ValueError("LangGraph locked evidence is incomplete")
-    if not isinstance(blind_attempts, list):
-        raise ValueError("LangGraph locked attempts are missing")
-    blind_locked = blind_splits.get("locked")
-    if not isinstance(blind_locked, dict) or blind_locked.get("attempts") != 3:
-        raise ValueError("LangGraph locked evidence must contain three attempts")
+    aggregate_path = (
+        ROOT / "evaluation" / "frozen" / f"{LANGGRAPH_BLIND_AGGREGATE_ID}.json"
+    )
+    aggregate_checksum_path = aggregate_path.with_suffix(".json.sha256")
+    aggregate = read_json(aggregate_path)
+    if not isinstance(aggregate, dict):
+        raise ValueError("LangGraph blind aggregate must be a JSON object")
+    expected_aggregate_sha = aggregate_checksum_path.read_text(encoding="utf-8").split()[0]
+    if sha256_file(aggregate_path) != expected_aggregate_sha:
+        raise ValueError("LangGraph blind aggregate checksum mismatch")
+    blind_summary = aggregate.get("summary")
+    blind_integrity = aggregate.get("integrity")
+    if not isinstance(blind_summary, dict) or not isinstance(blind_integrity, dict):
+        raise ValueError("LangGraph blind aggregate is incomplete")
+
+    cohort_summaries: list[dict[str, object]] = []
+    blind_attempts: list[object] = []
+    for cohort_id in LANGGRAPH_BLIND_COHORT_IDS:
+        cohort_path = ROOT / "evaluation" / "frozen" / f"{cohort_id}.json"
+        cohort_checksum_path = cohort_path.with_suffix(".json.sha256")
+        cohort = read_json(cohort_path)
+        if not isinstance(cohort, dict):
+            raise ValueError("LangGraph blind cohort must be a JSON object")
+        expected_cohort_sha = cohort_checksum_path.read_text(encoding="utf-8").split()[0]
+        if sha256_file(cohort_path) != expected_cohort_sha:
+            raise ValueError(f"LangGraph blind cohort checksum mismatch: {cohort_id}")
+        cohort_split = cohort.get("splits", {}).get("locked")
+        cohort_attempts = cohort.get("attempts")
+        if (
+            not isinstance(cohort_split, dict)
+            or cohort_split.get("attempts") != 3
+            or cohort_split.get("one_shot") is not True
+            or cohort_split.get("retried") is not False
+            or not isinstance(cohort_attempts, list)
+        ):
+            raise ValueError(f"invalid LangGraph blind cohort protocol: {cohort_id}")
+        cohort_summaries.append(
+            {
+                "benchmarkId": cohort_id,
+                "frozenSummarySha256": expected_cohort_sha,
+                "reportSha256": cohort.get("report_sha256"),
+                "terminalLedgerSha256": cohort.get("terminal_ledger_sha256"),
+            }
+        )
+        blind_attempts.extend(cohort_attempts)
+    if len(blind_attempts) != 6 or len(
+        {str(item.get("task_id")) for item in blind_attempts if isinstance(item, dict)}
+    ) != 6:
+        raise ValueError("LangGraph blind aggregate must contain six distinct attempts")
+    blind_locked = {
+        "attempts": 6,
+        "successes": blind_summary.get("successes"),
+        "pass_at_1": blind_summary.get("pass_at_1"),
+        "one_shot": True,
+        "retried": False,
+        "all_outcomes_published": True,
+    }
     langgraph_blind = {
-        "benchmarkId": blind.get("benchmark_id"),
-        "agentVersion": blind.get("release_agent_version"),
-        "model": blind.get("model"),
-        "runs": blind_summary.get("attempted_tasks"),
+        "benchmarkId": aggregate.get("evidence_id"),
+        "agentVersion": aggregate.get("agent_version"),
+        "model": aggregate.get("model"),
+        "runs": blind_summary.get("attempts"),
         "successes": blind_summary.get("successes"),
         "failures": blind_summary.get("failures"),
         "passAt1": blind_summary.get("pass_at_1"),
@@ -182,12 +225,10 @@ def main() -> None:
         "wilson95": blind_summary.get("wilson_95_percent"),
         "attempts": blind_attempts,
         "locked": blind_locked,
-        "manifestSha256": blind.get("manifest_sha256"),
-        "preflightSealSha256": blind.get("preflight_seal_sha256"),
-        "reportSha256": blind.get("report_sha256"),
-        "terminalLedgerSha256": blind.get("terminal_ledger_sha256"),
-        "frozenSummarySha256": expected_blind_sha,
-        "scopeNote": blind.get("scope_note"),
+        "cohorts": cohort_summaries,
+        "independentHashChains": blind_integrity.get("independent_hash_chains"),
+        "evidenceIndexSha256": expected_aggregate_sha,
+        "scopeNote": aggregate.get("claim_boundary"),
     }
     catalog_payload = read_json(ROOT / "evaluation" / "cases.json")
     if not isinstance(catalog_payload, list):

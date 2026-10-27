@@ -160,10 +160,10 @@ window.TRACEREPAIR_DEMO = {
     },
     {
       "version": "0.7.0-dev2",
-      "runs": 13,
-      "successes": 8,
-      "successRate": 0.6154,
-      "averageTokens": 582.0
+      "runs": 16,
+      "successes": 9,
+      "successRate": 0.5625,
+      "averageTokens": 543.44
     },
     {
       "version": "legacy",
@@ -2022,21 +2022,21 @@ window.TRACEREPAIR_DEMO = {
     "lockedAttempts": 0
   },
   "langgraphBlind": {
-    "benchmarkId": "langgraph-blind-v0.7.0-dev2",
+    "benchmarkId": "langgraph-blind-six-repository-v0.7.0-dev2",
     "agentVersion": "0.7.0-dev2",
     "model": "qwen3.8-flash",
-    "runs": 3,
-    "successes": 1,
-    "failures": 2,
+    "runs": 6,
+    "successes": 2,
+    "failures": 4,
     "passAt1": 0.3333,
-    "humanHandoffs": 2,
+    "humanHandoffs": 4,
     "incorrectAcceptedPatches": 0,
-    "averageTokens": 533.67,
-    "p50Seconds": 14.718,
+    "averageTokens": 455.0,
+    "p50Seconds": 11.454,
     "p95Seconds": 16.265,
     "wilson95": {
-      "lower": 0.0615,
-      "upper": 0.7923
+      "lower": 0.0968,
+      "upper": 0.7
     },
     "attempts": [
       {
@@ -2068,23 +2068,68 @@ window.TRACEREPAIR_DEMO = {
         "candidate_applied": false,
         "tests_started": false,
         "record_sha256": "17ba3faac4a6182c121215e006a760f0fb4280524774025ed156743b8cb3188a"
+      },
+      {
+        "task_id": "cachetools-falsey-getsizeof",
+        "split": "locked",
+        "success": false,
+        "status": "needs_human",
+        "stop_reason": "planner stopped safely: model reason is invalid",
+        "candidate_diff_present": false,
+        "candidate_applied": false,
+        "tests_started": false,
+        "model_response_sha256": "3783ebe0061981d67e04f884b616c4dfae062a5453d23c2d607a01b7beac0498",
+        "record_sha256": "aa766d320a79f8b053a6466830ab75c38a0102a88ac59012d62cf7dcee7c9911"
+      },
+      {
+        "task_id": "python-slugify-invalid-types",
+        "split": "locked",
+        "success": true,
+        "status": "awaiting_review",
+        "stop_reason": "candidate patch passed target and regression tests; human review required",
+        "candidate_sha256": "a2483b532066bfb7e0603b031e0b16072ae4d92da6b012e177d996694d533aa5",
+        "target_test_passed": true,
+        "regression_passed": true,
+        "record_sha256": "ee7b6e4f84c148faf842922ad1295067012105ae38260b2b7e8dd7cf54da0715"
+      },
+      {
+        "task_id": "click-sentinel-copy",
+        "split": "locked",
+        "success": false,
+        "status": "needs_human",
+        "stop_reason": "planner stopped safely: model reason is invalid",
+        "candidate_diff_present": false,
+        "candidate_applied": false,
+        "tests_started": false,
+        "model_response_sha256": "f5399db8e40d2dc181b9ffffbff018e55af11130a317a353228f744d8474c080",
+        "record_sha256": "50bb8391f922a98d1ceb31cf3aeaf4882a695a7317838c1fd92da084749f9b52"
       }
     ],
     "locked": {
-      "attempts": 3,
-      "successes": 1,
+      "attempts": 6,
+      "successes": 2,
       "pass_at_1": 0.3333,
-      "new_repositories": true,
       "one_shot": true,
       "retried": false,
       "all_outcomes_published": true
     },
-    "manifestSha256": "fda36a88b38f7dca2e5b035a0736088daa8c0fe04db78ffd1a2294acbbf7f842",
-    "preflightSealSha256": "42fda4daa06d9261a452a78d7f9485c82ab85fbfcf3de42a6fe2ab4668b0251c",
-    "reportSha256": "001301c7cf90954d3d6e7485b46d1fcc6783e0c7d6f7499d85ce60a43dd4293e",
-    "terminalLedgerSha256": "17ba3faac4a6182c121215e006a760f0fb4280524774025ed156743b8cb3188a",
-    "frozenSummarySha256": "06d7561f09184cc9d5e8aefe250113b9970baed1b5b0ee4e0ca4f5700529f673",
-    "scopeNote": "Three previously unused repositories were preregistered, oracle-validated, and run once after the Agent, prompt, model, task inputs, and policy were sealed. The 1/3 result is genuine locked pass@1 evidence; its small sample does not establish broad repair accuracy."
+    "cohorts": [
+      {
+        "benchmarkId": "langgraph-blind-v0.7.0-dev2",
+        "frozenSummarySha256": "06d7561f09184cc9d5e8aefe250113b9970baed1b5b0ee4e0ca4f5700529f673",
+        "reportSha256": "001301c7cf90954d3d6e7485b46d1fcc6783e0c7d6f7499d85ce60a43dd4293e",
+        "terminalLedgerSha256": "17ba3faac4a6182c121215e006a760f0fb4280524774025ed156743b8cb3188a"
+      },
+      {
+        "benchmarkId": "langgraph-blind-extension-v0.7.0-dev2",
+        "frozenSummarySha256": "3454d9a38351bc87aef5868181b54eecd9eb4de24f80500f9e2e5c1479af8754",
+        "reportSha256": "031ce93c4f2bdea654374990b099f14fa9fec3c8dc87062cd63259a22f4fbaf2",
+        "terminalLedgerSha256": "50bb8391f922a98d1ceb31cf3aeaf4882a695a7317838c1fd92da084749f9b52"
+      }
+    ],
+    "independentHashChains": 2,
+    "evidenceIndexSha256": "5721f6a5ef7d6f7b7947abdcba987feedaf5131cc84c8cf077160e72f1042e19",
+    "scopeNote": "Six previously unused repositories provide stronger one-shot transfer evidence than the original three, but remain too few and too curated to estimate universal code-repair accuracy. The evidence supports bounded execution, honest failure retention and zero observed incorrect accepted patches."
   },
   "repositoryCohort": {
     "projectVersion": "0.6.1",

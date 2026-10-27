@@ -105,7 +105,8 @@ python scripts\showcase.py --section repair --case 10
 benchmark manifest，并使用全新锁定仓库；不能重跑失败样本后覆盖本次 `3/5`。
 `langgraph-review-offline-v0.7.0-dev2` 的 `4/5` 也已冻结为开发证据；任何针对 tqdm
 的策略改动都必须升级版本。随后我把同一版本、Prompt、模型和门禁全部冻结，在
-toolz、prettytable、glom 三个未参与调试的仓库上各运行一次：结果是 1/3 通过，
-prettytable 被完整回归拦截，glom 因结构化复核输出非法在执行前停止，错误接受补丁
-为 0。这个结果不漂亮，但比事后重试得到的高分更能说明系统的真实边界。
+toolz、prettytable、glom、cachetools、python-slugify、Click 六个未参与调试的仓库上
+各运行一次：结果是 2/6 通过、4/6 安全转人工，错误接受补丁为 0。prettytable 被
+完整回归拦截，另外三个失败在结构化输出校验阶段停止。两个 cohort 保留独立的
+SHA-256 账本链。这个结果不漂亮，但比事后重试得到的高分更能说明系统的真实边界。
 失败的策略调整都必须升级为新 Agent 版本，不能覆盖本次结果。

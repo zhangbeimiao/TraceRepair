@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "langgraph-blind-extension-v0.7.0-dev2",
+  "protocol": "pass@1",
+  "release_agent_version": "0.7.0-dev2",
+  "evaluated_runtime_agent_version": "0.7.0-dev2",
+  "model": "qwen3.8-flash",
+  "manifest_sha256": "cc0dce72e5e963d634223016477c12188a4a84eee71ba7bd77cc490b72322a2e",
+  "preflight_seal_sha256": "33393bbe7536e13393ae0f0b14d4c0d91033768d3473018268f40907621ea2d3",
+  "agent_config_sha256": "eddf732c4a2d6d4478e27b46ead8a163e7ad82c906a0074c260fd7ba4e4c05c8",
+  "report_sha256": "031ce93c4f2bdea654374990b099f14fa9fec3c8dc87062cd63259a22f4fbaf2",
+  "terminal_ledger_sha256": "50bb8391f922a98d1ceb31cf3aeaf4882a695a7317838c1fd92da084749f9b52",
+  "summary": {
+    "attempted_tasks": 3,
+    "successes": 1,
+    "failures": 2,
+    "pass_at_1": 0.3333,
+    "human_handoffs": 2,
+    "incorrect_accepted_patches": 0,
+    "average_completion_tokens": 376.33,
+    "total_completion_tokens": 1129,
+    "p50_wall_seconds": 9.032,
+    "p95_wall_seconds": 14.156,
+    "wilson_95_percent": {
+      "lower": 0.0615,
+      "upper": 0.7923
+    }
+  },
+  "splits": {
+    "development": {
+      "attempts": 0,
+      "successes": 0,
+      "not_run": true
+    },
+    "locked": {
+      "attempts": 3,
+      "successes": 1,
+      "pass_at_1": 0.3333,
+      "new_repositories": true,
+      "one_shot": true,
+      "retried": false,
+      "all_outcomes_published": true
+    }
+  },
+  "attempts": [
+    {
+      "task_id": "cachetools-falsey-getsizeof",
+      "split": "locked",
+      "success": false,
+      "status": "needs_human",
+      "stop_reason": "planner stopped safely: model reason is invalid",
+      "candidate_diff_present": false,
+      "candidate_applied": false,
+      "tests_started": false,
+      "model_response_sha256": "3783ebe0061981d67e04f884b616c4dfae062a5453d23c2d607a01b7beac0498",
+      "record_sha256": "aa766d320a79f8b053a6466830ab75c38a0102a88ac59012d62cf7dcee7c9911"
+    },
+    {
+      "task_id": "python-slugify-invalid-types",
+      "split": "locked",
+      "success": true,
+      "status": "awaiting_review",
+      "stop_reason": "candidate patch passed target and regression tests; human review required",
+      "candidate_sha256": "a2483b532066bfb7e0603b031e0b16072ae4d92da6b012e177d996694d533aa5",
+      "target_test_passed": true,
+      "regression_passed": true,
+      "record_sha256": "ee7b6e4f84c148faf842922ad1295067012105ae38260b2b7e8dd7cf54da0715"
+    },
+    {
+      "task_id": "click-sentinel-copy",
+      "split": "locked",
+      "success": false,
+      "status": "needs_human",
+      "stop_reason": "planner stopped safely: model reason is invalid",
+      "candidate_diff_present": false,
+      "candidate_applied": false,
+      "tests_started": false,
+      "model_response_sha256": "f5399db8e40d2dc181b9ffffbff018e55af11130a317a353228f744d8474c080",
+      "record_sha256": "50bb8391f922a98d1ceb31cf3aeaf4882a695a7317838c1fd92da084749f9b52"
+    }
+  ],
+  "scope_note": "A second cohort of three previously unused repositories was preregistered, oracle-validated and run once after the Agent, prompt, model, tasks and policy were sealed. The 1/3 result is genuine locked pass@1 evidence. Combined with the separately sealed first cohort, the public blind evidence is 2/6; six tasks remain too small for a broad repair-accuracy claim."
+}

@@ -49,16 +49,19 @@ def test_public_demo_contains_verified_patches_and_frozen_failures() -> None:
     assert langgraph["comparison"]["baseline_pass_at_1"] == 0.4
     assert langgraph["failure"]["final_status"] == "needs_human"
     blind = payload["langgraphBlind"]
-    assert blind["benchmarkId"] == "langgraph-blind-v0.7.0-dev2"
+    assert blind["benchmarkId"] == "langgraph-blind-six-repository-v0.7.0-dev2"
     assert blind["agentVersion"] == "0.7.0-dev2"
-    assert blind["runs"] == 3
-    assert blind["successes"] == 1
-    assert blind["failures"] == 2
-    assert blind["humanHandoffs"] == 2
+    assert blind["runs"] == 6
+    assert blind["successes"] == 2
+    assert blind["failures"] == 4
+    assert blind["humanHandoffs"] == 4
     assert blind["incorrectAcceptedPatches"] == 0
     assert blind["locked"]["one_shot"] is True
     assert blind["locked"]["retried"] is False
-    assert len(blind["attempts"]) == 3
+    assert len(blind["attempts"]) == 6
+    assert blind["independentHashChains"] == 2
+    assert len(blind["cohorts"]) == 2
+    assert len(blind["evidenceIndexSha256"]) == 64
     assert len(payload["traces"]) == 13
     assert len(payload["failures"]) == 3
     assert len(payload["recoveryScenarios"]) == 2
