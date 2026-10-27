@@ -1,0 +1,15 @@
+{
+  "$schema": "../../docs/repository-task.schema.json",
+  "schema_version": 1,
+  "name": "cachetools-falsey-getsizeof",
+  "repository_root": "../repositories/cachetools-falsey-getsizeof",
+  "issue": "Cache must honor a callable getsizeof object even when that callable is falsey.",
+  "source_allowlist": ["src/cachetools"],
+  "target_test": "tests/test_tracerepair_falsey_getsizeof.py::test_falsey_getsizeof_callable_is_honored",
+  "regression_suite": "tests/test_tracerepair_falsey_getsizeof.py",
+  "diagnostic_queries": ["def __init__", "getsizeof"],
+  "pythonpath": ["src"],
+  "timeout_seconds": 120,
+  "max_repository_bytes": 31457280,
+  "max_repository_files": 2000
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "../../docs/benchmark-manifest.schema.json",
+  "schema_version": 1,
+  "benchmark_id": "langgraph-blind-extension-v0.7.0-dev2",
+  "agent_version": "0.7.0-dev2",
+  "model": "qwen3.8-flash",
+  "protocol": "pass@1",
+  "tasks": [
+    {
+      "id": "cachetools-falsey-getsizeof",
+      "split": "locked",
+      "task_config": "../tasks/cachetools-falsey-getsizeof.json",
+      "source": {
+        "repository_url": "https://github.com/tkem/cachetools",
+        "buggy_commit": "110fe5d03e7b4b8f5c5ec97533c94254cdf8733f",
+        "fixed_commit": "ffe21c44d3f7de9c7a89870c8cf1fd7aa583a2ae",
+        "issue_url": "https://github.com/tkem/cachetools/pull/431"
+      }
+    },
+    {
+      "id": "python-slugify-invalid-types",
+      "split": "locked",
+      "task_config": "../tasks/python-slugify-invalid-types.json",
+      "source": {
+        "repository_url": "https://github.com/un33k/python-slugify",
+        "buggy_commit": "fee5aa338d3bd7a9e36c269e33b496a7848edc44",
+        "fixed_commit": "bc388221e3b48a0d33fc64090acb3985ba955fdf",
+        "issue_url": "https://github.com/un33k/python-slugify/pull/196"
+      }
+    },
+    {
+      "id": "click-sentinel-copy",
+      "split": "locked",
+      "task_config": "../tasks/click-sentinel-copy.json",
+      "source": {
+        "repository_url": "https://github.com/pallets/click",
+        "buggy_commit": "420c8fb44eeadb537cae69d2fee3796e808558dd",
+        "fixed_commit": "f58ca3e81424a35626c8a475eb59ab95589008ce",
+        "issue_url": "https://github.com/pallets/click/pull/3805"
+      }
+    }
+  ]
+}

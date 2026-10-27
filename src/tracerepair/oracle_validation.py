@@ -72,6 +72,18 @@ _FIXED_ARCHIVES = {
         "glom-6fd4134.zip",
         "369ed1500d35545807d549de9d3ec142ed70da6967947ea9694c9fd53ab21fe8",
     ),
+    "ffe21c44d3f7de9c7a89870c8cf1fd7aa583a2ae": (
+        "cachetools-ffe21c4.zip",
+        "685f8c4374daea405b2f3466d85dca72be2f3b8d630be4f68be4eabbf4d3e980",
+    ),
+    "bc388221e3b48a0d33fc64090acb3985ba955fdf": (
+        "python-slugify-bc38822.zip",
+        "5b97082209fe2c549d42496349091113c9845d7d33c8b94e92c77134bf48bc7b",
+    ),
+    "f58ca3e81424a35626c8a475eb59ab95589008ce": (
+        "click-f58ca3e.zip",
+        "06bba4231892d2e82d7a9007dc01226d2c1eb778f5f49b6bea74e2b9b4bb0eab",
+    ),
 }
 
 
@@ -211,6 +223,34 @@ def test_index_equal_to_path_length_raises_index_error():
 
     with pytest.raises(IndexError):
         path[2]
+'''
+
+
+_CACHETOOLS_FALSEY_GETSIZEOF_ORACLE = '''"""Offline oracle for falsey getsizeof callables."""
+
+from cachetools import Cache
+
+
+class FalseyGetSize:
+    def __bool__(self):
+        return False
+
+    def __call__(self, value):
+        return len(value)
+
+
+def test_falsey_getsizeof_callable_is_honored():
+    cache = Cache(maxsize=10, getsizeof=FalseyGetSize())
+    cache["key"] = "four"
+
+    assert cache.currsize == 4
+
+
+def test_default_getsizeof_still_counts_one_per_item():
+    cache = Cache(maxsize=10)
+    cache["key"] = "four"
+
+    assert cache.currsize == 1
 '''
 
 
@@ -369,6 +409,12 @@ def _write_generated_files(task_id: str, root: Path) -> None:
         target = root / "glom" / "test" / "test_tracerepair_path_boundary.py"
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(_GLOM_PATH_ORACLE, encoding="utf-8", newline="\n")
+    elif task_id == "cachetools-falsey-getsizeof":
+        target = root / "tests" / "test_tracerepair_falsey_getsizeof.py"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(
+            _CACHETOOLS_FALSEY_GETSIZEOF_ORACLE, encoding="utf-8", newline="\n"
+        )
 
 
 def _file_sha256(path: Path) -> str:

@@ -4,12 +4,14 @@ from pathlib import Path
 import pytest
 
 from scripts.prepare_historical_benchmark import (
+    CACHETOOLS_FALSEY_GETSIZEOF_ORACLE,
     GLOM_PATH_ORACLE,
     HTTPIE_OFFLINE_ORACLE,
     PRETTYTABLE_ALIGN_ORACLE,
     TOOLZ_INTERPOSE_ORACLE,
 )
 from tracerepair.oracle_validation import (
+    _CACHETOOLS_FALSEY_GETSIZEOF_ORACLE,
     _GLOM_PATH_ORACLE,
     _HTTPIE_OFFLINE_ORACLE,
     _PRETTYTABLE_ALIGN_ORACLE,
@@ -103,3 +105,4 @@ def test_blind_oracles_are_identical_in_preparation_and_validation() -> None:
     assert TOOLZ_INTERPOSE_ORACLE == _TOOLZ_INTERPOSE_ORACLE
     assert PRETTYTABLE_ALIGN_ORACLE == _PRETTYTABLE_ALIGN_ORACLE
     assert GLOM_PATH_ORACLE == _GLOM_PATH_ORACLE
+    assert CACHETOOLS_FALSEY_GETSIZEOF_ORACLE == _CACHETOOLS_FALSEY_GETSIZEOF_ORACLE

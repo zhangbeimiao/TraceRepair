@@ -1,0 +1,15 @@
+{
+  "$schema": "../../docs/repository-task.schema.json",
+  "schema_version": 1,
+  "name": "click-sentinel-copy",
+  "repository_root": "../repositories/click-sentinel-copy",
+  "issue": "Copying, deep-copying or pickling Click objects must preserve Sentinel enum member identity.",
+  "source_allowlist": ["src/click"],
+  "target_test": "tests/test_utils/test_sentinel.py::test_parameter_duplication",
+  "regression_suite": "tests/test_utils/test_sentinel.py",
+  "diagnostic_queries": ["class Sentinel", "UNSET"],
+  "pythonpath": ["src"],
+  "timeout_seconds": 120,
+  "max_repository_bytes": 31457280,
+  "max_repository_files": 2000
+}

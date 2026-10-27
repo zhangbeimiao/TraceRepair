@@ -1,0 +1,15 @@
+{
+  "$schema": "../../docs/repository-task.schema.json",
+  "schema_version": 1,
+  "name": "python-slugify-invalid-types",
+  "repository_root": "../repositories/python-slugify-invalid-types",
+  "issue": "slugify() must reject bool or non-int max_length values and non-string separators instead of silently truncating or failing later.",
+  "source_allowlist": ["slugify"],
+  "target_test": "test.py::TestSlugify::test_max_length_rejects_bool",
+  "regression_suite": "test.py",
+  "diagnostic_queries": ["def slugify", "max_length"],
+  "pythonpath": ["."],
+  "timeout_seconds": 120,
+  "max_repository_bytes": 31457280,
+  "max_repository_files": 2000
+}

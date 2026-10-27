@@ -147,6 +147,34 @@ def test_index_equal_to_path_length_raises_index_error():
 '''
 
 
+CACHETOOLS_FALSEY_GETSIZEOF_ORACLE = '''"""Offline oracle for falsey getsizeof callables."""
+
+from cachetools import Cache
+
+
+class FalseyGetSize:
+    def __bool__(self):
+        return False
+
+    def __call__(self, value):
+        return len(value)
+
+
+def test_falsey_getsizeof_callable_is_honored():
+    cache = Cache(maxsize=10, getsizeof=FalseyGetSize())
+    cache["key"] = "four"
+
+    assert cache.currsize == 4
+
+
+def test_default_getsizeof_still_counts_one_per_item():
+    cache = Cache(maxsize=10)
+    cache["key"] = "four"
+
+    assert cache.currsize == 1
+'''
+
+
 THEFUCK_PYTEST_COMPAT = '''"""Benchmark-only compatibility for the historical pytest Node API."""
 
 from _pytest.nodes import Node
@@ -429,6 +457,61 @@ CASES = (
         "glom/test/test_path_and_t.py",
         (("glom/test/test_tracerepair_path_boundary.py", GLOM_PATH_ORACLE),),
     ),
+    HistoricalCase(
+        "cachetools-falsey-getsizeof",
+        Archive(
+            "cachetools-110fe5d",
+            "tkem",
+            "cachetools",
+            "110fe5d03e7b4b8f5c5ec97533c94254cdf8733f",
+            "2574dac474bc9f73b32b35d4ab6522bdf226946db31de4a571a62e07c10eab85",
+        ),
+        Archive(
+            "cachetools-ffe21c4",
+            "tkem",
+            "cachetools",
+            "ffe21c44d3f7de9c7a89870c8cf1fd7aa583a2ae",
+            "685f8c4374daea405b2f3466d85dca72be2f3b8d630be4f68be4eabbf4d3e980",
+        ),
+        "tests/test_tracerepair_falsey_getsizeof.py",
+        (("tests/test_tracerepair_falsey_getsizeof.py", CACHETOOLS_FALSEY_GETSIZEOF_ORACLE),),
+    ),
+    HistoricalCase(
+        "python-slugify-invalid-types",
+        Archive(
+            "python-slugify-fee5aa3",
+            "un33k",
+            "python-slugify",
+            "fee5aa338d3bd7a9e36c269e33b496a7848edc44",
+            "6afc6a929730eac3da8ce34005762364c28ec55e02c5cf7037b0426e2138eca5",
+        ),
+        Archive(
+            "python-slugify-bc38822",
+            "un33k",
+            "python-slugify",
+            "bc388221e3b48a0d33fc64090acb3985ba955fdf",
+            "5b97082209fe2c549d42496349091113c9845d7d33c8b94e92c77134bf48bc7b",
+        ),
+        "test.py",
+    ),
+    HistoricalCase(
+        "click-sentinel-copy",
+        Archive(
+            "click-420c8fb",
+            "pallets",
+            "click",
+            "420c8fb44eeadb537cae69d2fee3796e808558dd",
+            "505860a5982cf7838cf790bafb7addaa26bd27a76e15fc3a380746d8ebe98203",
+        ),
+        Archive(
+            "click-f58ca3e",
+            "pallets",
+            "click",
+            "f58ca3e81424a35626c8a475eb59ab95589008ce",
+            "06bba4231892d2e82d7a9007dc01226d2c1eb778f5f49b6bea74e2b9b4bb0eab",
+        ),
+        "tests/test_utils/test_sentinel.py",
+    ),
 )
 
 
@@ -502,13 +585,19 @@ def _materialize_case(case: HistoricalCase, archive_root: Path, destination: Pat
         _safe_extract(archive_root / case.fixed.filename, fixed_root)
         buggy_tree = _single_top_directory(buggy_root)
         fixed_tree = _single_top_directory(fixed_root)
-        fixed_test = (fixed_tree / case.regression_test).resolve()
-        if not fixed_test.is_file() or not fixed_test.is_relative_to(fixed_tree.resolve()):
-            raise SystemExit(f"Pinned regression test is missing: {case.regression_test}")
         shutil.copytree(buggy_tree, destination)
-        target_test = destination / case.regression_test
-        target_test.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(fixed_test, target_test)
+        generated_paths = {relative for relative, _ in case.generated_files}
+        if case.regression_test not in generated_paths:
+            fixed_test = (fixed_tree / case.regression_test).resolve()
+            if not fixed_test.is_file() or not fixed_test.is_relative_to(
+                fixed_tree.resolve()
+            ):
+                raise SystemExit(
+                    f"Pinned regression test is missing: {case.regression_test}"
+                )
+            target_test = destination / case.regression_test
+            target_test.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(fixed_test, target_test)
         _write_generated_files(case, destination)
     except Exception:
         shutil.rmtree(destination, ignore_errors=True)
