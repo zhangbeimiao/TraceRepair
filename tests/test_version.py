@@ -21,7 +21,7 @@ def test_project_version_matches_package_metadata() -> None:
 
 
 def test_development_agent_does_not_relabel_frozen_historical_evidence() -> None:
-    assert AGENT_VERSION == "0.7.0-dev2"
+    assert AGENT_VERSION == "0.8.0-dev1"
     assert MAX_COMPLETION_TOKENS == 800
     frozen = json.loads(
         (ROOT / "evaluation/frozen/historical-python-v1.0.0.json").read_text(
@@ -58,8 +58,13 @@ def test_development_agent_does_not_relabel_frozen_historical_evidence() -> None
             encoding="utf-8"
         )
     )
-    development = json.loads(
+    langgraph_dev2 = json.loads(
         (ROOT / "evaluation/configs/agent-v0.7.0-dev2.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    development = json.loads(
+        (ROOT / "evaluation/configs/agent-v0.8.0-dev1.json").read_text(
             encoding="utf-8"
         )
     )
@@ -80,7 +85,9 @@ def test_development_agent_does_not_relabel_frozen_historical_evidence() -> None
         == MAX_TOTAL_COMPLETION_TOKENS
         == 3072
     )
+    assert langgraph_dev2["agent_version"] == "0.7.0-dev2"
     assert development["architecture"] == "langgraph_end_to_end"
+    assert development["planner_protocol"] == "native_function_calling"
     assert development["durable_state"] == "sqlite_only"
     assert development["langgraph_checkpointer"] is False
     assert development["semantic_review"]["execution_authority"] is False

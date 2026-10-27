@@ -1,0 +1,197 @@
+{
+  "agent_config": {
+    "path": "evaluation/configs/agent-v0.8.0-dev1.json",
+    "sha256": "226aa108596b4ad0827cebc8ee042340e2ad1e72f02027e1d8170891fcbcbf2f"
+  },
+  "agent_version": "0.8.0-dev1",
+  "all_function_schemas_sha256": "f9a263beff0253479d8324bd65883ba742ea9fa4ce17f198a69e752309326892",
+  "claim_boundary": "This manifest freezes a development protocol contract. It is not a repair-rate result and does not replace the published 0.7.0-dev2 locked evidence.",
+  "execution_boundary": {
+    "controller_only_operations": [
+      "apply_patch",
+      "run_tests",
+      "run_regression",
+      "state_transition"
+    ],
+    "model_has_execution_authority": false,
+    "model_visible_functions": [
+      "handoff",
+      "propose_patch",
+      "read_file",
+      "repo_map",
+      "search_code"
+    ]
+  },
+  "function_schemas": {
+    "handoff": {
+      "schema": {
+        "function": {
+          "description": "Stop safely and request a human when evidence is insufficient.",
+          "name": "handoff",
+          "parameters": {
+            "additionalProperties": false,
+            "properties": {
+              "reason": {
+                "maxLength": 500,
+                "type": "string"
+              }
+            },
+            "required": [
+              "reason"
+            ],
+            "type": "object"
+          }
+        },
+        "type": "function"
+      },
+      "sha256": "4e7c5ab74e2e00c21e36783f76ec48fb17841ccd4463b21c9c4a7f20a9b48627"
+    },
+    "propose_patch": {
+      "schema": {
+        "function": {
+          "description": "Propose one complete unified diff. This does not apply or approve the patch.",
+          "name": "propose_patch",
+          "parameters": {
+            "additionalProperties": false,
+            "properties": {
+              "reason": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "unified_diff": {
+                "maxLength": 12000,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "unified_diff",
+              "reason"
+            ],
+            "type": "object"
+          }
+        },
+        "type": "function"
+      },
+      "sha256": "fe93782d6913ffc0f4aa6a0e281aba28701c547bd4627b3671405a8f57e30c13"
+    },
+    "read_file": {
+      "schema": {
+        "function": {
+          "description": "Read a bounded line range from one exact path observed in a prior tool result.",
+          "name": "read_file",
+          "parameters": {
+            "additionalProperties": false,
+            "properties": {
+              "end_line": {
+                "maximum": 10000,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "path": {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              "start_line": {
+                "maximum": 10000,
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "path",
+              "start_line",
+              "end_line"
+            ],
+            "type": "object"
+          }
+        },
+        "type": "function"
+      },
+      "sha256": "c09979e901b8fe18d99db983c7bcc60981a4b1e1da035e768dde312022955b0b"
+    },
+    "repo_map": {
+      "schema": {
+        "function": {
+          "description": "List a bounded map of allowlisted Python source files.",
+          "name": "repo_map",
+          "parameters": {
+            "additionalProperties": false,
+            "properties": {
+              "max_files": {
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "max_files"
+            ],
+            "type": "object"
+          }
+        },
+        "type": "function"
+      },
+      "sha256": "6f4f43bc8ebf815645ddb96219e5bc09e0fbb46f5b15910782ef4e96c45b59e4"
+    },
+    "search_code": {
+      "schema": {
+        "function": {
+          "description": "Search allowlisted Python source using one literal substring, never regex.",
+          "name": "search_code",
+          "parameters": {
+            "additionalProperties": false,
+            "properties": {
+              "max_hits": {
+                "maximum": 30,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "query": {
+                "maxLength": 200,
+                "minLength": 2,
+                "type": "string"
+              }
+            },
+            "required": [
+              "query",
+              "max_hits"
+            ],
+            "type": "object"
+          }
+        },
+        "type": "function"
+      },
+      "sha256": "481ef9c659852013f50763c5ecf7d31244fa1f75afb46360824dfd417698d99a"
+    }
+  },
+  "planner_protocol": "native_function_calling",
+  "prompts": [
+    {
+      "prompt_id": "diagnosis-native-tools-v1",
+      "sha256": "4e1bb5b4903754ecd60cb0f71c13dc3fb570b372ff873c496d35f890c65c2398",
+      "stage": "diagnosis",
+      "version": "1.0.0"
+    },
+    {
+      "prompt_id": "patch-native-tools-v1",
+      "sha256": "c664432501823d74a40f92605c0ab4c03f157400e33dc35c507760db569b845e",
+      "stage": "patch_generation",
+      "version": "1.0.0"
+    },
+    {
+      "prompt_id": "review-native-tools-v1",
+      "sha256": "6815c5283304a07b78c769f2dd45305582ee18e6ab886b83d779e65bbd289feb",
+      "stage": "patch_review",
+      "version": "1.0.0"
+    }
+  ],
+  "protocol_id": "native-function-calling-v0.8.0-dev1",
+  "schema_version": 1,
+  "source_sha256": {
+    "src/tracerepair/function_calling.py": "3a8c799601936a4bb6ccd066de5e62a428697a244ddd1e09e65b73f7714da5a6",
+    "src/tracerepair/prompt_registry.py": "6d7d0fc31a522bbe34d81055b4dc35fe47518f6f19011d8149504226059610e5"
+  },
+  "status": "development_contract_not_locked_evaluation"
+}

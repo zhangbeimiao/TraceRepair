@@ -47,6 +47,12 @@ jobs:
       - name: Verify frozen benchmark evidence
         run: python scripts/verify_benchmark_evidence.py
 
+      - name: Verify six-repository blind evidence
+        run: python scripts/verify_blind_evidence.py
+
+      - name: Verify native function protocol manifest
+        run: python scripts/freeze_protocol_manifest.py --verify
+
       - name: Run test suite
         run: |
           mkdir -p .tmp

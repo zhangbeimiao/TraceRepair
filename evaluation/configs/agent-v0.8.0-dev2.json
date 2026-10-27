@@ -1,0 +1,26 @@
+{
+  "agent_version": "0.8.0-dev2",
+  "parent_agent_version": "0.8.0-dev1",
+  "status": "planned_pending_semantic_retrieval_gate",
+  "architecture": "langgraph_end_to_end",
+  "durable_state": "sqlite_only",
+  "planner_protocol": "native_function_calling",
+  "prompt_protocol": "native-function-calling-v0.8.0-dev1",
+  "retrieval": {
+    "mode": "hybrid",
+    "chunker_version": "ast-symbol-v1",
+    "lexical_index": "sqlite_fts5",
+    "embedding_model": "qwen3.7-text-embedding-flash",
+    "embedding_dimensions": 256,
+    "fusion": "reciprocal_rank_fusion",
+    "rrf_k": 60,
+    "top_k": 5,
+    "execution_authority": false
+  },
+  "activation_gate": {
+    "split": "known_development_tasks_only",
+    "required_metrics": ["file_recall_at_1", "file_recall_at_3", "file_recall_at_5", "mrr"],
+    "rule": "semantic hybrid must not reduce Recall@5 and must improve at least one of Recall@1 or MRR over FTS5"
+  },
+  "evaluation_rule": "do not run locked tasks until dev1 protocol results and dev2 retrieval settings are frozen"
+}

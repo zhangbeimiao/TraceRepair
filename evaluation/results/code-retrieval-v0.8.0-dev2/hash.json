@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "evaluation_id": "code-retrieval-v0.8.0-dev2",
+  "split": "development",
+  "embedding_mode": "hash",
+  "embedding_model": "local-hash-baseline-v1",
+  "embedding_dimensions": 256,
+  "query_contract": "task issue plus failing pytest selector; diagnostic_queries are excluded",
+  "tasks": [
+    {
+      "task": "humanize-negative-fraction",
+      "expected_paths": [
+        "src/humanize/number.py"
+      ],
+      "repository_sha256": "7ae73612b415f8986e8250b981bd58722fddbe7fef1c97f983b365355bf19448",
+      "chunks": 45,
+      "files": 7,
+      "embedding_model": "local-hash-baseline-v1",
+      "embedding_dimensions": 256,
+      "lexical": {
+        "file_recall_at_1": 1.0,
+        "file_recall_at_3": 1.0,
+        "file_recall_at_5": 1.0,
+        "mrr": 1.0,
+        "top_paths": [
+          "src/humanize/number.py",
+          "src/humanize/i18n.py",
+          "src/humanize/time.py",
+          "src/humanize/__init__.py"
+        ]
+      },
+      "hybrid": {
+        "file_recall_at_1": 1.0,
+        "file_recall_at_3": 1.0,
+        "file_recall_at_5": 1.0,
+        "mrr": 1.0,
+        "top_paths": [
+          "src/humanize/number.py",
+          "src/humanize/i18n.py",
+          "src/humanize/time.py"
+        ]
+      }
+    },
+    {
+      "task": "boltons-empty-multireplace",
+      "expected_paths": [
+        "boltons/strutils.py"
+      ],
+      "repository_sha256": "d73352df20b9c1b88017b916b7208929c252f32283cb59cf495d924f16a4a451",
+      "chunks": 1041,
+      "files": 30,
+      "embedding_model": "local-hash-baseline-v1",
+      "embedding_dimensions": 256,
+      "lexical": {
+        "file_recall_at_1": 0.0,
+        "file_recall_at_3": 0.0,
+        "file_recall_at_5": 1.0,
+        "mrr": 0.25,
+        "top_paths": [
+          "boltons/queueutils.py",
+          "boltons/dictutils.py",
+          "boltons/urlutils.py",
+          "boltons/strutils.py",
+          "boltons/cacheutils.py"
+        ]
+      },
+      "hybrid": {
+        "file_recall_at_1": 0.0,
+        "file_recall_at_3": 0.0,
+        "file_recall_at_5": 1.0,
+        "mrr": 0.25,
+        "top_paths": [
+          "boltons/urlutils.py",
+          "boltons/dictutils.py",
+          "boltons/queueutils.py",
+          "boltons/strutils.py",
+          "boltons/timeutils.py"
+        ]
+      }
+    },
+    {
+      "task": "more-itertools-falsey-validator",
+      "expected_paths": [
+        "more_itertools/more.py"
+      ],
+      "repository_sha256": "c90952a40b7042317d646ca5e0b1aa56344b561d31666de5f068534291d56311",
+      "chunks": 298,
+      "files": 3,
+      "embedding_model": "local-hash-baseline-v1",
+      "embedding_dimensions": 256,
+      "lexical": {
+        "file_recall_at_1": 1.0,
+        "file_recall_at_3": 1.0,
+        "file_recall_at_5": 1.0,
+        "mrr": 1.0,
+        "top_paths": [
+          "more_itertools/more.py"
+        ]
+      },
+      "hybrid": {
+        "file_recall_at_1": 1.0,
+        "file_recall_at_3": 1.0,
+        "file_recall_at_5": 1.0,
+        "mrr": 1.0,
+        "top_paths": [
+          "more_itertools/more.py",
+          "more_itertools/recipes.py"
+        ]
+      }
+    },
+    {
+      "task": "tqdm-sizeless-bool",
+      "expected_paths": [
+        "tqdm/_tqdm.py"
+      ],
+      "repository_sha256": "15d14b03e1cb8472fb5c53d1b094c7c32e6d4d89b3db453511045e1426157ea3",
+      "chunks": 282,
+      "files": 18,
+      "embedding_model": "local-hash-baseline-v1",
+      "embedding_dimensions": 256,
+      "lexical": {
+        "file_recall_at_1": 0.0,
+        "file_recall_at_3": 1.0,
+        "file_recall_at_5": 1.0,
+        "mrr": 0.5,
+        "top_paths": [
+          "tqdm/tests/tests_tqdm.py",
+          "tqdm/_tqdm.py",
+          "tqdm/_tqdm_notebook.py",
+          "tqdm/_monitor.py",
+          "tqdm/tests/tests_synchronisation.py"
+        ]
+      },
+      "hybrid": {
+        "file_recall_at_1": 0.0,
+        "file_recall_at_3": 1.0,
+        "file_recall_at_5": 1.0,
+        "mrr": 0.3333333333333333,
+        "top_paths": [
+          "tqdm/_monitor.py",
+          "tqdm/tests/tests_tqdm.py",
+          "tqdm/_tqdm.py"
+        ]
+      }
+    },
+    {
+      "task": "httpie-host-header-offline",
+      "expected_paths": [
+        "httpie/models.py"
+      ],
+      "repository_sha256": "8c9891ad20dba2a3c97549e32788747885d12db79a6ca2c2cadcf951384accd8",
+      "chunks": 234,
+      "files": 25,
+      "embedding_model": "local-hash-baseline-v1",
+      "embedding_dimensions": 256,
+      "lexical": {
+        "file_recall_at_1": 1.0,
+        "file_recall_at_3": 1.0,
+        "file_recall_at_5": 1.0,
+        "mrr": 1.0,
+        "top_paths": [
+          "httpie/models.py",
+          "httpie/sessions.py",
+          "httpie/downloads.py",
+          "httpie/input.py"
+        ]
+      },
+      "hybrid": {
+        "file_recall_at_1": 0.0,
+        "file_recall_at_3": 1.0,
+        "file_recall_at_5": 1.0,
+        "mrr": 0.3333333333333333,
+        "top_paths": [
+          "httpie/sessions.py",
+          "httpie/downloads.py",
+          "httpie/models.py",
+          "httpie/output/streams.py",
+          "httpie/input.py"
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "lexical_file_recall_at_1": 0.6,
+    "lexical_file_recall_at_3": 0.8,
+    "lexical_file_recall_at_5": 1.0,
+    "lexical_mrr": 0.75,
+    "hybrid_file_recall_at_1": 0.4,
+    "hybrid_file_recall_at_3": 0.8,
+    "hybrid_file_recall_at_5": 1.0,
+    "hybrid_mrr": 0.5833
+  },
+  "claim_boundary": "Known development tasks evaluate retrieval mechanics only and do not support a generalisation claim."
+}

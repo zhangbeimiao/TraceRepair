@@ -9,9 +9,17 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from evaluation.materialize import load_case, materialize_case
+from tracerepair.code_retrieval import (
+    BailianEmbeddingProvider,
+    CodeIndex,
+    CodeRagRetriever,
+    HashEmbeddingProvider,
+    RetrievalError,
+)
 from tracerepair.instrumented_tools import InstrumentedTools
+from tracerepair.function_calling import NativeFunctionPlanner
 from tracerepair.langgraph_end_to_end import LangGraphEndToEndRepairWorkflow
-from tracerepair.model_planner import BailianChatTransport, ModelPlanner, PlannerConfig, PlannerError
+from tracerepair.model_planner import BailianChatTransport, PlannerConfig, PlannerError
 from tracerepair.models import Task, TaskStatus
 from tracerepair.patch_apply import PatchApplier
 from tracerepair.patch_policy import PatchPolicy
@@ -38,6 +46,7 @@ from tracerepair.version import (
     MAX_MODEL_CALLS,
     MAX_TOTAL_COMPLETION_TOKENS,
     MODEL_ID,
+    PLANNER_PROTOCOL,
     PROJECT_VERSION,
 )
 from tracerepair.workflow import case_selector
@@ -81,8 +90,24 @@ def main() -> None:
         choices=(SOURCE_READ, PATCH_APPLIED),
         help="test-only fault injection immediately after a durable checkpoint",
     )
+    parser.add_argument(
+        "--rag",
+        choices=("none", "fts", "hash", "hybrid"),
+        default="none",
+        help="optional code retrieval; hash is an offline vector-path baseline",
+    )
+    parser.add_argument("--embedding-model", default="qwen3.7-text-embedding-flash")
+    parser.add_argument(
+        "--embedding-dimensions",
+        type=int,
+        choices=(256, 512, 768, 1024),
+        default=256,
+    )
+    parser.add_argument("--rag-limit", type=int, choices=range(1, 11), default=5)
+    parser.add_argument("--rrf-k", type=int, choices=range(1, 1001), default=60)
     arguments = parser.parse_args()
     store = TraceStore(ROOT / "data" / "model-agent.sqlite3")
+    code_index: CodeIndex | None = None
     try:
         if arguments.resume:
             task_id = arguments.resume
@@ -147,6 +172,9 @@ def main() -> None:
                     "agent_version": AGENT_VERSION,
                     "project_version": PROJECT_VERSION,
                     "model": MODEL_ID,
+                    "planner_protocol": PLANNER_PROTOCOL,
+                    "prompt_protocol": "native-function-calling-v0.8.0-dev1",
+                    "rag_mode": arguments.rag,
                     "repository_task": spec.name,
                     "target_selector": selector,
                     "regression_suite": regression_suite,
@@ -190,6 +218,9 @@ def main() -> None:
                     "agent_version": AGENT_VERSION,
                     "project_version": PROJECT_VERSION,
                     "model": MODEL_ID,
+                    "planner_protocol": PLANNER_PROTOCOL,
+                    "prompt_protocol": "native-function-calling-v0.8.0-dev1",
+                    "rag_mode": arguments.rag,
                     "case_name": case_name,
                     "evaluation_split": str(case["split"]),
                     "target_selector": selector,
@@ -216,7 +247,46 @@ def main() -> None:
             ),
             PatchApplier(workspace, PatchPolicy(allowed_roots=source_allowlist)),
         )
-        planner = ModelPlanner(
+        rag_retriever = None
+        if arguments.rag != "none" and not resume:
+            embedding_provider = None
+            if arguments.rag == "hash":
+                embedding_provider = HashEmbeddingProvider(arguments.embedding_dimensions)
+            elif arguments.rag == "hybrid":
+                embedding_provider = BailianEmbeddingProvider(
+                    model_id=arguments.embedding_model,
+                    dimensions=arguments.embedding_dimensions,
+                )
+            code_index = CodeIndex(
+                ROOT / "data" / "retrieval" / "runtime" / f"{task_id}.sqlite3"
+            )
+            build = code_index.build(
+                workspace,
+                allowed_roots=source_allowlist,
+                embedding_provider=embedding_provider,
+            )
+            rag_retriever = CodeRagRetriever(
+                code_index,
+                embedding_provider=embedding_provider,
+                limit=arguments.rag_limit,
+                rrf_k=arguments.rrf_k,
+            )
+            store.append_event(
+                task_id,
+                "rag_index_built",
+                {
+                    "mode": rag_retriever.mode,
+                    "chunks": build.chunks,
+                    "files": build.files,
+                    "repository_sha256": build.repository_sha256,
+                    "embedding_model": build.embedding_model,
+                    "embedding_dimensions": build.embedding_dimensions,
+                    "top_k": arguments.rag_limit,
+                    "rrf_k": arguments.rrf_k,
+                    "execution_authority": False,
+                },
+            )
+        planner = NativeFunctionPlanner(
             transport,
             PlannerConfig(
                 max_completion_tokens=MAX_COMPLETION_TOKENS,
@@ -234,6 +304,7 @@ def main() -> None:
             allowed_source_roots=source_allowlist,
             max_diagnosis_turns=MAX_DIAGNOSIS_TURNS,
             crash_after=arguments.inject_crash_after,
+            rag_retriever=rag_retriever,
         ).run(
             task_evidence,
             diagnostic_queries=diagnostic_queries,
@@ -273,7 +344,18 @@ def main() -> None:
                 pass
         print(f"Configured repository task rejected safely: {error}")
         raise SystemExit(2) from error
+    except RetrievalError as error:
+        if "task_id" in locals():
+            try:
+                if store.get_task(task_id).status is TaskStatus.RUNNING:
+                    store.transition(task_id, TaskStatus.NEEDS_HUMAN, f"RAG stopped safely: {error}")
+            except KeyError:
+                pass
+        print(f"Code RAG stopped safely: {error}")
+        raise SystemExit(3) from error
     finally:
+        if code_index is not None:
+            code_index.close()
         store.close()
 
 

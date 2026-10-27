@@ -26,6 +26,26 @@
       "type": "number",
       "minimum": 0
     },
+    "retrieval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "chunker_version",
+        "embedding_model",
+        "embedding_dimensions",
+        "top_k",
+        "rrf_k"
+      ],
+      "properties": {
+        "mode": {"enum": ["fts5", "hybrid"]},
+        "chunker_version": {"type": "string", "minLength": 1, "maxLength": 60},
+        "embedding_model": {"type": ["string", "null"], "maxLength": 100},
+        "embedding_dimensions": {"enum": [null, 256, 512, 768, 1024]},
+        "top_k": {"type": "integer", "minimum": 1, "maximum": 10},
+        "rrf_k": {"type": "integer", "minimum": 1, "maximum": 1000}
+      }
+    },
     "tasks": {
       "type": "array",
       "minItems": 2,

@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "evaluation_id": "retrieval-ground-truth-v0.8.0-dev2",
+  "split": "development",
+  "query_contract": "task issue plus failing pytest selector; diagnostic_queries are excluded",
+  "tasks": [
+    {
+      "task_config": "tasks/humanize-negative-fraction.json",
+      "expected_paths": ["src/humanize/number.py"]
+    },
+    {
+      "task_config": "tasks/boltons-empty-multireplace.json",
+      "expected_paths": ["boltons/strutils.py"]
+    },
+    {
+      "task_config": "tasks/more-itertools-falsey-validator.json",
+      "expected_paths": ["more_itertools/more.py"]
+    },
+    {
+      "task_config": "tasks/tqdm-sizeless-bool.json",
+      "expected_paths": ["tqdm/_tqdm.py"]
+    },
+    {
+      "task_config": "tasks/httpie-host-header-offline.json",
+      "expected_paths": ["httpie/models.py"]
+    }
+  ],
+  "claim_boundary": "Known development tasks evaluate retrieval mechanics only and do not support a generalisation claim."
+}

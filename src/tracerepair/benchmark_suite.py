@@ -58,6 +58,16 @@ class BenchmarkTask:
 
 
 @dataclass(frozen=True)
+class RetrievalConfig:
+    mode: str
+    chunker_version: str
+    embedding_model: str | None
+    embedding_dimensions: int | None
+    top_k: int
+    rrf_k: int
+
+
+@dataclass(frozen=True)
 class BenchmarkManifest:
     benchmark_id: str
     agent_version: str
@@ -67,6 +77,7 @@ class BenchmarkManifest:
     manifest_path: Path
     manifest_sha256: str
     tasks: tuple[BenchmarkTask, ...]
+    retrieval: RetrievalConfig | None = None
 
     @classmethod
     def load(cls, path: Path) -> "BenchmarkManifest":
@@ -117,6 +128,7 @@ class BenchmarkManifest:
             seen_ids.add(task.task_id)
             seen_configs.add(task.config_path)
             tasks.append(task)
+        retrieval = _load_retrieval(payload.get("retrieval"))
         return cls(
             benchmark_id=benchmark_id,
             agent_version=agent_version,
@@ -126,10 +138,11 @@ class BenchmarkManifest:
             manifest_path=manifest_path,
             manifest_sha256=hashlib.sha256(raw).hexdigest(),
             tasks=tuple(tasks),
+            retrieval=retrieval,
         )
 
     def lock_payload(self) -> dict[str, object]:
-        return {
+        payload: dict[str, object] = {
             "schema_version": SCHEMA_VERSION,
             "benchmark_id": self.benchmark_id,
             "protocol": self.protocol,
@@ -149,6 +162,9 @@ class BenchmarkManifest:
                 for task in self.tasks
             ],
         }
+        if self.retrieval is not None:
+            payload["retrieval"] = asdict(self.retrieval)
+        return payload
 
 
 def append_ledger_record(path: Path, payload: Mapping[str, object]) -> dict[str, object]:
@@ -358,6 +374,52 @@ def _load_task(payload: object, base_directory: Path) -> BenchmarkTask:
             fixed_commit=fixed_commit,
             issue_url=issue_url,
         ),
+    )
+
+
+def _load_retrieval(payload: object) -> RetrievalConfig | None:
+    if payload is None:
+        return None
+    if not isinstance(payload, dict):
+        raise BenchmarkManifestError("retrieval must be an object")
+    expected = {
+        "mode",
+        "chunker_version",
+        "embedding_model",
+        "embedding_dimensions",
+        "top_k",
+        "rrf_k",
+    }
+    if set(payload) != expected:
+        raise BenchmarkManifestError("retrieval fields must be explicitly frozen")
+    mode = _text(payload, "mode", 20)
+    if mode not in {"fts5", "hybrid"}:
+        raise BenchmarkManifestError("retrieval mode must be fts5 or hybrid")
+    chunker = _text(payload, "chunker_version", 60)
+    model = payload.get("embedding_model")
+    dimensions = payload.get("embedding_dimensions")
+    if mode == "fts5":
+        if model is not None or dimensions is not None:
+            raise BenchmarkManifestError("fts5 retrieval cannot declare an embedding model")
+    else:
+        if not isinstance(model, str) or not model.strip() or len(model) > 100:
+            raise BenchmarkManifestError("hybrid retrieval must freeze an embedding model")
+        if dimensions not in {256, 512, 768, 1024}:
+            raise BenchmarkManifestError("hybrid retrieval has unsupported dimensions")
+        model = model.strip()
+    top_k = payload.get("top_k")
+    rrf_k = payload.get("rrf_k")
+    if not isinstance(top_k, int) or isinstance(top_k, bool) or not 1 <= top_k <= 10:
+        raise BenchmarkManifestError("retrieval top_k must be between 1 and 10")
+    if not isinstance(rrf_k, int) or isinstance(rrf_k, bool) or not 1 <= rrf_k <= 1000:
+        raise BenchmarkManifestError("retrieval rrf_k must be between 1 and 1000")
+    return RetrievalConfig(
+        mode=mode,
+        chunker_version=chunker,
+        embedding_model=model,
+        embedding_dimensions=dimensions,
+        top_k=top_k,
+        rrf_k=rrf_k,
     )
 
 

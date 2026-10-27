@@ -16,6 +16,7 @@ from typing import Annotated, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
+from tracerepair.code_retrieval import CodeRagRetriever
 from tracerepair.end_to_end_workflow import (
     EndToEndResult,
     _bounded_int,
@@ -28,6 +29,7 @@ from tracerepair.end_to_end_workflow import (
     _unique_hit_window,
 )
 from tracerepair.instrumented_tools import InstrumentedTools
+from tracerepair.function_calling import NativeFunctionPlanner
 from tracerepair.model_planner import ModelPlanner
 from tracerepair.models import TaskStatus
 from tracerepair.read_tools import FileSlice, ReadOnlyResult
@@ -78,13 +80,14 @@ class LangGraphEndToEndRepairWorkflow:
         self,
         task_id: str,
         store: TraceStore,
-        planner: ModelPlanner,
+        planner: ModelPlanner | NativeFunctionPlanner,
         tools: InstrumentedTools,
         *,
         target_selector: str | None = None,
         allowed_source_roots: tuple[str, ...] = ("src/eventrelay",),
         max_diagnosis_turns: int = 3,
         crash_after: str | None = None,
+        rag_retriever: CodeRagRetriever | None = None,
     ) -> None:
         if not 1 <= max_diagnosis_turns <= 5:
             raise ValueError("max_diagnosis_turns must be between 1 and 5")
@@ -96,7 +99,37 @@ class LangGraphEndToEndRepairWorkflow:
         self._allowed_source_roots = allowed_source_roots
         self._max_diagnosis_turns = max_diagnosis_turns
         self._crash_after = crash_after
+        self._rag_retriever = rag_retriever
         self._graph = self._build_graph()
+
+    def _suggest(
+        self,
+        evidence: str,
+        *,
+        allowed_tools: set[str],
+        allow_patch: bool,
+        stage: str,
+    ):
+        """Keep the frozen JSON planner byte-identical while adapting new calls."""
+
+        common = {
+            "allowed_tools": allowed_tools,
+            "allow_patch": allow_patch,
+        }
+        if isinstance(self._planner, NativeFunctionPlanner):
+            return self._planner.suggest(
+                self._task_id,
+                self._store,
+                evidence,
+                stage=stage,
+                **common,
+            )
+        return self._planner.suggest(
+            self._task_id,
+            self._store,
+            evidence,
+            **common,
+        )
 
     @property
     def graph(self):
@@ -115,13 +148,28 @@ class LangGraphEndToEndRepairWorkflow:
         if task.status is not TaskStatus.RUNNING:
             raise ValueError("end-to-end workflow requires a running task")
 
+        evidence = self._initial_evidence(issue, diagnostic_queries)
+        initial_allowed_tools = ("repo_map", "search_code")
+        if self._rag_retriever is not None and not resume:
+            rag_query = f"{issue} {' '.join(diagnostic_queries)}"
+            hits = self._rag_retriever.retrieve(rag_query)
+            evidence = f"{evidence}\n{self._rag_retriever.evidence(hits)}"
+            if hits:
+                # Retrieval only supplies untrusted read candidates. The host still
+                # validates every path before allowing the model to inspect a file.
+                initial_allowed_tools = ("repo_map", "search_code", "read_file")
+            self._store.append_event(
+                self._task_id,
+                "rag_retrieval_completed",
+                self._rag_retriever.trace_payload(rag_query, hits),
+            )
         initial: RepairGraphState = {
             "task_id": self._task_id,
             "issue": issue,
             "diagnostic_queries": diagnostic_queries,
             "resume": resume,
-            "evidence": self._initial_evidence(issue, diagnostic_queries),
-            "allowed_tools": ("repo_map", "search_code"),
+            "evidence": evidence,
+            "allowed_tools": initial_allowed_tools,
             "seen_actions": [],
             "diagnosis_turns": 0,
             "completion_tokens": _checkpoint_tokens(self._store.load_checkpoint(self._task_id))
@@ -212,12 +260,11 @@ class LangGraphEndToEndRepairWorkflow:
         turn = int(state.get("diagnosis_turns", 0)) + 1
         total_tokens = int(state.get("completion_tokens", 0))
         allowed_tools = set(state.get("allowed_tools", ("repo_map", "search_code")))
-        plan = self._planner.suggest(
-            self._task_id,
-            self._store,
+        plan = self._suggest(
             str(state["evidence"]),
             allowed_tools=allowed_tools,
             allow_patch=False,
+            stage="diagnosis",
         )
         total_tokens += plan.completion_tokens
         if plan.kind == "handoff":
@@ -437,12 +484,11 @@ class LangGraphEndToEndRepairWorkflow:
             "workflow_phase_changed",
             {"phase": "patch_generation", "source_path": source.path},
         )
-        patch_plan = self._planner.suggest(
-            self._task_id,
-            self._store,
+        patch_plan = self._suggest(
             self._patch_evidence(str(state["issue"]), source),
             allowed_tools=set(),
             allow_patch=True,
+            stage="patch_generation",
         )
         total_tokens = int(state.get("completion_tokens", 0)) + patch_plan.completion_tokens
         if patch_plan.kind != "patch":
@@ -498,12 +544,11 @@ class LangGraphEndToEndRepairWorkflow:
             "workflow_phase_changed",
             {"phase": "patch_review", "source_path": source.path},
         )
-        review_plan = self._planner.suggest(
-            self._task_id,
-            self._store,
+        review_plan = self._suggest(
             self._review_evidence(str(state["issue"]), source, draft),
             allowed_tools=set(),
             allow_patch=True,
+            stage="patch_review",
         )
         total_tokens += review_plan.completion_tokens
         if review_plan.kind != "patch":

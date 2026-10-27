@@ -106,6 +106,37 @@ def test_manifest_freezes_configs_repositories_and_sources(tmp_path: Path) -> No
     assert all(len(task.config_sha256) == 64 for task in manifest.tasks)
     assert all(len(task.repository_sha256) == 64 for task in manifest.tasks)
     assert manifest.tasks[1].split == "locked"
+    assert manifest.retrieval is None
+
+
+def test_manifest_freezes_hybrid_retrieval_contract(tmp_path: Path) -> None:
+    path = _manifest(tmp_path)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["retrieval"] = {
+        "mode": "hybrid",
+        "chunker_version": "ast-symbol-v1",
+        "embedding_model": "qwen3.7-text-embedding-flash",
+        "embedding_dimensions": 256,
+        "top_k": 5,
+        "rrf_k": 60,
+    }
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    manifest = BenchmarkManifest.load(path)
+
+    assert manifest.retrieval is not None
+    assert manifest.retrieval.embedding_dimensions == 256
+    assert manifest.lock_payload()["retrieval"] == payload["retrieval"]
+
+
+def test_manifest_rejects_incomplete_retrieval_contract(tmp_path: Path) -> None:
+    path = _manifest(tmp_path)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["retrieval"] = {"mode": "hybrid"}
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(BenchmarkManifestError, match="explicitly frozen"):
+        BenchmarkManifest.load(path)
 
 
 def test_ledger_detects_modified_historical_result(tmp_path: Path) -> None:

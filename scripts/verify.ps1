@@ -23,6 +23,12 @@ New-Item -ItemType Directory -Force -Path $env:TEMP, $env:PIP_CACHE_DIR, $env:PY
 if ($LASTEXITCODE -ne 0) { throw "Demo export failed." }
 & $Python scripts\verify_release.py
 if ($LASTEXITCODE -ne 0) { throw "Release safety checks failed." }
+& $Python scripts\verify_benchmark_evidence.py
+if ($LASTEXITCODE -ne 0) { throw "Frozen benchmark evidence verification failed." }
+& $Python scripts\verify_blind_evidence.py
+if ($LASTEXITCODE -ne 0) { throw "Blind benchmark evidence verification failed." }
+& $Python scripts\freeze_protocol_manifest.py --verify
+if ($LASTEXITCODE -ne 0) { throw "Native function protocol verification failed." }
 & $Python -m pytest -q --basetemp (Join-Path $ProjectRoot "tmp\pytest-verify")
 if ($LASTEXITCODE -ne 0) { throw "Test suite failed." }
 git diff --check

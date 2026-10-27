@@ -248,6 +248,14 @@ def _print_preflight(
         f"agent={manifest.agent_version} model={manifest.model}"
     )
     print(f"manifest_sha256={manifest.manifest_sha256}")
+    if manifest.retrieval is not None:
+        print(
+            "retrieval="
+            f"{manifest.retrieval.mode} chunker={manifest.retrieval.chunker_version} "
+            f"model={manifest.retrieval.embedding_model} "
+            f"dimensions={manifest.retrieval.embedding_dimensions} "
+            f"top_k={manifest.retrieval.top_k} rrf_k={manifest.retrieval.rrf_k}"
+        )
     print(f"selected={len(selected)} pending={len(pending)} results={result_root}")
     pending_ids = {task.task_id for task in pending}
     for task in selected:
@@ -293,13 +301,35 @@ def _run_task(
     stdout = ""
     stderr = ""
     try:
+        command = [
+            sys.executable,
+            str(ROOT / "scripts" / "model_repair_agent.py"),
+            "--task",
+            str(task.config_path),
+        ]
+        if manifest.retrieval is not None:
+            retrieval = manifest.retrieval
+            command.extend(
+                [
+                    "--rag",
+                    "fts" if retrieval.mode == "fts5" else "hybrid",
+                    "--rag-limit",
+                    str(retrieval.top_k),
+                    "--rrf-k",
+                    str(retrieval.rrf_k),
+                ]
+            )
+            if retrieval.mode == "hybrid":
+                command.extend(
+                    [
+                        "--embedding-model",
+                        str(retrieval.embedding_model),
+                        "--embedding-dimensions",
+                        str(retrieval.embedding_dimensions),
+                    ]
+                )
         completed = subprocess.run(
-            [
-                sys.executable,
-                str(ROOT / "scripts" / "model_repair_agent.py"),
-                "--task",
-                str(task.config_path),
-            ],
+            command,
             cwd=ROOT,
             env=environment,
             check=False,
