@@ -60,4 +60,5 @@ def test_file_level_rag_revision_is_versioned_and_does_not_authorize_execution()
     assert benchmark["retrieval"]["fusion"] == "file_level_reciprocal_rank_fusion"
     assert config["parent_agent_version"] == "0.8.0-dev1.1"
     assert config["retrieval"]["execution_authority"] is False
-    assert config["evaluation_rule"].startswith("do not run repair or locked tasks")
+    assert config["activation_gate"]["passed"] is True
+    assert "do not run locked tasks" in config["evaluation_rule"]

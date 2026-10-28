@@ -27,7 +27,7 @@ Demo 只回放冻结并脱敏的真实 Trace，不需要 API Key，也不会产�
 
 TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Agent。大模型负责在不确定环境中选择搜索、读取和补丁动作；确定性控制器负责权限、状态、成本、测试和人工审核。模型不能直接运行 Shell，也不能绕过验证门禁修改仓库。仓库差异由 JSON 任务配置描述，不再写死 EventRelay 路径。
 
-> **0.8 开发分支（尚未替代冻结结果）**：当前代码正在加入原生 Function Calling、Prompt Registry 和可选 Code RAG。三个阶段 Prompt 与五个工具 Schema 均有版本和 SHA-256，模型只拥有提议权；7 个确定性 Prompt Injection/越权调用用例均被宿主边界拦截。AST Chunk、SQLite FTS5、Embedding 与 RRF 只提供未受信任的只读候选。离线检索评测中 FTS5 的 Recall@1/3/5 为 `0.60/0.80/1.00`、MRR 为 `0.75`；真实语义向量与它持平，因此激活门槛明确返回 `keep_rag_disabled`，没有把无提升的 RAG 接入主流程。完整实现边界、运行顺序与 `0.8.0` 发布门槛见 [`docs/v0.8-function-calling-rag.md`](docs/v0.8-function-calling-rag.md)。公开可信主结论仍是下方 `0.7.0-dev2` 的六仓库一次性盲测。
+> **0.8 开发分支（尚未替代冻结结果）**：当前代码正在加入原生 Function Calling、Prompt Registry 和可选 Code RAG。三个阶段 Prompt 与五个工具 Schema 均有版本和 SHA-256，模型只拥有提议权；7 个确定性 Prompt Injection/越权调用用例均被宿主边界拦截。首版语义检索与 FTS5 持平并被门禁拒绝；独立版本 `0.8.0-dev2.1` 改为文件级 RRF 后，在五个已知开发任务上将 Recall@3 从 `0.80` 提升到 `1.00`、MRR 从 `0.75` 提升到 `0.80`，Recall@5 保持 `1.00`，因此通过激活门禁。RAG 结果仍是未受信任的只读提示，必须由 `read_file` 确认，不能写入、测试或改变状态。完整实现边界、运行顺序与 `0.8.0` 发布门槛见 [`docs/v0.8-function-calling-rag.md`](docs/v0.8-function-calling-rag.md)。公开可信主结论仍是下方 `0.7.0-dev2` 的六仓库一次性盲测。
 
 首次原生协议开发运行得到 `0/5`：五题均因 Function Calling 格式契约不兼容而安全停止，完整负面结果保存在 [`DEVELOPMENT_FINDINGS.md`](evaluation/results/function-calling-v0.8.0-dev1/DEVELOPMENT_FINDINGS.md)。真实语义检索与 FTS5 的 Recall@K/MRR 完全持平，因此激活门槛返回 `keep_rag_disabled`。两项结果都保留，不以调参后的结果覆盖。
 

@@ -1,6 +1,7 @@
 """Run one bounded end-to-end repair attempt on an allowlisted evaluation case."""
 
 import argparse
+import re
 import sys
 from pathlib import Path
 from uuid import uuid4
@@ -257,8 +258,13 @@ def main() -> None:
                     model_id=arguments.embedding_model,
                     dimensions=arguments.embedding_dimensions,
                 )
+            safe_case_name = re.sub(r"[^A-Za-z0-9._-]+", "-", case_name).strip("-")[:80]
+            model_name = (
+                embedding_provider.model_id if embedding_provider is not None else "lexical-only"
+            )
+            safe_model_name = re.sub(r"[^A-Za-z0-9._-]+", "-", model_name).strip("-")[:80]
             code_index = CodeIndex(
-                ROOT / "data" / "retrieval" / "runtime" / f"{task_id}.sqlite3"
+                ROOT / "data" / "retrieval" / f"{safe_case_name}-{safe_model_name}.sqlite3"
             )
             build = code_index.build(
                 workspace,
@@ -283,6 +289,8 @@ def main() -> None:
                     "embedding_dimensions": build.embedding_dimensions,
                     "top_k": arguments.rag_limit,
                     "rrf_k": arguments.rrf_k,
+                    "fusion": "file_level_reciprocal_rank_fusion",
+                    "cache_contract": "exact repository and retrieval metadata match only",
                     "execution_authority": False,
                 },
             )

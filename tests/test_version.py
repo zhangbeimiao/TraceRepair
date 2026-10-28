@@ -21,7 +21,7 @@ def test_project_version_matches_package_metadata() -> None:
 
 
 def test_development_agent_does_not_relabel_frozen_historical_evidence() -> None:
-    assert AGENT_VERSION == "0.8.0-dev1.1"
+    assert AGENT_VERSION == "0.8.0-dev2.1"
     assert MAX_COMPLETION_TOKENS == 800
     frozen = json.loads(
         (ROOT / "evaluation/frozen/historical-python-v1.0.0.json").read_text(
@@ -68,17 +68,24 @@ def test_development_agent_does_not_relabel_frozen_historical_evidence() -> None
             encoding="utf-8"
         )
     )
-    development = json.loads(
+    native_development = json.loads(
         (ROOT / "evaluation/configs/agent-v0.8.0-dev1.1.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    development = json.loads(
+        (ROOT / "evaluation/configs/agent-v0.8.0-dev2.1.json").read_text(
             encoding="utf-8"
         )
     )
 
     assert development["agent_version"] == AGENT_VERSION
-    assert development["status"] == "development_only_protocol_compatibility_revision"
+    assert native_development["status"] == "development_only_protocol_compatibility_revision"
     assert initial_native["agent_version"] == "0.8.0-dev1"
-    assert development["parent_agent_version"] == "0.8.0-dev1"
-    assert development["preserved_negative_evidence"]["result"].startswith("0/5 pass@1")
+    assert native_development["parent_agent_version"] == "0.8.0-dev1"
+    assert native_development["preserved_negative_evidence"]["result"].startswith("0/5 pass@1")
+    assert development["parent_agent_version"] == "0.8.0-dev1.1"
+    assert development["activation_gate"]["passed"] is True
     assert development_v1["agent_version"] == "0.6.0-dev1"
     assert development_v2["agent_version"] == "0.6.0-dev2"
     assert development_v3["agent_version"] == "0.6.0-dev3"
@@ -86,19 +93,19 @@ def test_development_agent_does_not_relabel_frozen_historical_evidence() -> None
     assert langgraph_dev1["agent_version"] == "0.7.0-dev1"
     assert langgraph_dev1["planner"]["max_calls_per_task"] == 4
     assert langgraph_dev1["planner"]["max_total_completion_tokens"] == 2048
-    assert development["planner"]["max_completion_tokens"] == MAX_COMPLETION_TOKENS
-    assert development["planner"]["max_calls_per_task"] == MAX_MODEL_CALLS == 5
+    assert native_development["planner"]["max_completion_tokens"] == MAX_COMPLETION_TOKENS
+    assert native_development["planner"]["max_calls_per_task"] == MAX_MODEL_CALLS == 5
     assert (
-        development["planner"]["max_total_completion_tokens"]
+        native_development["planner"]["max_total_completion_tokens"]
         == MAX_TOTAL_COMPLETION_TOKENS
         == 3072
     )
     assert langgraph_dev2["agent_version"] == "0.7.0-dev2"
-    assert development["architecture"] == "langgraph_end_to_end"
-    assert development["planner_protocol"] == "native_function_calling"
-    assert development["durable_state"] == "sqlite_only"
-    assert development["langgraph_checkpointer"] is False
-    assert development["semantic_review"]["execution_authority"] is False
+    assert native_development["architecture"] == "langgraph_end_to_end"
+    assert native_development["planner_protocol"] == "native_function_calling"
+    assert native_development["durable_state"] == "sqlite_only"
+    assert native_development["langgraph_checkpointer"] is False
+    assert native_development["semantic_review"]["execution_authority"] is False
     frozen_v06 = json.loads(
         (ROOT / "evaluation/frozen/agent-v0.6.0.json").read_text(encoding="utf-8")
     )

@@ -1,7 +1,7 @@
 {
   "agent_version": "0.8.0-dev2.1",
   "parent_agent_version": "0.8.0-dev1.1",
-  "status": "planned_pending_file_level_retrieval_gate",
+  "status": "retrieval_gate_passed_development_evaluation_frozen",
   "architecture": "langgraph_end_to_end",
   "durable_state": "sqlite_only",
   "planner_protocol": "native_function_calling",
@@ -23,11 +23,16 @@
   "activation_gate": {
     "split": "known_development_tasks_only",
     "required_metrics": ["file_recall_at_1", "file_recall_at_3", "file_recall_at_5", "mrr"],
-    "rule": "file-level semantic hybrid must not reduce Recall@5 and must improve Recall@1 or MRR over FTS5"
+    "rule": "file-level semantic hybrid must not reduce Recall@5 and must improve Recall@1 or MRR over FTS5",
+    "passed": true,
+    "decision": "activate_dev2",
+    "lexical_report_sha256": "ad39a7acdb5619a2751f432d3148c570a5cfc1d5fc80213d67ec9a01b3b230e5",
+    "semantic_report_sha256": "1da646921d0a7667e0a9336043856ee9132f88abffe3bc282623b23e0fd51b3d",
+    "gate_report_sha256": "07a963285e46182fde1dbc04544a7bf4739218e36382d250d4a8c7d5fdbcee6c"
   },
   "preserved_negative_evidence": {
     "candidate": "0.8.0-dev2",
     "result": "semantic hybrid tied FTS5; activation decision keep_rag_disabled"
   },
-  "evaluation_rule": "do not run repair or locked tasks unless the retrieval activation gate passes"
+  "evaluation_rule": "run the five registered development repair tasks once; do not run locked tasks before the complete agent is frozen"
 }

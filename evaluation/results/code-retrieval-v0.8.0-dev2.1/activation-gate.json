@@ -1,0 +1,27 @@
+{
+  "baseline": {
+    "file_recall_at_1": 0.6,
+    "file_recall_at_3": 0.8,
+    "file_recall_at_5": 1.0,
+    "mrr": 0.75
+  },
+  "candidate": {
+    "file_recall_at_1": 0.6,
+    "file_recall_at_3": 1.0,
+    "file_recall_at_5": 1.0,
+    "mrr": 0.8
+  },
+  "checks": {
+    "recall_at_1_or_mrr_improved": true,
+    "recall_at_5_not_reduced": true
+  },
+  "claim_boundary": "Development retrieval gate only; it is not locked repair evidence.",
+  "decision": "activate_dev2",
+  "gate_id": "semantic-retrieval-activation-v0.8.0-dev2.1",
+  "lexical_report_sha256": "ad39a7acdb5619a2751f432d3148c570a5cfc1d5fc80213d67ec9a01b3b230e5",
+  "passed": true,
+  "rule": "semantic hybrid must not reduce Recall@5 and must improve at least one of Recall@1 or MRR over FTS5",
+  "schema_version": 1,
+  "semantic_report_sha256": "1da646921d0a7667e0a9336043856ee9132f88abffe3bc282623b23e0fd51b3d",
+  "split": "known_development_tasks_only"
+}
