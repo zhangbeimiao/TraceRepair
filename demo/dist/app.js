@@ -11,6 +11,7 @@
   const historical = data.historicalBenchmark;
   const langgraph = data.langgraphDevelopment;
   const blind = data.langgraphBlind;
+  const v080 = data.functionRagLocked;
   const developmentAttempts = historical.attempts.filter((attempt) => attempt.split === "development");
   const lockedAttempts = historical.attempts.filter((attempt) => attempt.split === "locked");
   const countSuccesses = (attempts) => attempts.filter((attempt) => attempt.success).length;
@@ -56,6 +57,9 @@
       + `evidence ${blind.evidenceIndexSha256.slice(0, 12)}…`,
   );
   setText("#langgraph-blind-scope", blind.scopeNote);
+  setText("#v080-locked-result", `${v080.successes}/${v080.runs} pass@1 · ${v080.humanHandoffs} 次转人工 · ${v080.incorrectAcceptedPatches} 个错误补丁被接受；通过者仍需人工审核。`);
+  setText("#v080-locked-integrity", `每题一次 · report ${v080.reportSha256.slice(0, 12)}… · ledger ${v080.terminalLedgerSha256.slice(0, 12)}…`);
+  setText("#v080-locked-scope", "三个新仓库的单次盲测，样本有限；不能推断通用修复率。structlog 因可见源码切片不足而转人工。");
   setText("#generated-at", `snapshot ${new Date(data.generatedAt).toLocaleString("zh-CN")}`);
   if (data.repositoryCohort) {
     const repository = data.repositoryCohort;

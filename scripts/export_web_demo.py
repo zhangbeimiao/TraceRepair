@@ -16,6 +16,7 @@ from tracerepair.demo_evidence import (
 from tracerepair.evaluation_report import TraceEvaluator
 from tracerepair.showcase import load_showcase_trace, showcase_steps
 from tracerepair.version import PROJECT_VERSION
+from scripts.verify_benchmark_evidence import verify_evidence
 
 DEV_CASES = {"01", "03", "07", "10"}
 LOCKED_CASES = {"02", "04", "06", "08", "09"}
@@ -40,6 +41,27 @@ def sha256_file(path: Path) -> str:
 
 
 def main() -> None:
+    locked_v080 = verify_evidence(ROOT, benchmark_id="function-rag-locked-v0.8.0")
+    frozen_v080 = read_json(ROOT / "evaluation/frozen/function-rag-locked-v0.8.0.json")
+    if not isinstance(frozen_v080, dict):
+        raise ValueError("v0.8.0 frozen evidence must be a JSON object")
+    v080_summary = frozen_v080["summary"]
+    function_rag_locked = {
+        "benchmarkId": locked_v080["benchmark_id"],
+        "agentVersion": locked_v080["release_agent_version"],
+        "runs": locked_v080["tasks"],
+        "successes": locked_v080["successes"],
+        "humanHandoffs": v080_summary["human_handoffs"],
+        "incorrectAcceptedPatches": v080_summary["incorrect_accepted_patches"],
+        "averageTokens": v080_summary["average_completion_tokens"],
+        "p50Seconds": v080_summary["p50_wall_seconds"],
+        "p95Seconds": v080_summary["p95_wall_seconds"],
+        "wilson95": v080_summary["wilson_95_percent"],
+        "reportSha256": locked_v080["report_sha256"],
+        "terminalLedgerSha256": locked_v080["terminal_ledger_sha256"],
+        "scopeNote": frozen_v080["scope_note"],
+        "oneShot": True,
+    }
     # The EventRelay traces are retained as controlled engineering regression
     # evidence. The headline result is the separately frozen real-history
     # benchmark below; never silently reinterpret the older cohort as v0.5.0.
@@ -445,6 +467,7 @@ def main() -> None:
         "historicalBenchmark": historical_benchmark,
         "langgraphDevelopment": langgraph_development,
         "langgraphBlind": langgraph_blind,
+        "functionRagLocked": function_rag_locked,
         "repositoryCohort": repository_cohort,
         "lockedRepositoryResult": locked_repository_result,
     }

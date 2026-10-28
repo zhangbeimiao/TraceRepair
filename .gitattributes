@@ -11,3 +11,5 @@
 *.svg text eol=lf
 *.diff text eol=lf
 *.ps1 text eol=crlf
+evaluation/results/function-rag-locked-v0.8.0/attempts.jsonl -text
+evaluation/results/function-rag-locked-v0.8.0/logs/*.log -text

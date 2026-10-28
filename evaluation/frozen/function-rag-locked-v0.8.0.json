@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "function-rag-locked-v0.8.0",
+  "protocol": "pass@1",
+  "release_agent_version": "0.8.0",
+  "evaluated_runtime_agent_version": "0.8.0",
+  "model": "qwen3.8-flash",
+  "manifest_sha256": "5a18f23610864368aedcbab109e19e2562d702cc7909aad0743adb55c9559fe4",
+  "agent_config_sha256": "01a3fd3fa1ff3fe41ff637fda50421dacd6ea17aeb01f861865afb9c278bf141",
+  "report_sha256": "e032d5966f4bee4f692bdbe8aa18c9f7151acadce2781537052f7dfb5540811d",
+  "terminal_ledger_sha256": "570a4a9092239cb50c91cacae14fdfa284708f6f5664f74321f22ba8a4bdb35d",
+  "summary": {
+    "attempted_tasks": 3,
+    "successes": 2,
+    "failures": 1,
+    "pass_at_1": 0.6667,
+    "human_handoffs": 1,
+    "incorrect_accepted_patches": 0,
+    "average_completion_tokens": 414.33,
+    "total_completion_tokens": 1243,
+    "p50_wall_seconds": 13.047,
+    "p95_wall_seconds": 21.157,
+    "wilson_95_percent": {
+      "lower": 0.2077,
+      "upper": 0.9385
+    }
+  },
+  "splits": {
+    "development": {
+      "attempts": 0,
+      "successes": 0,
+      "not_run": true
+    },
+    "locked": {
+      "attempts": 3,
+      "successes": 2,
+      "pass_at_1": 0.6667,
+      "one_shot": true,
+      "retried": false,
+      "all_outcomes_published": true
+    }
+  },
+  "attempts": [
+    {
+      "task_id": "jaraco-text-headless-camel",
+      "split": "locked",
+      "success": true,
+      "record_sha256": "2e10352fadbd027be80df03873385817d4d40d194bf8e03b3570350757abb0da"
+    },
+    {
+      "task_id": "sortedcontainers-empty-extend",
+      "split": "locked",
+      "success": true,
+      "record_sha256": "518870f5c2fa86e4bf0b2bcb41722a26b73298a39f40f678767eb9cfa1f9b027"
+    },
+    {
+      "task_id": "structlog-missing-event",
+      "split": "locked",
+      "success": false,
+      "status": "needs_human",
+      "stop_reason": "The provided slice of src/structlog/dev.py (lines 80-190) ends before ConsoleRenderer.__call__, so the code that reads event_dict[\"event\"] and raises KeyError is not visible; I cannot produce an exact, minimal diff without altering unseen behavior.",
+      "record_sha256": "570a4a9092239cb50c91cacae14fdfa284708f6f5664f74321f22ba8a4bdb35d"
+    }
+  ],
+  "contracts": {
+    "prompt_protocol_sha256": "1c2cf6f03167c5e09a43f069c1e4c145784e22e7854449311d2789b6cab31b46",
+    "prompt_security_sha256": "afa1e856d793484b714c7f155254c1128120dd81e077d2611b4d429e0d57aa36",
+    "retrieval_gate_sha256": "07a963285e46182fde1dbc04544a7bf4739218e36382d250d4a8c7d5fdbcee6c"
+  },
+  "scope_note": "Three previously unused repositories were run once after public preregistration. Two passed target and regression tests; one safely handed off before patching. This small selected sample validates the bounded protocol, not universal repair accuracy."
+}

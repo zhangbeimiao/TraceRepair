@@ -5,6 +5,7 @@ def test_offline_showcase_replays_all_evidence_without_private_metadata() -> Non
     output = render_showcase(load_demo_data())
 
     assert "provider requests: 0" in output
+    assert "v0.8.0 locked one-shot          : 2/3 passed; 1 human handoff" in output
     assert "Real historical bugs, pass@1   : 3/5 passed; 2 safely rejected" in output
     assert "0 incorrect patches accepted; 2 human handoffs" in output
     assert "1/2 passed; each task ran once" in output

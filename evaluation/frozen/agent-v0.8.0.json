@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "release_agent_version": "0.8.0",
+  "evaluated_runtime_agent_version": "0.8.0",
+  "status": "released_after_locked_evaluation",
+  "frozen_at": "2026-10-28T17:14:17+08:00",
+  "implementation_commit": "45393f4",
+  "configuration": {
+    "path": "evaluation/configs/agent-v0.8.0.json",
+    "sha256": "01a3fd3fa1ff3fe41ff637fda50421dacd6ea17aeb01f861865afb9c278bf141"
+  },
+  "benchmark": {
+    "id": "function-rag-locked-v0.8.0",
+    "manifest_sha256": "5a18f23610864368aedcbab109e19e2562d702cc7909aad0743adb55c9559fe4",
+    "protocol": "pass@1",
+    "locked_attempts": 3,
+    "locked_successes": 2,
+    "locked_pass_at_1": 0.6667,
+    "incorrect_accepted_patches": 0,
+    "terminal_ledger_sha256": "570a4a9092239cb50c91cacae14fdfa284708f6f5664f74321f22ba8a4bdb35d",
+    "report_file_sha256": "e032d5966f4bee4f692bdbe8aa18c9f7151acadce2781537052f7dfb5540811d"
+  },
+  "locked_protocol": {
+    "task_ids": [
+      "jaraco-text-headless-camel",
+      "sortedcontainers-empty-extend",
+      "structlog-missing-event"
+    ],
+    "maximum_attempts_per_task": 1,
+    "retried": false,
+    "all_outcomes_published": true,
+    "configuration_changes_after_freeze": false
+  }
+}

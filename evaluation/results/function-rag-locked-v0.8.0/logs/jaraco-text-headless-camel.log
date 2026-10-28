@@ -1,0 +1,8 @@
+End-to-end repair run completed.
+Agent version: 0.8.0; task: repo-jaraco-text-headless-camel (jaraco-text-headless-camel)
+Diagnosis turns: 1/3
+Model usage: calls=3/5, output_tokens=454/3072
+Verification action: run_regression
+Final task status: awaiting_review
+Detail: all tests passed
+Trace database: data/model-agent.sqlite3 (task model-agent-repo-jaraco-text-headless-camel-bae5858f)

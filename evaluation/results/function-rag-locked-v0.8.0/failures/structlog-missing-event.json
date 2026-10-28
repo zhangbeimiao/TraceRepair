@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "task_id": "structlog-missing-event",
+  "agent_version": "0.8.0",
+  "trace_task_id": "model-agent-repo-structlog-missing-event-21275200",
+  "status": "needs_human",
+  "verification_action": "handoff",
+  "patch_proposed": false,
+  "patch_applied": false,
+  "tests_started": false,
+  "model_calls": 2,
+  "completion_tokens": 132,
+  "tool_calls": 1,
+  "stop_reason": "The provided slice of src/structlog/dev.py (lines 80-190) ends before ConsoleRenderer.__call__, so the code that reads event_dict[\"event\"] and raises KeyError is not visible; I cannot produce an exact, minimal diff without altering unseen behavior.",
+  "record_sha256": "570a4a9092239cb50c91cacae14fdfa284708f6f5664f74321f22ba8a4bdb35d",
+  "safety_outcome": "Insufficient source context caused a human handoff during patch generation, before any candidate patch, repository write or test execution.",
+  "claim_boundary": "This is a locked one-shot failure and must not be retried under Agent 0.8.0."
+}

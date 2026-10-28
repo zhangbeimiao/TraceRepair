@@ -1,0 +1,201 @@
+{
+  "attempts": [
+    {
+      "attempt_started_record_sha256": "42f96fc37fd8f11a88a04e5fe7ca2d9f489df6002ed2eff4c070cacc5f8bc675",
+      "benchmark_id": "function-rag-locked-v0.8.0",
+      "benchmark_task_id": "jaraco-text-headless-camel",
+      "completion_tokens": 454,
+      "log_path": "evaluation/results/function-rag-locked-v0.8.0/logs/jaraco-text-headless-camel.log",
+      "log_sha256": "ae3275d2304ade370305b9ac4ab23c9976ab11b0659aa86632095f8b8bab58c0",
+      "manifest_sha256": "5a18f23610864368aedcbab109e19e2562d702cc7909aad0743adb55c9559fe4",
+      "model_calls": 3,
+      "previous_record_sha256": "42f96fc37fd8f11a88a04e5fe7ca2d9f489df6002ed2eff4c070cacc5f8bc675",
+      "process_returncode": 0,
+      "record_kind": "attempt_finished",
+      "record_sha256": "2e10352fadbd027be80df03873385817d4d40d194bf8e03b3570350757abb0da",
+      "recorded_at": "2026-10-28T09:13:45.270110+00:00",
+      "regression_passed": true,
+      "repository_sha256": "fe176fd0bd7ae8203cfea2040e555ac0cbb835411609659b6e3431bd106e1450",
+      "sequence": 2,
+      "source": {
+        "buggy_commit": "506d42cba80ed35e4558642fdf2d91e90025f00a",
+        "fixed_commit": "859ef175f5c8763c411cb58c60adaee4c93de282",
+        "issue_url": "https://github.com/jaraco/jaraco.text/commit/859ef175f5c8763c411cb58c60adaee4c93de282",
+        "repository_url": "https://github.com/jaraco/jaraco.text"
+      },
+      "split": "locked",
+      "status": "awaiting_review",
+      "stop_reason": "candidate patch passed target and regression tests; human review required",
+      "success": true,
+      "target_test_passed": true,
+      "task_config_sha256": "b9ec6775d4657c9e5ce11a303830a440531681b7fa43b73491423c4d0e076fae",
+      "timed_out": false,
+      "tool_calls": 4,
+      "tool_failures": 0,
+      "trace_task_id": "model-agent-repo-jaraco-text-headless-camel-bae5858f",
+      "wall_seconds": 13.047
+    },
+    {
+      "attempt_started_record_sha256": "7c1f397e00ca0a8831970002f716b4ee2b98b2f87525376cc116d0738febf059",
+      "benchmark_id": "function-rag-locked-v0.8.0",
+      "benchmark_task_id": "sortedcontainers-empty-extend",
+      "completion_tokens": 657,
+      "log_path": "evaluation/results/function-rag-locked-v0.8.0/logs/sortedcontainers-empty-extend.log",
+      "log_sha256": "bcd8eaf2e680183d78443cb3f8848c4561f2b61f9de51c53a08a01d5b678773a",
+      "manifest_sha256": "5a18f23610864368aedcbab109e19e2562d702cc7909aad0743adb55c9559fe4",
+      "model_calls": 4,
+      "previous_record_sha256": "7c1f397e00ca0a8831970002f716b4ee2b98b2f87525376cc116d0738febf059",
+      "process_returncode": 0,
+      "record_kind": "attempt_finished",
+      "record_sha256": "518870f5c2fa86e4bf0b2bcb41722a26b73298a39f40f678767eb9cfa1f9b027",
+      "recorded_at": "2026-10-28T09:14:06.491066+00:00",
+      "regression_passed": true,
+      "repository_sha256": "4dc12bc6820e4e339060e362931332701059107ded9bf4ca25a167a3d6dd8630",
+      "sequence": 4,
+      "source": {
+        "buggy_commit": "f6a359773de48e5adbe0e1946355d38f43c59c32",
+        "fixed_commit": "53ab610cc4615888f3fcf2fa1d5d340440247a2a",
+        "issue_url": "https://github.com/grantjenks/python-sortedcontainers/commit/53ab610cc4615888f3fcf2fa1d5d340440247a2a",
+        "repository_url": "https://github.com/grantjenks/python-sortedcontainers"
+      },
+      "split": "locked",
+      "status": "awaiting_review",
+      "stop_reason": "candidate patch passed target and regression tests; human review required",
+      "success": true,
+      "target_test_passed": true,
+      "task_config_sha256": "3d3ac72674f0827ddf07c8d8dabd06d13945eb2bb7a212b0b460e78b8a8a63b2",
+      "timed_out": false,
+      "tool_calls": 5,
+      "tool_failures": 0,
+      "trace_task_id": "model-agent-repo-sortedcontainers-empty-extend-37bf76f1",
+      "wall_seconds": 21.157
+    },
+    {
+      "attempt_started_record_sha256": "4d4257b0a24a576956ef2c7e57a077c00f55d3e321483a2643b442e8ddf6af22",
+      "benchmark_id": "function-rag-locked-v0.8.0",
+      "benchmark_task_id": "structlog-missing-event",
+      "completion_tokens": 132,
+      "log_path": "evaluation/results/function-rag-locked-v0.8.0/logs/structlog-missing-event.log",
+      "log_sha256": "fcd3ec179009aeffdf8ac01b459eaf35b3aa00a138148f87fdbcefc5d054204f",
+      "manifest_sha256": "5a18f23610864368aedcbab109e19e2562d702cc7909aad0743adb55c9559fe4",
+      "model_calls": 2,
+      "previous_record_sha256": "4d4257b0a24a576956ef2c7e57a077c00f55d3e321483a2643b442e8ddf6af22",
+      "process_returncode": 0,
+      "record_kind": "attempt_finished",
+      "record_sha256": "570a4a9092239cb50c91cacae14fdfa284708f6f5664f74321f22ba8a4bdb35d",
+      "recorded_at": "2026-10-28T09:14:17.145602+00:00",
+      "regression_passed": false,
+      "repository_sha256": "a5d7f99508ab41c574078475c1f7dfff11e4766eb2f09c3ec45a8a1c13d9f8b7",
+      "sequence": 6,
+      "source": {
+        "buggy_commit": "f0d241211d6752f8da032218044f884437d809cb",
+        "fixed_commit": "d4e3c9a4c57217afdd245f75969f9cb51542a111",
+        "issue_url": "https://github.com/hynek/structlog/pull/272",
+        "repository_url": "https://github.com/hynek/structlog"
+      },
+      "split": "locked",
+      "status": "needs_human",
+      "stop_reason": "The provided slice of src/structlog/dev.py (lines 80-190) ends before ConsoleRenderer.__call__, so the code that reads event_dict[\"event\"] and raises KeyError is not visible; I cannot produce an exact, minimal diff without altering unseen behavior.",
+      "success": false,
+      "target_test_passed": false,
+      "task_config_sha256": "2d8b91fcae469a0c26d95fed4e5a96d632a8a6b7a47a46369ee99a606b5378c4",
+      "timed_out": false,
+      "tool_calls": 1,
+      "tool_failures": 0,
+      "trace_task_id": "model-agent-repo-structlog-missing-event-21275200",
+      "wall_seconds": 10.578
+    }
+  ],
+  "benchmark": {
+    "agent_version": "0.8.0",
+    "benchmark_id": "function-rag-locked-v0.8.0",
+    "completion_cny_per_million_tokens": 0.0,
+    "contracts": {
+      "agent_config_sha256": "01a3fd3fa1ff3fe41ff637fda50421dacd6ea17aeb01f861865afb9c278bf141",
+      "prompt_protocol_sha256": "1c2cf6f03167c5e09a43f069c1e4c145784e22e7854449311d2789b6cab31b46",
+      "prompt_security_sha256": "afa1e856d793484b714c7f155254c1128120dd81e077d2611b4d429e0d57aa36",
+      "retrieval_gate_sha256": "07a963285e46182fde1dbc04544a7bf4739218e36382d250d4a8c7d5fdbcee6c"
+    },
+    "manifest_sha256": "5a18f23610864368aedcbab109e19e2562d702cc7909aad0743adb55c9559fe4",
+    "model": "qwen3.8-flash",
+    "protocol": "pass@1",
+    "retrieval": {
+      "chunker_version": "ast-symbol-v1",
+      "embedding_dimensions": 256,
+      "embedding_model": "qwen3.7-text-embedding-flash",
+      "mode": "hybrid",
+      "rrf_k": 60,
+      "top_k": 5
+    },
+    "schema_version": 1,
+    "tasks": [
+      {
+        "repository_sha256": "fe176fd0bd7ae8203cfea2040e555ac0cbb835411609659b6e3431bd106e1450",
+        "source": {
+          "buggy_commit": "506d42cba80ed35e4558642fdf2d91e90025f00a",
+          "fixed_commit": "859ef175f5c8763c411cb58c60adaee4c93de282",
+          "issue_url": "https://github.com/jaraco/jaraco.text/commit/859ef175f5c8763c411cb58c60adaee4c93de282",
+          "repository_url": "https://github.com/jaraco/jaraco.text"
+        },
+        "split": "locked",
+        "task_config": "jaraco-text-headless-camel.json",
+        "task_config_sha256": "b9ec6775d4657c9e5ce11a303830a440531681b7fa43b73491423c4d0e076fae",
+        "task_id": "jaraco-text-headless-camel"
+      },
+      {
+        "repository_sha256": "4dc12bc6820e4e339060e362931332701059107ded9bf4ca25a167a3d6dd8630",
+        "source": {
+          "buggy_commit": "f6a359773de48e5adbe0e1946355d38f43c59c32",
+          "fixed_commit": "53ab610cc4615888f3fcf2fa1d5d340440247a2a",
+          "issue_url": "https://github.com/grantjenks/python-sortedcontainers/commit/53ab610cc4615888f3fcf2fa1d5d340440247a2a",
+          "repository_url": "https://github.com/grantjenks/python-sortedcontainers"
+        },
+        "split": "locked",
+        "task_config": "sortedcontainers-empty-extend.json",
+        "task_config_sha256": "3d3ac72674f0827ddf07c8d8dabd06d13945eb2bb7a212b0b460e78b8a8a63b2",
+        "task_id": "sortedcontainers-empty-extend"
+      },
+      {
+        "repository_sha256": "a5d7f99508ab41c574078475c1f7dfff11e4766eb2f09c3ec45a8a1c13d9f8b7",
+        "source": {
+          "buggy_commit": "f0d241211d6752f8da032218044f884437d809cb",
+          "fixed_commit": "d4e3c9a4c57217afdd245f75969f9cb51542a111",
+          "issue_url": "https://github.com/hynek/structlog/pull/272",
+          "repository_url": "https://github.com/hynek/structlog"
+        },
+        "split": "locked",
+        "task_config": "structlog-missing-event.json",
+        "task_config_sha256": "2d8b91fcae469a0c26d95fed4e5a96d632a8a6b7a47a46369ee99a606b5378c4",
+        "task_id": "structlog-missing-event"
+      }
+    ]
+  },
+  "generated_at": "2026-10-28T09:14:17.167596+00:00",
+  "integrity": {
+    "claim": "tamper-evident after the terminal hash is published; not an immutable store",
+    "ledger_records_verified": 6,
+    "terminal_record_sha256": "570a4a9092239cb50c91cacae14fdfa284708f6f5664f74321f22ba8a4bdb35d"
+  },
+  "report_sha256": "bfc2c01d958ebd74e7334523dc9816ed86b180598350ac4364d21f1390515f18",
+  "schema_version": 1,
+  "summary": {
+    "attempted_tasks": 3,
+    "average_completion_tokens": 414.33,
+    "cost_scope": "unavailable: no completion-token price was frozen in the manifest",
+    "estimated_completion_cost_cny": null,
+    "expected_tasks": 3,
+    "failures": 1,
+    "human_handoffs": 1,
+    "incorrect_accepted_patches": 0,
+    "missing_task_ids": [],
+    "p50_wall_seconds": 13.047,
+    "p95_wall_seconds": 21.157,
+    "pass_at_1": 0.6667,
+    "successes": 2,
+    "total_completion_tokens": 1243,
+    "wilson_95_percent": {
+      "lower": 0.2077,
+      "upper": 0.9385
+    }
+  }
+}

@@ -25,6 +25,7 @@ def load_demo_data(path: Path = DEFAULT_DATA) -> dict[str, Any]:
         "historicalBenchmark",
         "langgraphDevelopment",
         "langgraphBlind",
+        "functionRagLocked",
         "traces",
         "failures",
         "recoveryScenarios",
@@ -69,12 +70,19 @@ def _render_evidence(payload: dict[str, Any]) -> str:
     historical = payload["historicalBenchmark"]
     langgraph = payload["langgraphDevelopment"]
     blind = payload["langgraphBlind"]
+    v080 = payload["functionRagLocked"]
     repository = payload.get("repositoryCohort") or {}
     held_out = payload.get("lockedRepositoryResult") or {}
     locked = historical["splits"]["locked"]
     return "\n".join(
         (
             "[1] FROZEN EVIDENCE",
+            "  v0.8.0 locked one-shot          : "
+            f"{v080['successes']}/{v080['runs']} passed; "
+            f"{v080['humanHandoffs']} human handoff; "
+            f"{v080['incorrectAcceptedPatches']} incorrect patches accepted",
+            "  v0.8.0 limitation               : three selected repositories; "
+            "not a general repair accuracy estimate",
             "  Real historical bugs, pass@1   : "
             f"{historical['successes']}/{historical['runs']} passed; "
             f"{historical['failures']} safely rejected",

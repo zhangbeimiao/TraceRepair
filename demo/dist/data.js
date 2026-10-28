@@ -166,6 +166,34 @@ window.TRACEREPAIR_DEMO = {
       "averageTokens": 543.44
     },
     {
+      "version": "0.8.0",
+      "runs": 3,
+      "successes": 2,
+      "successRate": 0.6667,
+      "averageTokens": 414.33
+    },
+    {
+      "version": "0.8.0-dev1",
+      "runs": 5,
+      "successes": 0,
+      "successRate": 0.0,
+      "averageTokens": 439.4
+    },
+    {
+      "version": "0.8.0-dev1.1",
+      "runs": 5,
+      "successes": 3,
+      "successRate": 0.6,
+      "averageTokens": 489.6
+    },
+    {
+      "version": "0.8.0-dev2.1",
+      "runs": 5,
+      "successes": 3,
+      "successRate": 0.6,
+      "averageTokens": 473.6
+    },
+    {
       "version": "legacy",
       "runs": 7,
       "successes": 3,
@@ -2130,6 +2158,25 @@ window.TRACEREPAIR_DEMO = {
     "independentHashChains": 2,
     "evidenceIndexSha256": "5721f6a5ef7d6f7b7947abdcba987feedaf5131cc84c8cf077160e72f1042e19",
     "scopeNote": "Six previously unused repositories provide stronger one-shot transfer evidence than the original three, but remain too few and too curated to estimate universal code-repair accuracy. The evidence supports bounded execution, honest failure retention and zero observed incorrect accepted patches."
+  },
+  "functionRagLocked": {
+    "benchmarkId": "function-rag-locked-v0.8.0",
+    "agentVersion": "0.8.0",
+    "runs": 3,
+    "successes": 2,
+    "humanHandoffs": 1,
+    "incorrectAcceptedPatches": 0,
+    "averageTokens": 414.33,
+    "p50Seconds": 13.047,
+    "p95Seconds": 21.157,
+    "wilson95": {
+      "lower": 0.2077,
+      "upper": 0.9385
+    },
+    "reportSha256": "e032d5966f4bee4f692bdbe8aa18c9f7151acadce2781537052f7dfb5540811d",
+    "terminalLedgerSha256": "570a4a9092239cb50c91cacae14fdfa284708f6f5664f74321f22ba8a4bdb35d",
+    "scopeNote": "Three previously unused repositories were run once after public preregistration. Two passed target and regression tests; one safely handed off before patching. This small selected sample validates the bounded protocol, not universal repair accuracy.",
+    "oneShot": true
   },
   "repositoryCohort": {
     "projectVersion": "0.6.1",

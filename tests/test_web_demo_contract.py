@@ -62,6 +62,10 @@ def test_public_demo_contains_verified_patches_and_frozen_failures() -> None:
     assert blind["independentHashChains"] == 2
     assert len(blind["cohorts"]) == 2
     assert len(blind["evidenceIndexSha256"]) == 64
+    v080 = payload["functionRagLocked"]
+    assert (v080["runs"], v080["successes"], v080["humanHandoffs"]) == (3, 2, 1)
+    assert v080["incorrectAcceptedPatches"] == 0
+    assert v080["oneShot"] is True
     assert len(payload["traces"]) == 13
     assert len(payload["failures"]) == 3
     assert len(payload["recoveryScenarios"]) == 2
@@ -134,6 +138,9 @@ def test_demo_page_exposes_diff_and_failure_controls() -> None:
         "langgraph-blind-result",
         "langgraph-blind-integrity",
         "langgraph-blind-scope",
+        "v080-locked-result",
+        "v080-locked-integrity",
+        "v080-locked-scope",
     ):
         assert html.count(f'id="{element_id}"') == 1
         assert f'#{element_id}' in script
