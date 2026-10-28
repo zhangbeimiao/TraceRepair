@@ -35,7 +35,7 @@ if (-not $SkipFunctionBenchmark) {
 
     Write-Host "[2/5] Paired five-task development benchmark (no locked tasks)"
     & $Python scripts\run_benchmark.py `
-        --manifest evaluation\benchmarks\function-calling-v0.8.0-dev1.json `
+        --manifest evaluation\benchmarks\function-calling-v0.8.0-dev1.1.json `
         --split development
     if ($LASTEXITCODE -ne 0) { throw "Function Calling development benchmark failed." }
 

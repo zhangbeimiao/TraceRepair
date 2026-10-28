@@ -11,7 +11,7 @@ def test_prompt_registry_has_stable_unique_contracts() -> None:
     }
     assert len({item["prompt_id"] for item in manifest}) == len(manifest)
     assert all(len(item["sha256"]) == 64 for item in manifest)
-    assert all(item["version"] == "1.0.0" for item in manifest)
+    assert {item["version"] for item in manifest} == {"1.0.0", "1.1.0"}
     original = get_prompt("diagnosis")
     changed_template = type(original)(
         original.prompt_id,
@@ -43,3 +43,11 @@ def test_repository_cannot_close_the_untrusted_evidence_delimiter() -> None:
 
     assert user.count("</untrusted_repository_evidence>") == 1
     assert "&lt;/untrusted_repository_evidence&gt;" in user
+
+
+def test_patch_prompts_require_the_canonical_proposal_name() -> None:
+    for stage in ("patch_generation", "patch_review"):
+        prompt = get_prompt(stage)
+        assert prompt.version == "1.1.0"
+        assert "exact advertised function name propose_patch" in prompt.system
+        assert "never apply_patch" in prompt.system

@@ -1,0 +1,197 @@
+{
+  "agent_config": {
+    "path": "evaluation/configs/agent-v0.8.0-dev1.1.json",
+    "sha256": "31ab9d01f986d7395e89c5e4771adef5467001edecc817a2de454cfe9bf89dd8"
+  },
+  "agent_version": "0.8.0-dev1.1",
+  "all_function_schemas_sha256": "460ccfc4c140fc4a44615340916b71bd18bf40a6216995d5bf428ffef0339632",
+  "claim_boundary": "This manifest freezes a development protocol contract. It is not a repair-rate result and does not replace the published 0.7.0-dev2 locked evidence.",
+  "execution_boundary": {
+    "controller_only_operations": [
+      "apply_patch",
+      "run_tests",
+      "run_regression",
+      "state_transition"
+    ],
+    "model_has_execution_authority": false,
+    "model_visible_functions": [
+      "handoff",
+      "propose_patch",
+      "read_file",
+      "repo_map",
+      "search_code"
+    ],
+    "proposal_only_aliases": {
+      "apply_patch": "propose_patch"
+    }
+  },
+  "function_schemas": {
+    "handoff": {
+      "schema": {
+        "function": {
+          "description": "Stop safely and request a human when evidence is insufficient.",
+          "name": "handoff",
+          "parameters": {
+            "additionalProperties": false,
+            "properties": {
+              "reason": {
+                "maxLength": 500,
+                "type": "string"
+              }
+            },
+            "required": [],
+            "type": "object"
+          }
+        },
+        "type": "function"
+      },
+      "sha256": "13bd8bb5972aee3ba8b7e1c093323cbf065bf19d51fa385b025bb96db2b9480b"
+    },
+    "propose_patch": {
+      "schema": {
+        "function": {
+          "description": "Propose one complete unified diff. This does not apply or approve the patch.",
+          "name": "propose_patch",
+          "parameters": {
+            "additionalProperties": false,
+            "properties": {
+              "reason": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "unified_diff": {
+                "maxLength": 12000,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "unified_diff"
+            ],
+            "type": "object"
+          }
+        },
+        "type": "function"
+      },
+      "sha256": "aaec87d03170128a2d978305e851ef4a6cbd9698837e50880326831495589457"
+    },
+    "read_file": {
+      "schema": {
+        "function": {
+          "description": "Read a bounded line range from one exact path observed in a prior tool result.",
+          "name": "read_file",
+          "parameters": {
+            "additionalProperties": false,
+            "properties": {
+              "end_line": {
+                "maximum": 10000,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "path": {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              "start_line": {
+                "maximum": 10000,
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "path",
+              "start_line",
+              "end_line"
+            ],
+            "type": "object"
+          }
+        },
+        "type": "function"
+      },
+      "sha256": "c09979e901b8fe18d99db983c7bcc60981a4b1e1da035e768dde312022955b0b"
+    },
+    "repo_map": {
+      "schema": {
+        "function": {
+          "description": "List a bounded map of allowlisted Python source files.",
+          "name": "repo_map",
+          "parameters": {
+            "additionalProperties": false,
+            "properties": {
+              "max_files": {
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "max_files"
+            ],
+            "type": "object"
+          }
+        },
+        "type": "function"
+      },
+      "sha256": "6f4f43bc8ebf815645ddb96219e5bc09e0fbb46f5b15910782ef4e96c45b59e4"
+    },
+    "search_code": {
+      "schema": {
+        "function": {
+          "description": "Search allowlisted Python source using one literal substring, never regex.",
+          "name": "search_code",
+          "parameters": {
+            "additionalProperties": false,
+            "properties": {
+              "max_hits": {
+                "maximum": 30,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "query": {
+                "maxLength": 200,
+                "minLength": 2,
+                "type": "string"
+              }
+            },
+            "required": [
+              "query",
+              "max_hits"
+            ],
+            "type": "object"
+          }
+        },
+        "type": "function"
+      },
+      "sha256": "481ef9c659852013f50763c5ecf7d31244fa1f75afb46360824dfd417698d99a"
+    }
+  },
+  "planner_protocol": "native_function_calling",
+  "prompts": [
+    {
+      "prompt_id": "diagnosis-native-tools-v1",
+      "sha256": "4e1bb5b4903754ecd60cb0f71c13dc3fb570b372ff873c496d35f890c65c2398",
+      "stage": "diagnosis",
+      "version": "1.0.0"
+    },
+    {
+      "prompt_id": "patch-native-tools-v1.1",
+      "sha256": "66f10ecfc98881c52164d797f52e4b9220d662af59ff85e7abbe007b5bd25697",
+      "stage": "patch_generation",
+      "version": "1.1.0"
+    },
+    {
+      "prompt_id": "review-native-tools-v1.1",
+      "sha256": "32042bcd4d63c3764069e4f3c66dd277d8139c2cfd3808618fa570e5f317668d",
+      "stage": "patch_review",
+      "version": "1.1.0"
+    }
+  ],
+  "protocol_id": "native-function-calling-v0.8.0-dev1.1",
+  "schema_version": 1,
+  "source_sha256": {
+    "src/tracerepair/function_calling.py": "e534c0205e749fca8e487100e0b9370880488309074c3b6e15db8741f6be446c",
+    "src/tracerepair/prompt_registry.py": "915266e74aa851ee00c7ab2781a1a203935bb2e03026e6e20e61e1d1f958c4c7"
+  },
+  "status": "development_contract_not_locked_evaluation"
+}

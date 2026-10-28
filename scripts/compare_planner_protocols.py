@@ -13,10 +13,10 @@ DEFAULT_BASELINE = (
     ROOT / "evaluation" / "results" / "langgraph-review-offline-v0.7.0-dev2" / "report.json"
 )
 DEFAULT_NATIVE = (
-    ROOT / "evaluation" / "results" / "function-calling-v0.8.0-dev1" / "report.json"
+    ROOT / "evaluation" / "results" / "function-calling-v0.8.0-dev1.1" / "report.json"
 )
 DEFAULT_OUTPUT = (
-    ROOT / "evaluation" / "results" / "function-calling-v0.8.0-dev1" / "protocol-comparison.json"
+    ROOT / "evaluation" / "results" / "function-calling-v0.8.0-dev1.1" / "protocol-comparison.json"
 )
 FORMAT_MARKERS = (
     "invalid structured output",
@@ -49,7 +49,7 @@ def main() -> None:
         )
     payload = {
         "schema_version": 1,
-        "comparison_id": "custom-json-vs-native-functions-v0.8.0-dev1",
+        "comparison_id": "custom-json-vs-native-functions-v0.8.0-dev1.1",
         "split": "known_development_tasks",
         "paired_task_ids": sorted(baseline_ids),
         "baseline": _metrics(baseline, "custom_json", arguments.baseline),

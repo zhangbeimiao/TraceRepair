@@ -55,7 +55,7 @@ jobs:
           TRACEREPAIR_BAILIAN_MODEL: qwen3.8-flash
         run: python scripts/function_calling_probe.py
 
-      - name: Run v0.8.0-dev1 known development tasks only
+      - name: Run v0.8.0-dev1.1 known development tasks only
         env:
           DASHSCOPE_API_KEY: ${{ secrets.DASHSCOPE_API_KEY }}
           TRACEREPAIR_BAILIAN_BASE_URL: ${{ secrets.TRACEREPAIR_BAILIAN_BASE_URL }}
@@ -63,7 +63,7 @@ jobs:
         run: |
           mkdir -p .tmp tmp data
           python scripts/run_benchmark.py \
-            --manifest evaluation/benchmarks/function-calling-v0.8.0-dev1.json \
+            --manifest evaluation/benchmarks/function-calling-v0.8.0-dev1.1.json \
             --split development
 
       - name: Compare custom JSON and native Function Calling
@@ -84,7 +84,7 @@ jobs:
         with:
           name: tracerepair-v080-development-${{ github.run_id }}
           path: |
-            evaluation/results/function-calling-v0.8.0-dev1/
+            evaluation/results/function-calling-v0.8.0-dev1.1/
             evaluation/results/code-retrieval-v0.8.0-dev2/
             data/model-agent.sqlite3
             data/retrieval/

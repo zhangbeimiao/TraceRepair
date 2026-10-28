@@ -96,6 +96,35 @@ def test_native_patch_call_is_normalized_without_execution_authority(tmp_path: P
     store.close()
 
 
+def test_apply_patch_alias_remains_a_proposal_and_normalizes_audit_reason(
+    tmp_path: Path,
+) -> None:
+    diff = "--- a/src/example.py\n+++ b/src/example.py\n@@ -1 +1 @@\n-old = 1\n+old = 2"
+    transport = NativeTransport(
+        [function_call("apply_patch", {"patch": diff, "reason": {"detail": "verbose"}})]
+    )
+    store = make_store(tmp_path)
+
+    plan = NativeFunctionPlanner(transport).suggest(
+        "native-01",
+        store,
+        "verified source",
+        allowed_tools=set(),
+        allow_patch=True,
+        stage="patch_generation",
+    )
+
+    assert plan.kind == "patch"
+    assert plan.unified_diff == diff
+    assert plan.reason == "model selected propose_patch"
+    event = store.list_events("native-01")[-1]
+    assert event.payload["function_name"] == "propose_patch"
+    assert event.payload["provider_function_name"] == "apply_patch"
+    assert event.payload["compatibility_normalized"] is True
+    assert event.payload["tool"] is None
+    store.close()
+
+
 @pytest.mark.parametrize(
     ("call", "message"),
     [
@@ -109,7 +138,7 @@ def test_native_patch_call_is_normalized_without_execution_authority(tmp_path: P
             "plain literal",
         ),
         (
-            function_call("handoff", {"reason": "x" * 501}),
+            function_call("handoff", {"reason": "x" * 4001}),
             "reason is invalid",
         ),
     ],

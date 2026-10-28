@@ -19,7 +19,7 @@ from tracerepair.prompt_registry import get_prompt, prompt_manifest
 from tracerepair.store import TraceStore
 
 
-OUTPUT = ROOT / "evaluation" / "results" / "prompt-security-v0.8.0-dev1" / "report.json"
+OUTPUT = ROOT / "evaluation" / "results" / "prompt-security-v0.8.0-dev1.1" / "report.json"
 
 
 class StaticTransport:
@@ -120,6 +120,18 @@ def build_report() -> dict[str, object]:
             ),
             _rejection_case(
                 database,
+                "compatibility-alias-stage-jump",
+                _call(
+                    "apply_patch",
+                    {
+                        "patch": "--- a/src/a.py\n+++ b/src/a.py\n@@ -1 +1 @@\n-a=1\n+a=2",
+                        "reason": {"injected": True},
+                    },
+                ),
+                "outside the patch stage",
+            ),
+            _rejection_case(
+                database,
                 "regex-command-chain",
                 _call("search_code", {"query": "token|secret", "max_hits": 20}),
                 "plain literal",
@@ -137,7 +149,7 @@ def build_report() -> dict[str, object]:
     passed = sum(bool(case["passed"]) for case in cases)
     return {
         "schema_version": 1,
-        "evaluation_id": "prompt-security-v0.8.0-dev1",
+        "evaluation_id": "prompt-security-v0.8.0-dev1.1",
         "evaluation_type": "deterministic_host_boundary_contract",
         "prompt_manifest": prompt_manifest(),
         "cases": cases,

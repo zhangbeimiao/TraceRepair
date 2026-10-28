@@ -21,7 +21,7 @@ def test_project_version_matches_package_metadata() -> None:
 
 
 def test_development_agent_does_not_relabel_frozen_historical_evidence() -> None:
-    assert AGENT_VERSION == "0.8.0-dev1"
+    assert AGENT_VERSION == "0.8.0-dev1.1"
     assert MAX_COMPLETION_TOKENS == 800
     frozen = json.loads(
         (ROOT / "evaluation/frozen/historical-python-v1.0.0.json").read_text(
@@ -63,14 +63,22 @@ def test_development_agent_does_not_relabel_frozen_historical_evidence() -> None
             encoding="utf-8"
         )
     )
-    development = json.loads(
+    initial_native = json.loads(
         (ROOT / "evaluation/configs/agent-v0.8.0-dev1.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    development = json.loads(
+        (ROOT / "evaluation/configs/agent-v0.8.0-dev1.1.json").read_text(
             encoding="utf-8"
         )
     )
 
     assert development["agent_version"] == AGENT_VERSION
-    assert development["status"] == "development_only_not_benchmarked"
+    assert development["status"] == "development_only_protocol_compatibility_revision"
+    assert initial_native["agent_version"] == "0.8.0-dev1"
+    assert development["parent_agent_version"] == "0.8.0-dev1"
+    assert development["preserved_negative_evidence"]["result"].startswith("0/5 pass@1")
     assert development_v1["agent_version"] == "0.6.0-dev1"
     assert development_v2["agent_version"] == "0.6.0-dev2"
     assert development_v3["agent_version"] == "0.6.0-dev3"

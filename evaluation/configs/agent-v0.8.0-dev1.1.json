@@ -1,0 +1,61 @@
+{
+  "agent_version": "0.8.0-dev1.1",
+  "parent_agent_version": "0.8.0-dev1",
+  "status": "development_only_protocol_compatibility_revision",
+  "architecture": "langgraph_end_to_end",
+  "durable_state": "sqlite_only",
+  "langgraph_checkpointer": false,
+  "model": "qwen3.8-flash",
+  "planner_protocol": "native_function_calling",
+  "planner": {
+    "max_completion_tokens": 800,
+    "max_calls_per_task": 5,
+    "max_total_completion_tokens": 3072,
+    "tool_choice": "required",
+    "parallel_tool_calls": false
+  },
+  "prompt_registry": {
+    "source": "src/tracerepair/prompt_registry.py",
+    "stages": ["diagnosis", "patch_generation", "patch_review"],
+    "persist_prompt_sha256": true,
+    "untrusted_repository_delimiters": true,
+    "patch_prompt_version": "1.1.0"
+  },
+  "function_contract": {
+    "model_visible": ["repo_map", "search_code", "read_file", "propose_patch", "handoff"],
+    "controller_only": ["apply_patch", "run_tests", "run_regression"],
+    "proposal_only_aliases": {"apply_patch": "propose_patch"},
+    "alias_scope": "patch_stage_only_and_still_subject_to_all_deterministic_gates",
+    "reason_field_is_authorization": false,
+    "stage_allowlist": true,
+    "argument_validation": true,
+    "schema_sha256_persisted": true,
+    "execution_authority": false
+  },
+  "semantic_review": {
+    "allowed_outputs": ["propose_patch", "handoff"],
+    "tool_access": false,
+    "file_write_access": false,
+    "shell_access": false,
+    "test_access": false,
+    "execution_authority": false
+  },
+  "workflow": {
+    "max_diagnosis_turns": 3,
+    "max_patch_attempts": 1,
+    "semantic_review_attempts": 1,
+    "final_success_state": "awaiting_review"
+  },
+  "verification": ["patch_policy", "target_test", "regression_test", "human_review"],
+  "preserved_negative_evidence": {
+    "agent_version": "0.8.0-dev1",
+    "benchmark": "function-calling-v0.8.0-dev1",
+    "result": "0/5 pass@1; 5 format-contract safe stops; 0 incorrect accepted patches"
+  },
+  "frozen_predecessor_unchanged": {
+    "agent_version": "0.7.0-dev2",
+    "blind_benchmark": "langgraph-blind-six-repository-v0.7.0-dev2",
+    "result": "2/6 pass@1; 4 safe handoffs; 0 incorrect accepted patches"
+  },
+  "evaluation_rule": "development tasks only; never rerun or overwrite the parent benchmark"
+}

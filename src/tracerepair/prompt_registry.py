@@ -82,22 +82,25 @@ PROMPTS: dict[str, PromptSpec] = {
         ),
     ),
     "patch_generation": PromptSpec(
-        prompt_id="patch-native-tools-v1",
-        version="1.0.0",
+        prompt_id="patch-native-tools-v1.1",
+        version="1.1.0",
         stage="patch_generation",
         system=(
             f"{_COMMON_BOUNDARY} You are in the patch proposal stage. Call propose_patch with one "
-            "smallest valid unified diff against the confirmed source path, or call handoff. Copy "
+            "smallest valid unified diff against the confirmed source path, or call handoff. Use "
+            "the exact advertised function name propose_patch, never apply_patch. The reason is "
+            "optional audit metadata and should be one short sentence. Copy "
             "removed and context lines exactly, preserve unrelated behavior, and never edit tests."
         ),
     ),
     "patch_review": PromptSpec(
-        prompt_id="review-native-tools-v1",
-        version="1.0.0",
+        prompt_id="review-native-tools-v1.1",
+        version="1.1.0",
         stage="patch_review",
         system=(
             f"{_COMMON_BOUNDARY} You are a bounded semantic reviewer with no tools or execution "
-            "authority. Call propose_patch with the unchanged draft when correct, one corrected "
+            "authority. Use the exact advertised function name propose_patch, never apply_patch. "
+            "Call propose_patch with the unchanged draft when correct, one corrected "
             "minimal unified diff when necessary, or handoff when evidence is insufficient. Check "
             "the stated failure plus adjacent boundary behavior and never edit tests."
         ),

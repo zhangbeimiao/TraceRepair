@@ -6,7 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "freeze_protocol_manifest.py"
-MANIFEST = ROOT / "evaluation" / "protocols" / "native-function-calling-v0.8.0-dev1.json"
+MANIFEST = ROOT / "evaluation" / "protocols" / "native-function-calling-v0.8.0-dev1.1.json"
 
 
 def _module():
@@ -28,3 +28,6 @@ def test_native_protocol_manifest_matches_current_sources() -> None:
     assert len(payload["prompts"]) == 3
     assert len(payload["function_schemas"]) == 5
     assert payload["execution_boundary"]["model_has_execution_authority"] is False
+    assert payload["execution_boundary"]["proposal_only_aliases"] == {
+        "apply_patch": "propose_patch"
+    }

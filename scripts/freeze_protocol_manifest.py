@@ -15,8 +15,8 @@ from tracerepair.function_calling import FUNCTION_SCHEMAS, _canonical_sha256
 from tracerepair.prompt_registry import prompt_manifest
 
 
-OUTPUT = ROOT / "evaluation" / "protocols" / "native-function-calling-v0.8.0-dev1.json"
-CONFIG = ROOT / "evaluation" / "configs" / "agent-v0.8.0-dev1.json"
+OUTPUT = ROOT / "evaluation" / "protocols" / "native-function-calling-v0.8.0-dev1.1.json"
+CONFIG = ROOT / "evaluation" / "configs" / "agent-v0.8.0-dev1.1.json"
 
 
 def protocol_payload() -> dict[str, object]:
@@ -26,9 +26,9 @@ def protocol_payload() -> dict[str, object]:
     )
     return {
         "schema_version": 1,
-        "protocol_id": "native-function-calling-v0.8.0-dev1",
+        "protocol_id": "native-function-calling-v0.8.0-dev1.1",
         "status": "development_contract_not_locked_evaluation",
-        "agent_version": "0.8.0-dev1",
+        "agent_version": "0.8.0-dev1.1",
         "planner_protocol": "native_function_calling",
         "prompts": prompt_manifest(),
         "function_schemas": {
@@ -55,6 +55,7 @@ def protocol_payload() -> dict[str, object]:
                 "state_transition",
             ],
             "model_has_execution_authority": False,
+            "proposal_only_aliases": {"apply_patch": "propose_patch"},
         },
         "claim_boundary": (
             "This manifest freezes a development protocol contract. It is not a repair-rate "

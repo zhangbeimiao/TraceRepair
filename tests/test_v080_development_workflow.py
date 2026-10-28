@@ -14,7 +14,7 @@ def test_v080_online_workflow_is_manual_and_development_only() -> None:
     assert "--split development" in text
     assert "--split locked" not in text
     assert "--split all" not in text
-    assert "function-calling-v0.8.0-dev1.json" in text
+    assert "function-calling-v0.8.0-dev1.1.json" in text
     assert "langgraph-blind" not in text
 
 

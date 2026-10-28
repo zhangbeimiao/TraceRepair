@@ -22,6 +22,7 @@ from tracerepair.store import TraceStore
 
 READ_ONLY_FUNCTIONS = {"repo_map", "search_code", "read_file"}
 CONTROL_FUNCTIONS = {"propose_patch", "handoff"}
+FUNCTION_ALIASES = {"apply_patch": "propose_patch"}
 
 
 def _function(name: str, description: str, properties: dict[str, object], required: list[str]):
@@ -73,13 +74,13 @@ FUNCTION_SCHEMAS: dict[str, dict[str, object]] = {
             "unified_diff": {"type": "string", "minLength": 1, "maxLength": 12000},
             "reason": {"type": "string", "maxLength": 500},
         },
-        ["unified_diff", "reason"],
+        ["unified_diff"],
     ),
     "handoff": _function(
         "handoff",
         "Stop safely and request a human when evidence is insufficient.",
         {"reason": {"type": "string", "maxLength": 500}},
-        ["reason"],
+        [],
     ),
 }
 
@@ -155,6 +156,8 @@ class NativeFunctionPlanner:
                 stage=resolved_stage,
                 kind="invalid",
                 function_name=None,
+                provider_function_name=_response_function_name(response),
+                compatibility_normalized=False,
                 arguments_sha256=None,
                 tool_call_id_sha256=None,
                 policy_accepted=False,
@@ -176,6 +179,8 @@ class NativeFunctionPlanner:
             stage=resolved_stage,
             kind=plan.kind,
             function_name=str(call_meta["name"]),
+            provider_function_name=str(call_meta["provider_name"]),
+            compatibility_normalized=call_meta["compatibility_normalized"] == "true",
             arguments_sha256=str(call_meta["arguments_sha256"]),
             tool_call_id_sha256=str(call_meta["tool_call_id_sha256"]),
             policy_accepted=True,
@@ -205,8 +210,11 @@ class NativeFunctionPlanner:
         function = call.get("function")
         if call.get("type", "function") != "function" or not isinstance(function, Mapping):
             raise PlannerError("model returned an invalid function-call envelope")
-        name = function.get("name")
-        if not isinstance(name, str) or name not in FUNCTION_SCHEMAS:
+        provider_name = function.get("name")
+        if not isinstance(provider_name, str):
+            raise PlannerError("model proposed an unknown function")
+        name = FUNCTION_ALIASES.get(provider_name, provider_name)
+        if name not in FUNCTION_SCHEMAS:
             raise PlannerError("model proposed an unknown function")
         raw_arguments = function.get("arguments", "{}")
         if isinstance(raw_arguments, str):
@@ -218,6 +226,7 @@ class NativeFunctionPlanner:
             arguments = raw_arguments
         if not isinstance(arguments, dict):
             raise PlannerError("model function arguments must be an object")
+        arguments = _normalize_compatibility_arguments(provider_name, name, arguments)
         _validate_arguments(name, arguments)
         if name in READ_ONLY_FUNCTIONS and name not in permitted:
             raise PlannerError("model proposed a function outside the current stage")
@@ -240,6 +249,8 @@ class NativeFunctionPlanner:
         call_id = str(call.get("id", "missing"))
         return plan, {
             "name": name,
+            "provider_name": provider_name,
+            "compatibility_normalized": str(provider_name != name).lower(),
             "arguments_sha256": _canonical_sha256(arguments),
             "tool_call_id_sha256": hashlib.sha256(call_id.encode("utf-8")).hexdigest(),
         }
@@ -259,6 +270,8 @@ class NativeFunctionPlanner:
         stage: str,
         kind: str,
         function_name: str | None,
+        provider_function_name: str | None,
+        compatibility_normalized: bool,
         arguments_sha256: str | None,
         tool_call_id_sha256: str | None,
         policy_accepted: bool,
@@ -283,6 +296,8 @@ class NativeFunctionPlanner:
             "kind": kind,
             "tool": function_name if function_name in READ_ONLY_FUNCTIONS else None,
             "function_name": function_name,
+            "provider_function_name": provider_function_name,
+            "compatibility_normalized": compatibility_normalized,
             "completion_tokens": completion_tokens,
             "prompt_chars": prompt_chars,
             "prompt_id": prompt_id,
@@ -336,8 +351,36 @@ def _validate_arguments(name: str, arguments: dict[str, object]) -> None:
             raise PlannerError("model patch is not a bounded string")
     if "reason" in arguments:
         reason = arguments["reason"]
-        if not isinstance(reason, str) or len(reason) > 500:
+        if isinstance(reason, str) and len(reason) > 4_000:
             raise PlannerError("model reason is invalid")
+
+
+def _normalize_compatibility_arguments(
+    provider_name: str,
+    canonical_name: str,
+    arguments: dict[str, object],
+) -> dict[str, object]:
+    """Normalize one proposal-only alias without expanding execution authority."""
+
+    normalized = dict(arguments)
+    if provider_name == "apply_patch" and canonical_name == "propose_patch":
+        alternatives = [key for key in ("patch", "diff") if key in normalized]
+        if "unified_diff" not in normalized and len(alternatives) == 1:
+            normalized["unified_diff"] = normalized.pop(alternatives[0])
+    return normalized
+
+
+def _response_function_name(response: Mapping[str, object]) -> str | None:
+    """Return a bounded identifier for diagnostics without persisting arguments."""
+
+    try:
+        calls = response["choices"][0]["message"]["tool_calls"]  # type: ignore[index]
+        name = calls[0]["function"]["name"]  # type: ignore[index]
+    except (KeyError, IndexError, TypeError):
+        return None
+    if not isinstance(name, str) or len(name) > 80:
+        return None
+    return name if name.replace("_", "").isalnum() else None
 
 
 def _bounded_integer(value: object, minimum: int, maximum: int, name: str) -> int:
