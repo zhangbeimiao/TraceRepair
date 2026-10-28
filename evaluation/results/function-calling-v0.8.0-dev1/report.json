@@ -1,0 +1,283 @@
+{
+  "attempts": [
+    {
+      "attempt_started_record_sha256": "bc81c4b01b39b356a2c0d314f4db13783db0e0a3214332d409f3ee822ac6009c",
+      "benchmark_id": "function-calling-v0.8.0-dev1",
+      "benchmark_task_id": "humanize-negative-fraction",
+      "completion_tokens": 376,
+      "log_path": "evaluation/results/function-calling-v0.8.0-dev1/logs/humanize-negative-fraction.log",
+      "log_sha256": "4b82d173b5659e5cde3975974ca425365dd8a3d61eb4d604d5f5ffb7ec141844",
+      "manifest_sha256": "41d32dfc1956664fea4430b545bb9f5ba43dab5559bbb3648fda47872db37137",
+      "model_calls": 3,
+      "previous_record_sha256": "bc81c4b01b39b356a2c0d314f4db13783db0e0a3214332d409f3ee822ac6009c",
+      "process_returncode": 1,
+      "record_kind": "attempt_finished",
+      "record_sha256": "35e35b0cce56f6dc7abc6176cb91036f91c70816dbb23c08f63720da0a9ebd8a",
+      "recorded_at": "2026-10-28T05:53:53.557826+00:00",
+      "regression_passed": false,
+      "repository_sha256": "ea3ab743793c3b84d53f093975a013a6eb9108477ebd35c85f236e2080cf6193",
+      "sequence": 2,
+      "source": {
+        "buggy_commit": "976484a655df046aa6849f440a4f0cd44fc4918c",
+        "fixed_commit": "c2c410c1521a3b1eb3efef52f3b06c2e42f7b92b",
+        "issue_url": "https://github.com/python-humanize/humanize/pull/320",
+        "repository_url": "https://github.com/python-humanize/humanize"
+      },
+      "split": "development",
+      "status": "needs_human",
+      "stop_reason": "planner stopped safely: model reason is invalid",
+      "success": false,
+      "target_test_passed": false,
+      "task_config_sha256": "e085648cc1d813a5c9404dcb7cb541a24b22509d8e2a0be4005cd5683a57f5b6",
+      "timed_out": false,
+      "tool_calls": 2,
+      "tool_failures": 0,
+      "trace_task_id": "model-agent-repo-humanize-negative-fraction-2b373783",
+      "wall_seconds": 8.296
+    },
+    {
+      "attempt_started_record_sha256": "9857e866c1246bfe6ec93dbfd55b6ddfec50f084470a79708c4588e649b811cf",
+      "benchmark_id": "function-calling-v0.8.0-dev1",
+      "benchmark_task_id": "boltons-empty-multireplace",
+      "completion_tokens": 145,
+      "log_path": "evaluation/results/function-calling-v0.8.0-dev1/logs/boltons-empty-multireplace.log",
+      "log_sha256": "756beaa49ef0175e74b4a6816fe68f39a5e4c5a2fab17fd0be4b58cf8a7e1e73",
+      "manifest_sha256": "41d32dfc1956664fea4430b545bb9f5ba43dab5559bbb3648fda47872db37137",
+      "model_calls": 3,
+      "previous_record_sha256": "9857e866c1246bfe6ec93dbfd55b6ddfec50f084470a79708c4588e649b811cf",
+      "process_returncode": 1,
+      "record_kind": "attempt_finished",
+      "record_sha256": "66b9d00157afed41c1cc01c4254dc9b4d97cf72dd66fb8d47ce585f7fbc4d42e",
+      "recorded_at": "2026-10-28T05:53:58.563867+00:00",
+      "regression_passed": false,
+      "repository_sha256": "8b55bc3c3b7d3a2ec81cb5aaa985fe50a106d1ad3e7f94093d25e52089e4c9c5",
+      "sequence": 4,
+      "source": {
+        "buggy_commit": "0a3084e3058fd814684b1fc98343ec2e76d13ddc",
+        "fixed_commit": "435774ef8b10c1355bf77483a837945034011754",
+        "issue_url": null,
+        "repository_url": "https://github.com/mahmoud/boltons"
+      },
+      "split": "development",
+      "status": "needs_human",
+      "stop_reason": "planner stopped safely: model proposed an unknown function",
+      "success": false,
+      "target_test_passed": false,
+      "task_config_sha256": "757c251d82e67974cbc71be021433cf48335e265771bcd3d2c5aaeffd365ea59",
+      "timed_out": false,
+      "tool_calls": 2,
+      "tool_failures": 0,
+      "trace_task_id": "model-agent-repo-boltons-empty-multireplace-e3be0669",
+      "wall_seconds": 4.89
+    },
+    {
+      "attempt_started_record_sha256": "cbef5fa5c88b094b6b0ccae9a64f85e1da26fb8518c63b8bb7b3118c04d9aade",
+      "benchmark_id": "function-calling-v0.8.0-dev1",
+      "benchmark_task_id": "more-itertools-falsey-validator",
+      "completion_tokens": 632,
+      "log_path": "evaluation/results/function-calling-v0.8.0-dev1/logs/more-itertools-falsey-validator.log",
+      "log_sha256": "a6e0821445a934c016947fa3ad704df1fc34213f6f6c266b84a12e27367053a0",
+      "manifest_sha256": "41d32dfc1956664fea4430b545bb9f5ba43dab5559bbb3648fda47872db37137",
+      "model_calls": 4,
+      "previous_record_sha256": "cbef5fa5c88b094b6b0ccae9a64f85e1da26fb8518c63b8bb7b3118c04d9aade",
+      "process_returncode": 1,
+      "record_kind": "attempt_finished",
+      "record_sha256": "8072585a554d3e22710cdfb656b926dba9f838c77a306535cf1cf14a3bd598e9",
+      "recorded_at": "2026-10-28T05:54:11.917806+00:00",
+      "regression_passed": false,
+      "repository_sha256": "5e9a0e70fcf09eff6293de9459e5497b4d8bf2425388ecedbd677c76c0168bb5",
+      "sequence": 6,
+      "source": {
+        "buggy_commit": "1ea82a711c69f590054987b5cb194157f8ce8ac4",
+        "fixed_commit": "67fcf640477c78605580f5ee703a54c73c1e7a8a",
+        "issue_url": "https://github.com/more-itertools/more-itertools/pull/1308",
+        "repository_url": "https://github.com/more-itertools/more-itertools"
+      },
+      "split": "development",
+      "status": "needs_human",
+      "stop_reason": "planner stopped safely: model reason is invalid",
+      "success": false,
+      "target_test_passed": false,
+      "task_config_sha256": "245812df6c9523705eb3e1f53cc418ff69b1bb84dce656f294a6e51a7dfa5d52",
+      "timed_out": false,
+      "tool_calls": 4,
+      "tool_failures": 0,
+      "trace_task_id": "model-agent-repo-more-itertools-falsey-validator-279f7b7a",
+      "wall_seconds": 13.281
+    },
+    {
+      "attempt_started_record_sha256": "5a0102c9b4089c4f0733ed65dbce4bfd3d7c53485cb67867be2637eeef8cd3ac",
+      "benchmark_id": "function-calling-v0.8.0-dev1",
+      "benchmark_task_id": "tqdm-sizeless-bool",
+      "completion_tokens": 280,
+      "log_path": "evaluation/results/function-calling-v0.8.0-dev1/logs/tqdm-sizeless-bool.log",
+      "log_sha256": "220fa455fd1472713954bdfb1ae076d92673d39fa5c8f1d4efddf09679275dd9",
+      "manifest_sha256": "41d32dfc1956664fea4430b545bb9f5ba43dab5559bbb3648fda47872db37137",
+      "model_calls": 4,
+      "previous_record_sha256": "5a0102c9b4089c4f0733ed65dbce4bfd3d7c53485cb67867be2637eeef8cd3ac",
+      "process_returncode": 1,
+      "record_kind": "attempt_finished",
+      "record_sha256": "2ef0101a9e847b41ddc7995a4d441278d38f4c9b1332d0e66a5fefdbf41b5165",
+      "recorded_at": "2026-10-28T05:54:22.176188+00:00",
+      "regression_passed": false,
+      "repository_sha256": "030cd38f607eb99327d9a383dd5639944cec1bebbd0e3cdda590ec39d387fd92",
+      "sequence": 8,
+      "source": {
+        "buggy_commit": "c2599e3cd6087429f48bae34347ec5d2473c8392",
+        "fixed_commit": "73962a47026dd980ac0758820efc9c41cbf938e0",
+        "issue_url": null,
+        "repository_url": "https://github.com/tqdm/tqdm"
+      },
+      "split": "development",
+      "status": "needs_human",
+      "stop_reason": "planner stopped safely: model reason is invalid",
+      "success": false,
+      "target_test_passed": false,
+      "task_config_sha256": "5c6c72a46126d06a463bb825125a3030ef199853d8344aac3386905078f39d41",
+      "timed_out": false,
+      "tool_calls": 7,
+      "tool_failures": 0,
+      "trace_task_id": "model-agent-repo-tqdm-sizeless-bool-0b03359a",
+      "wall_seconds": 10.141
+    },
+    {
+      "attempt_started_record_sha256": "2b126ba750eccff38d60500805b9d8c9cc1e7730f8abf44ba7733d7e68628b7f",
+      "benchmark_id": "function-calling-v0.8.0-dev1",
+      "benchmark_task_id": "httpie-host-header-offline",
+      "completion_tokens": 764,
+      "log_path": "evaluation/results/function-calling-v0.8.0-dev1/logs/httpie-host-header-offline.log",
+      "log_sha256": "565c2da0d56adddfd26190dea053ebf363fad6285f22debaa959ff363878fa82",
+      "manifest_sha256": "41d32dfc1956664fea4430b545bb9f5ba43dab5559bbb3648fda47872db37137",
+      "model_calls": 4,
+      "previous_record_sha256": "2b126ba750eccff38d60500805b9d8c9cc1e7730f8abf44ba7733d7e68628b7f",
+      "process_returncode": 1,
+      "record_kind": "attempt_finished",
+      "record_sha256": "e3a17cebfc7d3678625ba8e8a5fdbf2eb00dd141852258801b8600b24b65be99",
+      "recorded_at": "2026-10-28T05:54:35.847254+00:00",
+      "regression_passed": false,
+      "repository_sha256": "40b403248592f6d362acc2b1a313996175fe31adfe279c03b3832dd137184c06",
+      "sequence": 10,
+      "source": {
+        "buggy_commit": "8c892edd4fe700a7ca5cc733dcb4817831d253e2",
+        "fixed_commit": "040d981f00c3f6830b2d0db3daf3c64c080e96e3",
+        "issue_url": null,
+        "repository_url": "https://github.com/httpie/cli"
+      },
+      "split": "development",
+      "status": "needs_human",
+      "stop_reason": "planner stopped safely: model reason is invalid",
+      "success": false,
+      "target_test_passed": false,
+      "task_config_sha256": "586bf51d883f7ea5a846e80e99e7280bc0e8436cd875d4d808103386274c8f80",
+      "timed_out": false,
+      "tool_calls": 2,
+      "tool_failures": 0,
+      "trace_task_id": "model-agent-repo-httpie-host-header-offline-02bc9e53",
+      "wall_seconds": 13.563
+    }
+  ],
+  "benchmark": {
+    "agent_version": "0.8.0-dev1",
+    "benchmark_id": "function-calling-v0.8.0-dev1",
+    "completion_cny_per_million_tokens": 0.0,
+    "manifest_sha256": "41d32dfc1956664fea4430b545bb9f5ba43dab5559bbb3648fda47872db37137",
+    "model": "qwen3.8-flash",
+    "protocol": "pass@1",
+    "schema_version": 1,
+    "tasks": [
+      {
+        "repository_sha256": "ea3ab743793c3b84d53f093975a013a6eb9108477ebd35c85f236e2080cf6193",
+        "source": {
+          "buggy_commit": "976484a655df046aa6849f440a4f0cd44fc4918c",
+          "fixed_commit": "c2c410c1521a3b1eb3efef52f3b06c2e42f7b92b",
+          "issue_url": "https://github.com/python-humanize/humanize/pull/320",
+          "repository_url": "https://github.com/python-humanize/humanize"
+        },
+        "split": "development",
+        "task_config": "humanize-negative-fraction.json",
+        "task_config_sha256": "e085648cc1d813a5c9404dcb7cb541a24b22509d8e2a0be4005cd5683a57f5b6",
+        "task_id": "humanize-negative-fraction"
+      },
+      {
+        "repository_sha256": "8b55bc3c3b7d3a2ec81cb5aaa985fe50a106d1ad3e7f94093d25e52089e4c9c5",
+        "source": {
+          "buggy_commit": "0a3084e3058fd814684b1fc98343ec2e76d13ddc",
+          "fixed_commit": "435774ef8b10c1355bf77483a837945034011754",
+          "issue_url": null,
+          "repository_url": "https://github.com/mahmoud/boltons"
+        },
+        "split": "development",
+        "task_config": "boltons-empty-multireplace.json",
+        "task_config_sha256": "757c251d82e67974cbc71be021433cf48335e265771bcd3d2c5aaeffd365ea59",
+        "task_id": "boltons-empty-multireplace"
+      },
+      {
+        "repository_sha256": "5e9a0e70fcf09eff6293de9459e5497b4d8bf2425388ecedbd677c76c0168bb5",
+        "source": {
+          "buggy_commit": "1ea82a711c69f590054987b5cb194157f8ce8ac4",
+          "fixed_commit": "67fcf640477c78605580f5ee703a54c73c1e7a8a",
+          "issue_url": "https://github.com/more-itertools/more-itertools/pull/1308",
+          "repository_url": "https://github.com/more-itertools/more-itertools"
+        },
+        "split": "development",
+        "task_config": "more-itertools-falsey-validator.json",
+        "task_config_sha256": "245812df6c9523705eb3e1f53cc418ff69b1bb84dce656f294a6e51a7dfa5d52",
+        "task_id": "more-itertools-falsey-validator"
+      },
+      {
+        "repository_sha256": "030cd38f607eb99327d9a383dd5639944cec1bebbd0e3cdda590ec39d387fd92",
+        "source": {
+          "buggy_commit": "c2599e3cd6087429f48bae34347ec5d2473c8392",
+          "fixed_commit": "73962a47026dd980ac0758820efc9c41cbf938e0",
+          "issue_url": null,
+          "repository_url": "https://github.com/tqdm/tqdm"
+        },
+        "split": "development",
+        "task_config": "tqdm-sizeless-bool.json",
+        "task_config_sha256": "5c6c72a46126d06a463bb825125a3030ef199853d8344aac3386905078f39d41",
+        "task_id": "tqdm-sizeless-bool"
+      },
+      {
+        "repository_sha256": "40b403248592f6d362acc2b1a313996175fe31adfe279c03b3832dd137184c06",
+        "source": {
+          "buggy_commit": "8c892edd4fe700a7ca5cc733dcb4817831d253e2",
+          "fixed_commit": "040d981f00c3f6830b2d0db3daf3c64c080e96e3",
+          "issue_url": null,
+          "repository_url": "https://github.com/httpie/cli"
+        },
+        "split": "development",
+        "task_config": "httpie-host-header-offline.json",
+        "task_config_sha256": "586bf51d883f7ea5a846e80e99e7280bc0e8436cd875d4d808103386274c8f80",
+        "task_id": "httpie-host-header-offline"
+      }
+    ]
+  },
+  "generated_at": "2026-10-28T05:54:35.870248+00:00",
+  "integrity": {
+    "claim": "tamper-evident after the terminal hash is published; not an immutable store",
+    "ledger_records_verified": 10,
+    "terminal_record_sha256": "e3a17cebfc7d3678625ba8e8a5fdbf2eb00dd141852258801b8600b24b65be99"
+  },
+  "report_sha256": "783cc9711fadb7babda9c0bf7199feb0d35bfef5389b216dd7311e91c2817942",
+  "schema_version": 1,
+  "summary": {
+    "attempted_tasks": 5,
+    "average_completion_tokens": 439.4,
+    "cost_scope": "unavailable: no completion-token price was frozen in the manifest",
+    "estimated_completion_cost_cny": null,
+    "expected_tasks": 5,
+    "failures": 5,
+    "human_handoffs": 5,
+    "incorrect_accepted_patches": 0,
+    "missing_task_ids": [],
+    "p50_wall_seconds": 10.141,
+    "p95_wall_seconds": 13.563,
+    "pass_at_1": 0.0,
+    "successes": 0,
+    "total_completion_tokens": 2197,
+    "wilson_95_percent": {
+      "lower": 0.0,
+      "upper": 0.4345
+    }
+  }
+}
