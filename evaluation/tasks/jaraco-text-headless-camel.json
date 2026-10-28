@@ -1,0 +1,15 @@
+{
+  "$schema": "../../docs/repository-task.schema.json",
+  "schema_version": 1,
+  "name": "jaraco-text-headless-camel",
+  "repository_root": "../repositories/jaraco-text-headless-camel",
+  "issue": "WordSet.headless_camel_case() must return the camel-cased string instead of an itertools.chain object.",
+  "source_allowlist": ["jaraco"],
+  "target_test": "tests/test_tracerepair_headless_camel.py::test_headless_camel_case_returns_text",
+  "regression_suite": "tests/test_tracerepair_headless_camel.py",
+  "diagnostic_queries": ["def headless_camel_case", "class WordSet", "camel_case"],
+  "pythonpath": ["."],
+  "timeout_seconds": 120,
+  "max_repository_bytes": 31457280,
+  "max_repository_files": 2000
+}

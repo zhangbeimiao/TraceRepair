@@ -46,6 +46,22 @@
         "rrf_k": {"type": "integer", "minimum": 1, "maximum": 1000}
       }
     },
+    "contracts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "agent_config_sha256",
+        "prompt_protocol_sha256",
+        "prompt_security_sha256",
+        "retrieval_gate_sha256"
+      ],
+      "properties": {
+        "agent_config_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "prompt_protocol_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "prompt_security_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "retrieval_gate_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
     "tasks": {
       "type": "array",
       "minItems": 2,

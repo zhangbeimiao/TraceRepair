@@ -59,6 +59,7 @@ def main() -> None:
 
     try:
         manifest = BenchmarkManifest.load(arguments.manifest)
+        _validate_frozen_contracts(manifest)
         # Oracle-only dry runs do not execute an Agent and must remain able to
         # verify historical manifests after the active runtime version moves on.
         if not arguments.dry_run:
@@ -146,6 +147,40 @@ def _validate_runtime(manifest: BenchmarkManifest) -> None:
         raise BenchmarkManifestError(
             f"manifest model {manifest.model} does not match runtime {MODEL_ID}"
         )
+
+
+def _validate_frozen_contracts(manifest: BenchmarkManifest) -> None:
+    """Bind a final benchmark to byte-exact Agent, Prompt, and RAG evidence."""
+
+    if manifest.contracts is None:
+        return
+    paths = {
+        "agent_config_sha256": ROOT
+        / "evaluation"
+        / "configs"
+        / f"agent-v{manifest.agent_version}.json",
+        "prompt_protocol_sha256": ROOT
+        / "evaluation"
+        / "protocols"
+        / "native-function-calling-v0.8.0-dev1.1.json",
+        "prompt_security_sha256": ROOT
+        / "evaluation"
+        / "results"
+        / "prompt-security-v0.8.0-dev1.1"
+        / "report.json",
+        "retrieval_gate_sha256": ROOT
+        / "evaluation"
+        / "results"
+        / "code-retrieval-v0.8.0-dev2.1"
+        / "activation-gate.json",
+    }
+    for field, path in paths.items():
+        if not path.is_file():
+            raise BenchmarkManifestError(f"frozen contract file is missing: {path.name}")
+        expected = getattr(manifest.contracts, field)
+        actual = hashlib.sha256(path.read_bytes()).hexdigest()
+        if actual != expected:
+            raise BenchmarkManifestError(f"frozen contract checksum mismatch: {field}")
 
 
 def _reject_manifest_reuse(

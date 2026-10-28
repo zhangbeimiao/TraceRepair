@@ -18,6 +18,7 @@ SCHEMA_VERSION = 1
 _BENCHMARK_ID = re.compile(r"^[a-z0-9][a-z0-9.-]{2,63}$")
 _TASK_ID = re.compile(r"^[a-z0-9][a-z0-9-]{1,63}$")
 _COMMIT = re.compile(r"^[0-9a-f]{40}$")
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _IGNORED_PARTS = {
     ".git",
     ".hg",
@@ -68,6 +69,14 @@ class RetrievalConfig:
 
 
 @dataclass(frozen=True)
+class FrozenContracts:
+    agent_config_sha256: str
+    prompt_protocol_sha256: str
+    prompt_security_sha256: str
+    retrieval_gate_sha256: str
+
+
+@dataclass(frozen=True)
 class BenchmarkManifest:
     benchmark_id: str
     agent_version: str
@@ -78,6 +87,7 @@ class BenchmarkManifest:
     manifest_sha256: str
     tasks: tuple[BenchmarkTask, ...]
     retrieval: RetrievalConfig | None = None
+    contracts: FrozenContracts | None = None
 
     @classmethod
     def load(cls, path: Path) -> "BenchmarkManifest":
@@ -129,6 +139,7 @@ class BenchmarkManifest:
             seen_configs.add(task.config_path)
             tasks.append(task)
         retrieval = _load_retrieval(payload.get("retrieval"))
+        contracts = _load_contracts(payload.get("contracts"))
         return cls(
             benchmark_id=benchmark_id,
             agent_version=agent_version,
@@ -139,6 +150,7 @@ class BenchmarkManifest:
             manifest_sha256=hashlib.sha256(raw).hexdigest(),
             tasks=tuple(tasks),
             retrieval=retrieval,
+            contracts=contracts,
         )
 
     def lock_payload(self) -> dict[str, object]:
@@ -164,6 +176,8 @@ class BenchmarkManifest:
         }
         if self.retrieval is not None:
             payload["retrieval"] = asdict(self.retrieval)
+        if self.contracts is not None:
+            payload["contracts"] = asdict(self.contracts)
         return payload
 
 
@@ -421,6 +435,28 @@ def _load_retrieval(payload: object) -> RetrievalConfig | None:
         top_k=top_k,
         rrf_k=rrf_k,
     )
+
+
+def _load_contracts(payload: object) -> FrozenContracts | None:
+    if payload is None:
+        return None
+    if not isinstance(payload, dict):
+        raise BenchmarkManifestError("contracts must be an object")
+    expected = {
+        "agent_config_sha256",
+        "prompt_protocol_sha256",
+        "prompt_security_sha256",
+        "retrieval_gate_sha256",
+    }
+    if set(payload) != expected:
+        raise BenchmarkManifestError("contract hashes must be explicitly frozen")
+    values: dict[str, str] = {}
+    for key in sorted(expected):
+        value = _text(payload, key, 64)
+        if not _SHA256.fullmatch(value):
+            raise BenchmarkManifestError(f"{key} must be a lowercase SHA-256")
+        values[key] = value
+    return FrozenContracts(**values)
 
 
 def _repository_sha256(root: Path) -> str:

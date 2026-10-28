@@ -27,11 +27,15 @@ Demo 只回放冻结并脱敏的真实 Trace，不需要 API Key，也不会产�
 
 TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Agent。大模型负责在不确定环境中选择搜索、读取和补丁动作；确定性控制器负责权限、状态、成本、测试和人工审核。模型不能直接运行 Shell，也不能绕过验证门禁修改仓库。仓库差异由 JSON 任务配置描述，不再写死 EventRelay 路径。
 
-> **0.8 开发分支（尚未替代冻结结果）**：当前代码正在加入原生 Function Calling、Prompt Registry 和可选 Code RAG。三个阶段 Prompt 与五个工具 Schema 均有版本和 SHA-256，模型只拥有提议权；7 个确定性 Prompt Injection/越权调用用例均被宿主边界拦截。首版语义检索与 FTS5 持平并被门禁拒绝；独立版本 `0.8.0-dev2.1` 改为文件级 RRF 后，在五个已知开发任务上将 Recall@3 从 `0.80` 提升到 `1.00`、MRR 从 `0.75` 提升到 `0.80`，Recall@5 保持 `1.00`，因此通过激活门禁。RAG 结果仍是未受信任的只读提示，必须由 `read_file` 确认，不能写入、测试或改变状态。完整实现边界、运行顺序与 `0.8.0` 发布门槛见 [`docs/v0.8-function-calling-rag.md`](docs/v0.8-function-calling-rag.md)。公开可信主结论仍是下方 `0.7.0-dev2` 的六仓库一次性盲测。
+> **0.8 开发分支（尚未替代冻结结果）**：当前代码已加入原生 Function Calling、Prompt Registry 和只读 Code RAG。三个阶段 Prompt 与五个工具 Schema 均有版本和 SHA-256，模型只拥有提议权；7 个确定性 Prompt Injection/越权调用用例均被宿主边界拦截。首版语义检索与 FTS5 持平并被门禁拒绝；独立版本 `0.8.0-dev2.1` 改为文件级 RRF 后，在五个已知开发任务上将 Recall@3 从 `0.80` 提升到 `1.00`、MRR 从 `0.75` 提升到 `0.80`，Recall@5 保持 `1.00`，因此通过激活门禁。RAG 结果仍是未受信任的只读提示，必须由 `read_file` 确认，不能写入、测试或改变状态。完整实现边界、运行顺序与 `0.8.0` 发布门槛见 [`docs/v0.8-function-calling-rag.md`](docs/v0.8-function-calling-rag.md)。公开可信主结论仍是下方 `0.7.0-dev2` 的六仓库一次性盲测。
 
 首次原生协议开发运行得到 `0/5`：五题均因 Function Calling 格式契约不兼容而安全停止，完整负面结果保存在 [`DEVELOPMENT_FINDINGS.md`](evaluation/results/function-calling-v0.8.0-dev1/DEVELOPMENT_FINDINGS.md)。真实语义检索与 FTS5 的 Recall@K/MRR 完全持平，因此激活门槛返回 `keep_rag_disabled`。两项结果都保留，不以调参后的结果覆盖。
 
 针对该失败新建了 `0.8.0-dev1.1`，没有重写旧账本。修订只处理协议兼容：`reason` 被降为非授权审计元数据，并把供应商偶发返回的 `apply_patch(patch=...)` 严格归一化为候选 `propose_patch(unified_diff=...)`。它依然不能写文件、运行测试或改变状态；阶段白名单、Diff 策略、目标测试和回归门禁全部不变。相同五题开发集结果为 **`3/5 pass@1`、`2/5` 安全转人工、错误接受补丁 `0`，格式失败率由 `100%` 降至 `0%`**。完整结果和失败边界见 [`DEVELOPMENT_FINDINGS.md`](evaluation/results/function-calling-v0.8.0-dev1.1/DEVELOPMENT_FINDINGS.md)。
+
+在相同五题上激活 `0.8.0-dev2.1` Code RAG 后，端到端结果仍为 **`3/5 pass@1`、`2/5` 安全转人工、错误接受补丁 `0`**，所以项目不宣称 RAG 提高了修复率。平均输出 Token 从 `489.6` 降至 `473.6`，P95 从 `51.234s` 降至 `18.906s`；由于只有五个已知任务，这些只作为描述性开发数据。一个失败中 RAG 正确找到 HTTPie 的目标符号，但模型返回的 malformed hunk 被 `PATCH_PARSE_ERROR` 拒绝，候选原文和停止证据均已保留。完整对比见 [`DEVELOPMENT_FINDINGS.md`](evaluation/results/rag-repair-v0.8.0-dev2.1/DEVELOPMENT_FINDINGS.md)。
+
+`0.8.0` 的最终 locked 配置现已预注册，但尚未运行模型：Agent 配置、Prompt/工具 Schema、安全测试和 RAG 门禁均以 SHA-256 写入 manifest；`jaraco.text`、`python-sortedcontainers`、`structlog` 三个全新仓库的 buggy/fixed oracle 已全部通过离线预检。每题只允许一次模型尝试，所有结果必须公开。预注册边界见 [`docs/v0.8-locked-preregistration.md`](docs/v0.8-locked-preregistration.md)。
 
 配置好百炼环境变量后，可用 `powershell -ExecutionPolicy Bypass -File scripts\run_v080_development.ps1` 一次完成 Function Calling 探针、五题开发集、协议对比和语义检索评测；该入口不包含 locked 任务。检索门禁未达到提升标准时会保存 `keep_rag_disabled` 负面证据并正常结束，只有报告损坏或配置不一致才作为基础设施错误失败。也可以在 GitHub Actions 中手动触发 `TraceRepair v0.8 Development Evaluation`：它只读取仓库 Secrets、上传完整开发证据，并且没有引用任何 locked manifest。
 
@@ -47,13 +51,15 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 
 | 协议 | Agent | 真实历史 Bug | pass@1 | 安全拒绝 | 错误接受补丁 | 平均输出 Tokens |
 |---|---|---:|---:|---:|---:|---:|
+| 已知开发任务、原生 Function Calling + Code RAG | `0.8.0-dev2.1` | 5 | **3/5（60%）** | 2 | **0** | 473.60 |
+| 已知开发任务、原生 Function Calling、无 RAG | `0.8.0-dev1.1` | 5 | **3/5（60%）** | 2 | **0** | 489.60 |
 | 全新仓库、冻结配置、locked one-shot | `0.7.0-dev2` | 6 | **2/6（33.33%）** | 4 | **0** | 455.00 |
 | 已知开发任务、语义复核机制评测 | `0.7.0-dev2` | 5 | **4/5（80%）** | 1 | **0** | 543.20 |
 | 相同开发任务、迁移基线 | `0.7.0-dev1` | 5 | **2/5（40%）** | 3 | **0** | 315.60 |
 | 冻结配置、pass@1 | `0.6.0` | 5 | **3/5（60%）** | 2 | **0** | 273.80 |
 | 历史基线（不同题集） | `0.5.0` | 3 | **2/3（66.67%）** | 1 | **0** | 268.67 |
 
-第一行是真正的新仓库 locked one-shot；第二、三行只比较同一组已知开发任务上的机制变化。六题盲测仍然很小且经过任务筛选，`33.33%` 不能外推为通用修复准确率，但它诚实证明了配置冻结后的迁移能力、失败 containment 和零错误接受补丁。
+前两行是相同已知开发任务上的 RAG 开发对比，不是泛化证据；第三行才是真正的新仓库 locked one-shot。六题盲测仍然很小且经过任务筛选，`33.33%` 不能外推为通用修复准确率，但它诚实证明了配置冻结后的迁移能力、失败 containment 和零错误接受补丁。
 
 - `toolz-empty-interpose`：目标测试与回归测试均通过，进入 `awaiting_review`。
 - `prettytable-horizontal-align`：目标测试通过，但完整回归失败，候选未被接受并转人工。

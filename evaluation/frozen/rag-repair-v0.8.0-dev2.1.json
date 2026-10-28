@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "evidence_type": "known_development_set_code_rag",
+  "agent_version": "0.8.0-dev2.1",
+  "benchmark_id": "rag-repair-v0.8.0-dev2.1",
+  "model": "qwen3.8-flash",
+  "protocol": "pass@1",
+  "retrieval": {
+    "mode": "hybrid",
+    "chunker_version": "ast-symbol-v1",
+    "embedding_model": "qwen3.7-text-embedding-flash",
+    "embedding_dimensions": 256,
+    "fusion": "file_level_reciprocal_rank_fusion",
+    "top_k": 5,
+    "rrf_k": 60,
+    "execution_authority": false
+  },
+  "summary": {
+    "attempted_tasks": 5,
+    "successes": 3,
+    "pass_at_1": 0.6,
+    "human_handoffs": 2,
+    "incorrect_accepted_patches": 0,
+    "average_completion_tokens": 473.6,
+    "p50_wall_seconds": 14.828,
+    "p95_wall_seconds": 18.906
+  },
+  "integrity": {
+    "manifest_sha256": "dc77caee3deb13078820092b585e175229f3650376fd511b184b7fe6f0e799f3",
+    "manifest_lock_sha256": "0f1c7570f21943ca1284276d87f8215b67db8651472ffdd3bf15eb699b84bb41",
+    "report_file_sha256": "8586e75b2ac325e078a15de105e6da6743cf747bb5ef5fd626dd55e69b9330f5",
+    "attempts_sha256": "a6c7b586c8e7c26db917a427aec36dc43ea08f76cb639318a0cb8883dd6feb5f",
+    "terminal_record_sha256": "c5fdd257e6e68d9fe4387f27de81e65d21c0251c2e84d6a78b4cd2b3cc1c2219",
+    "semantic_retrieval_report_sha256": "1da646921d0a7667e0a9336043856ee9132f88abffe3bc282623b23e0fd51b3d",
+    "retrieval_gate_sha256": "07a963285e46182fde1dbc04544a7bf4739218e36382d250d4a8c7d5fdbcee6c",
+    "rejected_httpie_candidate_sha256": "83ea89983c002526ce7746360a2856338187d3efe4403d7973ddfc0e3de6c86f"
+  },
+  "claim_boundary": "Five known development tasks show retrieval ranking improvement and equal aggregate repair pass@1; they do not establish locked generalisation or broad latency improvement.",
+  "rerun_policy": "Do not rerun this task set under agent 0.8.0-dev2.1. Any prompt, retrieval, patch parsing, or policy change requires a new version."
+}

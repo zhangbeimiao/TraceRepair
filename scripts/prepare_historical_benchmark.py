@@ -175,6 +175,106 @@ def test_default_getsizeof_still_counts_one_per_item():
 '''
 
 
+JARACO_TEXT_HEADLESS_CAMEL_ORACLE = '''"""Offline oracle for the headless camel-case regression."""
+
+from jaraco.text import WordSet
+
+
+def test_headless_camel_case_returns_text():
+    result = WordSet.parse("figured it out").headless_camel_case()
+
+    assert result == "figuredItOut"
+    assert isinstance(result, str)
+
+
+def test_regular_camel_case_remains_unchanged():
+    assert WordSet.parse("figured it out").camel_case() == "FiguredItOut"
+'''
+
+
+SORTEDCONTAINERS_EMPTY_EXTEND_ORACLE = '''"""Offline oracle for extending SortedList with no values."""
+
+from sortedcontainers import SortedList
+
+
+def test_empty_extend_is_a_noop():
+    values = SortedList([1, 2, 3], load=17)
+    values.extend([])
+
+    assert list(values) == [1, 2, 3]
+
+
+def test_nonempty_extend_still_sorts_values():
+    values = SortedList(load=17)
+    values.extend([1, 2, 3])
+
+    assert list(values) == [1, 2, 3]
+'''
+
+
+STRUCTLOG_MISSING_EVENT_ORACLE = '''"""Offline oracle for ConsoleRenderer without an event key."""
+
+from structlog.dev import ConsoleRenderer
+
+
+def test_console_renderer_accepts_missing_event():
+    rendered = ConsoleRenderer(colors=False)(None, None, {"answer": 42})
+
+    assert "answer=42" in rendered
+
+
+def test_console_renderer_keeps_explicit_event():
+    rendered = ConsoleRenderer(colors=False)(None, None, {"event": "hello"})
+
+    assert "hello" in rendered
+'''
+
+
+SORTEDCONTAINERS_PY311_COMPAT = '''"""Benchmark-only aliases for a pre-Python 3.10 collections API."""
+
+import collections
+import collections.abc
+
+
+for _name in (
+    "Sequence",
+    "MutableSequence",
+    "Set",
+    "MutableSet",
+    "KeysView",
+    "ValuesView",
+    "ItemsView",
+):
+    if not hasattr(collections, _name):
+        setattr(collections, _name, getattr(collections.abc, _name))
+'''
+
+
+JARACO_FUNCTOOLS_COMPAT = '''"""Benchmark-only minimal dependency shim for the historical snapshot."""
+
+import functools
+import sys
+from types import ModuleType
+
+
+compat = ModuleType("jaraco.functools")
+
+
+def compose(*functions):
+    def composed(value):
+        for function in reversed(functions):
+            value = function(value)
+        return value
+
+    return composed
+
+
+compat.compose = compose
+compat.method_cache = functools.lru_cache(maxsize=None)
+sys.modules.setdefault("jaraco.functools", compat)
+'''
+
+
 THEFUCK_PYTEST_COMPAT = '''"""Benchmark-only compatibility for the historical pytest Node API."""
 
 from _pytest.nodes import Node
@@ -511,6 +611,70 @@ CASES = (
             "06bba4231892d2e82d7a9007dc01226d2c1eb778f5f49b6bea74e2b9b4bb0eab",
         ),
         "tests/test_utils/test_sentinel.py",
+    ),
+    HistoricalCase(
+        "jaraco-text-headless-camel",
+        Archive(
+            "jaraco-text-506d42c",
+            "jaraco",
+            "jaraco.text",
+            "506d42cba80ed35e4558642fdf2d91e90025f00a",
+            "79ff5f7497599c5d7fa6adebfe7945554f18a5ff40af1c8a2600771d78c3ca4a",
+        ),
+        Archive(
+            "jaraco-text-859ef17",
+            "jaraco",
+            "jaraco.text",
+            "859ef175f5c8763c411cb58c60adaee4c93de282",
+            "684c5734b889074e54088406f5c801a3f5140cab951b1bcedf047bb060c995e8",
+        ),
+        "tests/test_tracerepair_headless_camel.py",
+        (
+            ("pytest.ini", "[pytest]\n"),
+            ("conftest.py", JARACO_FUNCTOOLS_COMPAT),
+            ("tests/test_tracerepair_headless_camel.py", JARACO_TEXT_HEADLESS_CAMEL_ORACLE),
+        ),
+    ),
+    HistoricalCase(
+        "sortedcontainers-empty-extend",
+        Archive(
+            "sortedcontainers-f6a3597",
+            "grantjenks",
+            "python-sortedcontainers",
+            "f6a359773de48e5adbe0e1946355d38f43c59c32",
+            "5eda50a7223f7cbd2093908df6075d308a2b48821620b91b23bc034c8272ea4c",
+        ),
+        Archive(
+            "sortedcontainers-53ab610",
+            "grantjenks",
+            "python-sortedcontainers",
+            "53ab610cc4615888f3fcf2fa1d5d340440247a2a",
+            "8022f0e35aaeecd29f25ec5de757f9aebf6be814adab150a454f4b55f350e795",
+        ),
+        "tests/test_tracerepair_empty_extend.py",
+        (
+            ("conftest.py", SORTEDCONTAINERS_PY311_COMPAT),
+            ("tests/test_tracerepair_empty_extend.py", SORTEDCONTAINERS_EMPTY_EXTEND_ORACLE),
+        ),
+    ),
+    HistoricalCase(
+        "structlog-missing-event",
+        Archive(
+            "structlog-f0d2412",
+            "hynek",
+            "structlog",
+            "f0d241211d6752f8da032218044f884437d809cb",
+            "e29b28712b6400948c031ea1cf27a02ad9c7815d513a3c7d5eb59e9cba1d3208",
+        ),
+        Archive(
+            "structlog-d4e3c9a",
+            "hynek",
+            "structlog",
+            "d4e3c9a4c57217afdd245f75969f9cb51542a111",
+            "af429985869788603a3c255ee4fa203737fb275884bfb25b718586f3a0ac282b",
+        ),
+        "tests/test_tracerepair_missing_event.py",
+        (("tests/test_tracerepair_missing_event.py", STRUCTLOG_MISSING_EVENT_ORACLE),),
     ),
 )
 

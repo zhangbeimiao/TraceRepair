@@ -1,0 +1,15 @@
+{
+  "$schema": "../../docs/repository-task.schema.json",
+  "schema_version": 1,
+  "name": "sortedcontainers-empty-extend",
+  "repository_root": "../repositories/sortedcontainers-empty-extend",
+  "issue": "SortedList.extend([]) must be a no-op even when the list already contains values.",
+  "source_allowlist": ["sortedcontainers"],
+  "target_test": "tests/test_tracerepair_empty_extend.py::test_empty_extend_is_a_noop",
+  "regression_suite": "tests/test_tracerepair_empty_extend.py",
+  "diagnostic_queries": ["def extend", "values[0]", "given sequence not in sort order"],
+  "pythonpath": ["."],
+  "timeout_seconds": 120,
+  "max_repository_bytes": 20971520,
+  "max_repository_files": 2000
+}

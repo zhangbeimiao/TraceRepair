@@ -1,0 +1,62 @@
+{
+  "agent_version": "0.8.0",
+  "parent_agent_version": "0.8.0-dev2.1",
+  "status": "frozen_locked_evaluation_candidate",
+  "frozen_on": "2026-10-28",
+  "architecture": "langgraph_end_to_end",
+  "durable_state": "sqlite_only",
+  "langgraph_checkpointer": false,
+  "model": "qwen3.8-flash",
+  "planner": {
+    "protocol": "native_function_calling",
+    "max_diagnosis_turns": 3,
+    "max_calls_per_task": 5,
+    "max_completion_tokens_per_call": 800,
+    "max_total_completion_tokens": 3072
+  },
+  "prompt_contract": {
+    "protocol_id": "native-function-calling-v0.8.0-dev1.1",
+    "protocol_manifest_sha256": "1c2cf6f03167c5e09a43f069c1e4c145784e22e7854449311d2789b6cab31b46",
+    "all_function_schemas_sha256": "460ccfc4c140fc4a44615340916b71bd18bf40a6216995d5bf428ffef0339632",
+    "diagnosis_prompt_sha256": "4e1bb5b4903754ecd60cb0f71c13dc3fb570b372ff873c496d35f890c65c2398",
+    "patch_prompt_sha256": "66f10ecfc98881c52164d797f52e4b9220d662af59ff85e7abbe007b5bd25697",
+    "review_prompt_sha256": "32042bcd4d63c3764069e4f3c66dd277d8139c2cfd3808618fa570e5f317668d",
+    "prompt_security_sha256": "afa1e856d793484b714c7f155254c1128120dd81e077d2611b4d429e0d57aa36"
+  },
+  "retrieval": {
+    "mode": "hybrid",
+    "chunker_version": "ast-symbol-v1",
+    "lexical_index": "sqlite_fts5",
+    "embedding_model": "qwen3.7-text-embedding-flash",
+    "embedding_dimensions": 256,
+    "fusion": "file_level_reciprocal_rank_fusion",
+    "rrf_k": 60,
+    "candidate_limit": 60,
+    "top_k": 5,
+    "reuse_verified_embedding_index": true,
+    "execution_authority": false,
+    "activation_gate_sha256": "07a963285e46182fde1dbc04544a7bf4739218e36382d250d4a8c7d5fdbcee6c"
+  },
+  "deterministic_gates": {
+    "stage_tool_allowlist": true,
+    "source_path_allowlist": true,
+    "bounded_diff_policy": true,
+    "exact_patch_context": true,
+    "registered_target_test": true,
+    "registered_regression_test": true,
+    "human_review_required": true
+  },
+  "development_evidence": {
+    "retrieval_report_sha256": "1da646921d0a7667e0a9336043856ee9132f88abffe3bc282623b23e0fd51b3d",
+    "rag_repair_report_file_sha256": "8586e75b2ac325e078a15de105e6da6743cf747bb5ef5fd626dd55e69b9330f5",
+    "rag_repair_result": "3/5 pass@1; 2 safe handoffs; 0 incorrect accepted patches"
+  },
+  "locked_protocol": {
+    "previously_unused_repositories": 3,
+    "one_attempt_per_task": true,
+    "publish_all_failures": true,
+    "post_hoc_retry": false,
+    "policy_change_after_outcome": false
+  },
+  "claim_boundary": "The final locked run measures pass@1 on three preregistered repositories. It cannot establish universal repair accuracy."
+}

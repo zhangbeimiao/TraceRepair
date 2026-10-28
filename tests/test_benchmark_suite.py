@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.run_benchmark import _load_or_finalize_report
+from scripts.run_benchmark import _load_or_finalize_report, _validate_frozen_contracts
 from tracerepair.benchmark_suite import (
     BenchmarkManifest,
     BenchmarkManifestError,
@@ -137,6 +137,57 @@ def test_manifest_rejects_incomplete_retrieval_contract(tmp_path: Path) -> None:
 
     with pytest.raises(BenchmarkManifestError, match="explicitly frozen"):
         BenchmarkManifest.load(path)
+
+
+def test_manifest_freezes_agent_prompt_and_retrieval_contract_hashes(tmp_path: Path) -> None:
+    path = _manifest(tmp_path)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["contracts"] = {
+        "agent_config_sha256": "a" * 64,
+        "prompt_protocol_sha256": "b" * 64,
+        "prompt_security_sha256": "c" * 64,
+        "retrieval_gate_sha256": "d" * 64,
+    }
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    manifest = BenchmarkManifest.load(path)
+
+    assert manifest.contracts is not None
+    assert manifest.contracts.agent_config_sha256 == "a" * 64
+    assert manifest.lock_payload()["contracts"] == payload["contracts"]
+
+
+def test_manifest_rejects_invalid_contract_hash(tmp_path: Path) -> None:
+    path = _manifest(tmp_path)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["contracts"] = {
+        "agent_config_sha256": "not-a-hash",
+        "prompt_protocol_sha256": "b" * 64,
+        "prompt_security_sha256": "c" * 64,
+        "retrieval_gate_sha256": "d" * 64,
+    }
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(BenchmarkManifestError, match="agent_config_sha256"):
+        BenchmarkManifest.load(path)
+
+
+def test_benchmark_rejects_modified_frozen_contract(tmp_path: Path, monkeypatch) -> None:
+    path = _manifest(tmp_path)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["agent_version"] = "test"
+    payload["contracts"] = {
+        "agent_config_sha256": "a" * 64,
+        "prompt_protocol_sha256": "b" * 64,
+        "prompt_security_sha256": "c" * 64,
+        "retrieval_gate_sha256": "d" * 64,
+    }
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    manifest = BenchmarkManifest.load(path)
+    monkeypatch.setattr("scripts.run_benchmark.ROOT", tmp_path)
+
+    with pytest.raises(BenchmarkManifestError, match="contract file is missing"):
+        _validate_frozen_contracts(manifest)
 
 
 def test_ledger_detects_modified_historical_result(tmp_path: Path) -> None:

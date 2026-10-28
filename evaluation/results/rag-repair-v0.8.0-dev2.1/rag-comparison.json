@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "comparison_id": "native-functions-no-rag-vs-file-level-rag-v0.8.0-dev2.1",
+  "split": "known_development_tasks",
+  "paired_task_ids": [
+    "boltons-empty-multireplace",
+    "httpie-host-header-offline",
+    "humanize-negative-fraction",
+    "more-itertools-falsey-validator",
+    "tqdm-sizeless-bool"
+  ],
+  "baseline": {
+    "agent_version": "0.8.0-dev1.1",
+    "retrieval": "disabled",
+    "source_report": "evaluation/results/function-calling-v0.8.0-dev1.1/report.json",
+    "source_report_sha256": "d9b13bec28f9555527654a97d5e9e1fb220a758cb44c8a398bbe7b9acc47842e",
+    "successes": 3,
+    "pass_at_1": 0.6,
+    "human_handoffs": 2,
+    "incorrect_accepted_patches": 0,
+    "average_completion_tokens": 489.6,
+    "p50_wall_seconds": 14.906,
+    "p95_wall_seconds": 51.234
+  },
+  "candidate": {
+    "agent_version": "0.8.0-dev2.1",
+    "retrieval": "hybrid_file_level_rrf",
+    "source_report": "evaluation/results/rag-repair-v0.8.0-dev2.1/report.json",
+    "source_report_sha256": "8586e75b2ac325e078a15de105e6da6743cf747bb5ef5fd626dd55e69b9330f5",
+    "successes": 3,
+    "pass_at_1": 0.6,
+    "human_handoffs": 2,
+    "incorrect_accepted_patches": 0,
+    "average_completion_tokens": 473.6,
+    "p50_wall_seconds": 14.828,
+    "p95_wall_seconds": 18.906
+  },
+  "delta": {
+    "pass_at_1": 0.0,
+    "average_completion_tokens_percent": -3.27,
+    "p50_wall_seconds_percent": -0.52,
+    "p95_wall_seconds_percent": -63.1
+  },
+  "interpretation_boundary": "Paired development evidence: retrieval improved file ranking and descriptive efficiency metrics but did not improve aggregate repair pass@1 on five known tasks."
+}

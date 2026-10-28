@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "task_id": "tqdm-sizeless-bool",
+  "agent_version": "0.8.0-dev2.1",
+  "trace_task_id": "model-agent-repo-tqdm-sizeless-bool-716fc4df",
+  "status": "needs_human",
+  "error_code": "INSUFFICIENT_SOURCE_EVIDENCE",
+  "candidate_generated": false,
+  "patch_applied": false,
+  "tests_started": false,
+  "retrieved_path": "tqdm/_tqdm.py",
+  "analysis": "The selected read slice did not include the __bool__ implementation, so the model handed off instead of inventing a patch.",
+  "claim_boundary": "This is a known development failure artifact, not locked evidence."
+}

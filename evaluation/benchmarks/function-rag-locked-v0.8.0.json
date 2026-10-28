@@ -1,0 +1,57 @@
+{
+  "$schema": "../../docs/benchmark-manifest.schema.json",
+  "schema_version": 1,
+  "benchmark_id": "function-rag-locked-v0.8.0",
+  "agent_version": "0.8.0",
+  "model": "qwen3.8-flash",
+  "protocol": "pass@1",
+  "retrieval": {
+    "mode": "hybrid",
+    "chunker_version": "ast-symbol-v1",
+    "embedding_model": "qwen3.7-text-embedding-flash",
+    "embedding_dimensions": 256,
+    "top_k": 5,
+    "rrf_k": 60
+  },
+  "contracts": {
+    "agent_config_sha256": "01a3fd3fa1ff3fe41ff637fda50421dacd6ea17aeb01f861865afb9c278bf141",
+    "prompt_protocol_sha256": "1c2cf6f03167c5e09a43f069c1e4c145784e22e7854449311d2789b6cab31b46",
+    "prompt_security_sha256": "afa1e856d793484b714c7f155254c1128120dd81e077d2611b4d429e0d57aa36",
+    "retrieval_gate_sha256": "07a963285e46182fde1dbc04544a7bf4739218e36382d250d4a8c7d5fdbcee6c"
+  },
+  "tasks": [
+    {
+      "id": "jaraco-text-headless-camel",
+      "split": "locked",
+      "task_config": "../tasks/jaraco-text-headless-camel.json",
+      "source": {
+        "repository_url": "https://github.com/jaraco/jaraco.text",
+        "buggy_commit": "506d42cba80ed35e4558642fdf2d91e90025f00a",
+        "fixed_commit": "859ef175f5c8763c411cb58c60adaee4c93de282",
+        "issue_url": "https://github.com/jaraco/jaraco.text/commit/859ef175f5c8763c411cb58c60adaee4c93de282"
+      }
+    },
+    {
+      "id": "sortedcontainers-empty-extend",
+      "split": "locked",
+      "task_config": "../tasks/sortedcontainers-empty-extend.json",
+      "source": {
+        "repository_url": "https://github.com/grantjenks/python-sortedcontainers",
+        "buggy_commit": "f6a359773de48e5adbe0e1946355d38f43c59c32",
+        "fixed_commit": "53ab610cc4615888f3fcf2fa1d5d340440247a2a",
+        "issue_url": "https://github.com/grantjenks/python-sortedcontainers/commit/53ab610cc4615888f3fcf2fa1d5d340440247a2a"
+      }
+    },
+    {
+      "id": "structlog-missing-event",
+      "split": "locked",
+      "task_config": "../tasks/structlog-missing-event.json",
+      "source": {
+        "repository_url": "https://github.com/hynek/structlog",
+        "buggy_commit": "f0d241211d6752f8da032218044f884437d809cb",
+        "fixed_commit": "d4e3c9a4c57217afdd245f75969f9cb51542a111",
+        "issue_url": "https://github.com/hynek/structlog/pull/272"
+      }
+    }
+  ]
+}

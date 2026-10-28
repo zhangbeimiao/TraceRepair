@@ -84,6 +84,18 @@ _FIXED_ARCHIVES = {
         "click-f58ca3e.zip",
         "06bba4231892d2e82d7a9007dc01226d2c1eb778f5f49b6bea74e2b9b4bb0eab",
     ),
+    "859ef175f5c8763c411cb58c60adaee4c93de282": (
+        "jaraco-text-859ef17.zip",
+        "684c5734b889074e54088406f5c801a3f5140cab951b1bcedf047bb060c995e8",
+    ),
+    "53ab610cc4615888f3fcf2fa1d5d340440247a2a": (
+        "sortedcontainers-53ab610.zip",
+        "8022f0e35aaeecd29f25ec5de757f9aebf6be814adab150a454f4b55f350e795",
+    ),
+    "d4e3c9a4c57217afdd245f75969f9cb51542a111": (
+        "structlog-d4e3c9a.zip",
+        "af429985869788603a3c255ee4fa203737fb275884bfb25b718586f3a0ac282b",
+    ),
 }
 
 
@@ -254,6 +266,106 @@ def test_default_getsizeof_still_counts_one_per_item():
 '''
 
 
+_JARACO_TEXT_HEADLESS_CAMEL_ORACLE = '''"""Offline oracle for the headless camel-case regression."""
+
+from jaraco.text import WordSet
+
+
+def test_headless_camel_case_returns_text():
+    result = WordSet.parse("figured it out").headless_camel_case()
+
+    assert result == "figuredItOut"
+    assert isinstance(result, str)
+
+
+def test_regular_camel_case_remains_unchanged():
+    assert WordSet.parse("figured it out").camel_case() == "FiguredItOut"
+'''
+
+
+_JARACO_FUNCTOOLS_COMPAT = '''"""Benchmark-only minimal dependency shim for the historical snapshot."""
+
+import functools
+import sys
+from types import ModuleType
+
+
+compat = ModuleType("jaraco.functools")
+
+
+def compose(*functions):
+    def composed(value):
+        for function in reversed(functions):
+            value = function(value)
+        return value
+
+    return composed
+
+
+compat.compose = compose
+compat.method_cache = functools.lru_cache(maxsize=None)
+sys.modules.setdefault("jaraco.functools", compat)
+'''
+
+
+_SORTEDCONTAINERS_EMPTY_EXTEND_ORACLE = '''"""Offline oracle for extending SortedList with no values."""
+
+from sortedcontainers import SortedList
+
+
+def test_empty_extend_is_a_noop():
+    values = SortedList([1, 2, 3], load=17)
+    values.extend([])
+
+    assert list(values) == [1, 2, 3]
+
+
+def test_nonempty_extend_still_sorts_values():
+    values = SortedList(load=17)
+    values.extend([1, 2, 3])
+
+    assert list(values) == [1, 2, 3]
+'''
+
+
+_SORTEDCONTAINERS_PY311_COMPAT = '''"""Benchmark-only aliases for a pre-Python 3.10 collections API."""
+
+import collections
+import collections.abc
+
+
+for _name in (
+    "Sequence",
+    "MutableSequence",
+    "Set",
+    "MutableSet",
+    "KeysView",
+    "ValuesView",
+    "ItemsView",
+):
+    if not hasattr(collections, _name):
+        setattr(collections, _name, getattr(collections.abc, _name))
+'''
+
+
+_STRUCTLOG_MISSING_EVENT_ORACLE = '''"""Offline oracle for ConsoleRenderer without an event key."""
+
+from structlog.dev import ConsoleRenderer
+
+
+def test_console_renderer_accepts_missing_event():
+    rendered = ConsoleRenderer(colors=False)(None, None, {"answer": 42})
+
+    assert "answer=42" in rendered
+
+
+def test_console_renderer_keeps_explicit_event():
+    rendered = ConsoleRenderer(colors=False)(None, None, {"event": "hello"})
+
+    assert "hello" in rendered
+'''
+
+
 def validate_historical_oracles(
     manifest: BenchmarkManifest,
     tasks: tuple[BenchmarkTask, ...],
@@ -347,6 +459,7 @@ def _fixed_archive(project_root: Path, task: BenchmarkTask) -> Path:
 def _safe_extract(path: Path, destination: Path) -> None:
     destination.mkdir(parents=True)
     with zipfile.ZipFile(path) as archive:
+        selected: list[zipfile.ZipInfo] = []
         for info in archive.infolist():
             member = PurePosixPath(info.filename)
             mode = info.external_attr >> 16
@@ -355,7 +468,13 @@ def _safe_extract(path: Path, destination: Path) -> None:
             target = destination.joinpath(*member.parts).resolve()
             if not target.is_relative_to(destination.resolve()):
                 raise OracleValidationError(f"fixed oracle archive escapes destination: {path.name}")
-        archive.extractall(destination)
+            # Documentation and CI assets cannot affect the registered oracle.
+            # Skipping them also avoids legacy Windows archives whose generated
+            # image names exceed MAX_PATH in the disposable preflight directory.
+            if any(part in {"docs", ".github", "htmlcov"} for part in member.parts[1:]):
+                continue
+            selected.append(info)
+        archive.extractall(destination, members=selected)
 
 
 def _single_top_directory(path: Path) -> Path:
@@ -414,6 +533,31 @@ def _write_generated_files(task_id: str, root: Path) -> None:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(
             _CACHETOOLS_FALSEY_GETSIZEOF_ORACLE, encoding="utf-8", newline="\n"
+        )
+    elif task_id == "jaraco-text-headless-camel":
+        (root / "pytest.ini").write_text("[pytest]\n", encoding="utf-8", newline="\n")
+        (root / "conftest.py").write_text(
+            _JARACO_FUNCTOOLS_COMPAT, encoding="utf-8", newline="\n"
+        )
+        target = root / "tests" / "test_tracerepair_headless_camel.py"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(
+            _JARACO_TEXT_HEADLESS_CAMEL_ORACLE, encoding="utf-8", newline="\n"
+        )
+    elif task_id == "sortedcontainers-empty-extend":
+        (root / "conftest.py").write_text(
+            _SORTEDCONTAINERS_PY311_COMPAT, encoding="utf-8", newline="\n"
+        )
+        target = root / "tests" / "test_tracerepair_empty_extend.py"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(
+            _SORTEDCONTAINERS_EMPTY_EXTEND_ORACLE, encoding="utf-8", newline="\n"
+        )
+    elif task_id == "structlog-missing-event":
+        target = root / "tests" / "test_tracerepair_missing_event.py"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(
+            _STRUCTLOG_MISSING_EVENT_ORACLE, encoding="utf-8", newline="\n"
         )
 
 

@@ -1,0 +1,15 @@
+{
+  "$schema": "../../docs/repository-task.schema.json",
+  "schema_version": 1,
+  "name": "structlog-missing-event",
+  "repository_root": "../repositories/structlog-missing-event",
+  "issue": "ConsoleRenderer must render an event dictionary without raising KeyError when the event key is absent.",
+  "source_allowlist": ["src/structlog"],
+  "target_test": "tests/test_tracerepair_missing_event.py::test_console_renderer_accepts_missing_event",
+  "regression_suite": "tests/test_tracerepair_missing_event.py",
+  "diagnostic_queries": ["class ConsoleRenderer", "event_dict.pop", "force event to str"],
+  "pythonpath": ["src"],
+  "timeout_seconds": 120,
+  "max_repository_bytes": 31457280,
+  "max_repository_files": 2000
+}

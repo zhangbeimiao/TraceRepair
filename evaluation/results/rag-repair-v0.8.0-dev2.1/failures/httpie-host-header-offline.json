@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "task_id": "httpie-host-header-offline",
+  "agent_version": "0.8.0-dev2.1",
+  "trace_task_id": "model-agent-repo-httpie-host-header-offline-be92c888",
+  "status": "needs_human",
+  "error_code": "PATCH_PARSE_ERROR",
+  "candidate_sha256": "83ea89983c002526ce7746360a2856338187d3efe4403d7973ddfc0e3de6c86f",
+  "published_diff_sha256": "9865292a1ce7b0abade295bf35ac55b93eed712a4e3ff1a49f11d4fe2588127d",
+  "patch_applied": false,
+  "tests_started": false,
+  "retrieval_top_hit": {
+    "path": "httpie/models.py",
+    "symbol": "HTTPRequest.headers",
+    "start_line": 95,
+    "end_line": 118
+  },
+  "analysis": "The candidate used a malformed hunk header: the old range omitted its required '-' prefix and the declared line counts did not match the body. The deterministic parser rejected it without repository writes. The published text copy has one terminal newline added for repository hygiene, so its artifact checksum is recorded separately from the exact trace candidate checksum.",
+  "claim_boundary": "This is a known development failure artifact, not locked evidence."
+}

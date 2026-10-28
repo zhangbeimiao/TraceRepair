@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "evidence_type": "locked_preregistration_and_oracle_preflight",
+  "benchmark_id": "function-rag-locked-v0.8.0",
+  "agent_version": "0.8.0",
+  "model": "qwen3.8-flash",
+  "protocol": "pass@1",
+  "manifest_sha256": "5a18f23610864368aedcbab109e19e2562d702cc7909aad0743adb55c9559fe4",
+  "contracts": {
+    "agent_config_sha256": "01a3fd3fa1ff3fe41ff637fda50421dacd6ea17aeb01f861865afb9c278bf141",
+    "prompt_protocol_sha256": "1c2cf6f03167c5e09a43f069c1e4c145784e22e7854449311d2789b6cab31b46",
+    "prompt_security_sha256": "afa1e856d793484b714c7f155254c1128120dd81e077d2611b4d429e0d57aa36",
+    "retrieval_gate_sha256": "07a963285e46182fde1dbc04544a7bf4739218e36382d250d4a8c7d5fdbcee6c"
+  },
+  "tasks": [
+    {
+      "task_id": "jaraco-text-headless-camel",
+      "repository": "jaraco/jaraco.text",
+      "task_config_sha256": "b9ec6775d4657c9e5ce11a303830a440531681b7fa43b73491423c4d0e076fae",
+      "repository_sha256": "fe176fd0bd7ae8203cfea2040e555ac0cbb835411609659b6e3431bd106e1450",
+      "buggy_exit_code": 1,
+      "fixed_target_passed": true,
+      "fixed_regression_passed": true
+    },
+    {
+      "task_id": "sortedcontainers-empty-extend",
+      "repository": "grantjenks/python-sortedcontainers",
+      "task_config_sha256": "3d3ac72674f0827ddf07c8d8dabd06d13945eb2bb7a212b0b460e78b8a8a63b2",
+      "repository_sha256": "4dc12bc6820e4e339060e362931332701059107ded9bf4ca25a167a3d6dd8630",
+      "buggy_exit_code": 1,
+      "fixed_target_passed": true,
+      "fixed_regression_passed": true
+    },
+    {
+      "task_id": "structlog-missing-event",
+      "repository": "hynek/structlog",
+      "task_config_sha256": "2d8b91fcae469a0c26d95fed4e5a96d632a8a6b7a47a46369ee99a606b5378c4",
+      "repository_sha256": "a5d7f99508ab41c574078475c1f7dfff11e4766eb2f09c3ec45a8a1c13d9f8b7",
+      "buggy_exit_code": 1,
+      "fixed_target_passed": true,
+      "fixed_regression_passed": true
+    }
+  ],
+  "provider_requests": 0,
+  "result_files_written": 0,
+  "locked_run_policy": "Each task may be attempted exactly once after this preregistration is published. Every outcome must be retained; no post-hoc retry or 0.8.0 policy change is allowed.",
+  "claim_boundary": "Oracle validity and byte-exact preregistration only; this file contains no repair result."
+}
