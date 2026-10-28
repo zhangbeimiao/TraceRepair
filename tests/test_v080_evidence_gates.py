@@ -38,8 +38,8 @@ def test_prompt_security_report_covers_host_containment_contract() -> None:
     report = module.build_report()
 
     assert report["summary"] == {
-        "cases": 6,
-        "passed": 6,
+        "cases": 7,
+        "passed": 7,
         "failed": 0,
         "containment_rate": 1.0,
     }
@@ -48,6 +48,7 @@ def test_prompt_security_report_covers_host_containment_contract() -> None:
         "unknown-tool",
         "path-traversal",
         "stage-jump",
+            "compatibility-alias-stage-jump",
         "regex-command-chain",
         "parallel-calls",
     }

@@ -49,6 +49,10 @@ def main() -> None:
         "lexical_file_recall_at_3": 0.0,
         "lexical_file_recall_at_5": 0.0,
         "lexical_mrr": 0.0,
+        "vector_file_recall_at_1": 0.0,
+        "vector_file_recall_at_3": 0.0,
+        "vector_file_recall_at_5": 0.0,
+        "vector_mrr": 0.0,
         "hybrid_file_recall_at_1": 0.0,
         "hybrid_file_recall_at_3": 0.0,
         "hybrid_file_recall_at_5": 0.0,
@@ -68,13 +72,17 @@ def main() -> None:
             )
             query = f"{spec.issue} Failing pytest selector: {spec.target_test}"
             lexical = index.lexical_search(query, limit=arguments.limit)
-            hybrid = index.hybrid_search(
-                query,
-                embedding_provider=provider,
-                limit=arguments.limit,
+            vector = (
+                index.vector_search(query, provider, limit=arguments.limit)
+                if provider is not None
+                else []
+            )
+            hybrid = index.hybrid_file_search(
+                query, embedding_provider=provider, limit=arguments.limit
             )
             expected = set(entry["expected_paths"])
             lexical_metrics = retrieval_metrics(lexical, expected)
+            vector_metrics = retrieval_metrics(vector, expected)
             hybrid_metrics = retrieval_metrics(hybrid, expected)
             row = {
                 "task": spec.name,
@@ -88,6 +96,10 @@ def main() -> None:
                     **lexical_metrics,
                     "top_paths": list(dict.fromkeys(hit.chunk.path for hit in lexical))[:5],
                 },
+                "vector": {
+                    **vector_metrics,
+                    "top_paths": list(dict.fromkeys(hit.chunk.path for hit in vector))[:5],
+                },
                 "hybrid": {
                     **hybrid_metrics,
                     "top_paths": list(dict.fromkeys(hit.chunk.path for hit in hybrid))[:5],
@@ -96,6 +108,8 @@ def main() -> None:
             rows.append(row)
             for metric, value in lexical_metrics.items():
                 totals[f"lexical_{metric}"] += value
+            for metric, value in vector_metrics.items():
+                totals[f"vector_{metric}"] += value
             for metric, value in hybrid_metrics.items():
                 totals[f"hybrid_{metric}"] += value
             print(
@@ -107,11 +121,13 @@ def main() -> None:
     summary = {key: round(value / count, 4) for key, value in totals.items()}
     result = {
         "schema_version": 1,
-        "evaluation_id": "code-retrieval-v0.8.0-dev2",
+        "evaluation_id": "code-retrieval-v0.8.0-dev2.1",
         "split": "development",
         "embedding_mode": arguments.embedding,
         "embedding_model": provider.model_id if provider is not None else None,
         "embedding_dimensions": provider.dimensions if provider is not None else None,
+        "fusion": "file-level reciprocal rank fusion",
+        "index_cache": "reuse only when repository, chunker, roots, model, dimensions and counts match",
         "query_contract": ground_truth["query_contract"],
         "tasks": rows,
         "summary": summary,
@@ -120,7 +136,7 @@ def main() -> None:
     encoded = (json.dumps(result, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
     digest = hashlib.sha256(encoded).hexdigest()
     output = arguments.output or (
-        ROOT / "evaluation" / "results" / "code-retrieval-v0.8.0-dev2" / f"{arguments.embedding}.json"
+        ROOT / "evaluation" / "results" / "code-retrieval-v0.8.0-dev2.1" / f"{arguments.embedding}.json"
     )
     output = output.resolve()
     if not output.is_relative_to(ROOT.resolve()) or output.drive.casefold() == "c:":

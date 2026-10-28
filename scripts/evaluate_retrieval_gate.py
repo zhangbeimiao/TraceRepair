@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RESULTS = ROOT / "evaluation" / "results" / "code-retrieval-v0.8.0-dev2"
+RESULTS = ROOT / "evaluation" / "results" / "code-retrieval-v0.8.0-dev2.1"
 LEXICAL = RESULTS / "none.json"
 SEMANTIC = RESULTS / "bailian.json"
 OUTPUT = RESULTS / "activation-gate.json"
@@ -66,7 +66,7 @@ def build_gate() -> dict[str, object]:
     passed = recall5_preserved and ranking_improved
     return {
         "schema_version": 1,
-        "gate_id": "semantic-retrieval-activation-v0.8.0-dev2",
+        "gate_id": "semantic-retrieval-activation-v0.8.0-dev2.1",
         "split": "known_development_tasks_only",
         "baseline": baseline,
         "candidate": candidate,

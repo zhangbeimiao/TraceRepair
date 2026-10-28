@@ -41,3 +41,23 @@ def test_rag_benchmark_freezes_retrieval_settings_on_development_tasks() -> None
         "rrf_k": 60,
     }
     assert config["status"] == "planned_pending_semantic_retrieval_gate"
+
+
+def test_file_level_rag_revision_is_versioned_and_does_not_authorize_execution() -> None:
+    benchmark = json.loads(
+        (ROOT / "evaluation/benchmarks/code-rag-v0.8.0-dev2.1.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    config = json.loads(
+        (ROOT / "evaluation/configs/agent-v0.8.0-dev2.1.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    assert benchmark["protocol"] == "retrieval_gate_only"
+    assert {task["split"] for task in benchmark["tasks"]} == {"development"}
+    assert benchmark["retrieval"]["fusion"] == "file_level_reciprocal_rank_fusion"
+    assert config["parent_agent_version"] == "0.8.0-dev1.1"
+    assert config["retrieval"]["execution_authority"] is False
+    assert config["evaluation_rule"].startswith("do not run repair or locked tasks")

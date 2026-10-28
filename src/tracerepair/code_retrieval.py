@@ -241,6 +241,36 @@ class CodeIndex:
         if not chunks:
             raise RetrievalError("repository produced no indexable Python chunks")
         fingerprint = _repository_fingerprint(chunks)
+        expected_metadata = {
+            "chunker_version": CHUNKER_VERSION,
+            "repository_sha256": fingerprint,
+            "allowed_roots": json.dumps(list(allowed_roots), separators=(",", ":")),
+            "embedding_model": embedding_provider.model_id if embedding_provider else "",
+            "embedding_dimensions": str(embedding_provider.dimensions)
+            if embedding_provider
+            else "",
+        }
+        current_metadata = self.metadata()
+        stored_chunks = int(
+            self._connection.execute("SELECT COUNT(*) FROM chunks").fetchone()[0]
+        )
+        stored_embeddings = int(
+            self._connection.execute("SELECT COUNT(*) FROM embeddings").fetchone()[0]
+        )
+        if (
+            current_metadata == expected_metadata
+            and stored_chunks == len(chunks)
+            and (embedding_provider is None or stored_embeddings == len(chunks))
+        ):
+            return IndexBuildResult(
+                chunks=len(chunks),
+                files=len(files),
+                repository_sha256=fingerprint,
+                embedding_model=embedding_provider.model_id if embedding_provider else None,
+                embedding_dimensions=embedding_provider.dimensions
+                if embedding_provider
+                else None,
+            )
         with self._connection:
             self._connection.execute("DELETE FROM embeddings")
             self._connection.execute("DELETE FROM chunks_fts")
@@ -268,17 +298,8 @@ class CodeIndex:
                 "INSERT INTO chunks_fts (chunk_id, path, symbol, content) VALUES (?, ?, ?, ?)",
                 [(chunk.chunk_id, chunk.path, chunk.symbol, chunk.content) for chunk in chunks],
             )
-            metadata = {
-                "chunker_version": CHUNKER_VERSION,
-                "repository_sha256": fingerprint,
-                "allowed_roots": json.dumps(list(allowed_roots), separators=(",", ":")),
-                "embedding_model": embedding_provider.model_id if embedding_provider else "",
-                "embedding_dimensions": str(embedding_provider.dimensions)
-                if embedding_provider
-                else "",
-            }
             self._connection.executemany(
-                "INSERT INTO metadata (key, value) VALUES (?, ?)", metadata.items()
+                "INSERT INTO metadata (key, value) VALUES (?, ?)", expected_metadata.items()
             )
         if embedding_provider is not None:
             for start in range(0, len(chunks), batch_size):
@@ -397,6 +418,52 @@ class CodeIndex:
             for key in ordered[: _limit(limit)]
         ]
 
+    def hybrid_file_search(
+        self,
+        query: str,
+        *,
+        embedding_provider: EmbeddingProvider | None,
+        limit: int = 8,
+        candidate_limit: int = 60,
+        rrf_k: int = 60,
+    ) -> list[RetrievalHit]:
+        """Fuse unique file ranks so large files cannot crowd out other candidates."""
+
+        if not 1 <= rrf_k <= 1_000:
+            raise ValueError("rrf_k must be between 1 and 1000")
+        lexical = self.lexical_search(query, limit=candidate_limit)
+        vector = (
+            self.vector_search(query, embedding_provider, limit=candidate_limit)
+            if embedding_provider is not None
+            else []
+        )
+        lexical_files = _collapse_file_ranks(lexical)
+        vector_files = _collapse_file_ranks(vector)
+        paths = set(lexical_files) | set(vector_files)
+        scored: list[tuple[float, str, CodeChunk, int | None, int | None]] = []
+        for path in paths:
+            lexical_entry = lexical_files.get(path)
+            vector_entry = vector_files.get(path)
+            lexical_rank = lexical_entry[0] if lexical_entry else None
+            vector_rank = vector_entry[0] if vector_entry else None
+            score = 0.0
+            if lexical_rank is not None:
+                score += 1 / (rrf_k + lexical_rank)
+            if vector_rank is not None:
+                score += 1 / (rrf_k + vector_rank)
+            if lexical_entry is None:
+                representative = vector_entry[1]  # type: ignore[index]
+            elif vector_entry is None or lexical_rank <= vector_rank:  # type: ignore[operator]
+                representative = lexical_entry[1]
+            else:
+                representative = vector_entry[1]
+            scored.append((score, path, representative.chunk, lexical_rank, vector_rank))
+        scored.sort(key=lambda item: (-item[0], item[1]))
+        return [
+            RetrievalHit(chunk, score, lexical_rank, vector_rank)
+            for score, _path, chunk, lexical_rank, vector_rank in scored[: _limit(limit)]
+        ]
+
     def metadata(self) -> dict[str, str]:
         rows = self._connection.execute("SELECT key, value FROM metadata ORDER BY key").fetchall()
         return {str(row["key"]): str(row["value"]) for row in rows}
@@ -439,7 +506,7 @@ class CodeRagRetriever:
         return self._embedding_provider.dimensions if self._embedding_provider is not None else None
 
     def retrieve(self, query: str) -> list[RetrievalHit]:
-        return self._index.hybrid_search(
+        return self._index.hybrid_file_search(
             query,
             embedding_provider=self._embedding_provider,
             limit=self._limit,
@@ -505,6 +572,14 @@ def retrieval_metrics(
     metrics = {f"file_recall_at_{k}": float(any(path in normalized for path in ranked_paths[:k])) for k in ks}
     metrics["mrr"] = 1.0 / first_rank if first_rank is not None else 0.0
     return metrics
+
+
+def _collapse_file_ranks(hits: Sequence[RetrievalHit]) -> dict[str, tuple[int, RetrievalHit]]:
+    collapsed: dict[str, tuple[int, RetrievalHit]] = {}
+    for hit in hits:
+        if hit.chunk.path not in collapsed:
+            collapsed[hit.chunk.path] = (len(collapsed) + 1, hit)
+    return collapsed
 
 
 def _allowed_python_files(root: Path, allowed_roots: tuple[str, ...]) -> list[Path]:

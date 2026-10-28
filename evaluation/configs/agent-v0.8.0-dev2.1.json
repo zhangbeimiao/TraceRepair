@@ -1,0 +1,33 @@
+{
+  "agent_version": "0.8.0-dev2.1",
+  "parent_agent_version": "0.8.0-dev1.1",
+  "status": "planned_pending_file_level_retrieval_gate",
+  "architecture": "langgraph_end_to_end",
+  "durable_state": "sqlite_only",
+  "planner_protocol": "native_function_calling",
+  "prompt_protocol": "native-function-calling-v0.8.0-dev1.1",
+  "retrieval": {
+    "mode": "hybrid",
+    "chunker_version": "ast-symbol-v1",
+    "lexical_index": "sqlite_fts5",
+    "embedding_model": "qwen3.7-text-embedding-flash",
+    "embedding_dimensions": 256,
+    "fusion": "file_level_reciprocal_rank_fusion",
+    "rrf_k": 60,
+    "candidate_limit": 60,
+    "top_k": 5,
+    "report_vector_only_metrics": true,
+    "reuse_verified_embedding_index": true,
+    "execution_authority": false
+  },
+  "activation_gate": {
+    "split": "known_development_tasks_only",
+    "required_metrics": ["file_recall_at_1", "file_recall_at_3", "file_recall_at_5", "mrr"],
+    "rule": "file-level semantic hybrid must not reduce Recall@5 and must improve Recall@1 or MRR over FTS5"
+  },
+  "preserved_negative_evidence": {
+    "candidate": "0.8.0-dev2",
+    "result": "semantic hybrid tied FTS5; activation decision keep_rag_disabled"
+  },
+  "evaluation_rule": "do not run repair or locked tasks unless the retrieval activation gate passes"
+}

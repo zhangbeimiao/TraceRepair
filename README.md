@@ -31,7 +31,7 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 
 首次原生协议开发运行得到 `0/5`：五题均因 Function Calling 格式契约不兼容而安全停止，完整负面结果保存在 [`DEVELOPMENT_FINDINGS.md`](evaluation/results/function-calling-v0.8.0-dev1/DEVELOPMENT_FINDINGS.md)。真实语义检索与 FTS5 的 Recall@K/MRR 完全持平，因此激活门槛返回 `keep_rag_disabled`。两项结果都保留，不以调参后的结果覆盖。
 
-针对该失败新建了 `0.8.0-dev1.1`，没有重写旧账本。修订只处理协议兼容：`reason` 被降为非授权审计元数据，并把供应商偶发返回的 `apply_patch(patch=...)` 严格归一化为候选 `propose_patch(unified_diff=...)`。它依然不能写文件、运行测试或改变状态；阶段白名单、Diff 策略、目标测试和回归门禁全部不变。新 Prompt、Schema、配置、报告和 SHA-256 使用独立版本路径，等待在同一五题开发集上重新评测。
+针对该失败新建了 `0.8.0-dev1.1`，没有重写旧账本。修订只处理协议兼容：`reason` 被降为非授权审计元数据，并把供应商偶发返回的 `apply_patch(patch=...)` 严格归一化为候选 `propose_patch(unified_diff=...)`。它依然不能写文件、运行测试或改变状态；阶段白名单、Diff 策略、目标测试和回归门禁全部不变。相同五题开发集结果为 **`3/5 pass@1`、`2/5` 安全转人工、错误接受补丁 `0`，格式失败率由 `100%` 降至 `0%`**。完整结果和失败边界见 [`DEVELOPMENT_FINDINGS.md`](evaluation/results/function-calling-v0.8.0-dev1.1/DEVELOPMENT_FINDINGS.md)。
 
 配置好百炼环境变量后，可用 `powershell -ExecutionPolicy Bypass -File scripts\run_v080_development.ps1` 一次完成 Function Calling 探针、五题开发集、协议对比和语义检索评测；该入口不包含 locked 任务。检索门禁未达到提升标准时会保存 `keep_rag_disabled` 负面证据并正常结束，只有报告损坏或配置不一致才作为基础设施错误失败。也可以在 GitHub Actions 中手动触发 `TraceRepair v0.8 Development Evaluation`：它只读取仓库 Secrets、上传完整开发证据，并且没有引用任何 locked manifest。
 

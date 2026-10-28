@@ -1,0 +1,35 @@
+{
+  "baseline": {
+    "attempts": 5,
+    "format_contract_failures": 0,
+    "format_failure_rate": 0.0,
+    "format_failure_task_ids": [],
+    "pass_at_1": 0.8,
+    "planner_protocol": "custom_json",
+    "source_report": "evaluation/results/langgraph-review-offline-v0.7.0-dev2/report.json",
+    "source_report_sha256": "21f6483aa613aa8f875f2eda4cb3d095cbcd8303349027799ec4fe7d10b46c53",
+    "successes": 4
+  },
+  "candidate": {
+    "attempts": 5,
+    "format_contract_failures": 0,
+    "format_failure_rate": 0.0,
+    "format_failure_task_ids": [],
+    "pass_at_1": 0.6,
+    "planner_protocol": "native_function_calling",
+    "source_report": "evaluation/results/function-calling-v0.8.0-dev1.1/report.json",
+    "source_report_sha256": "d9b13bec28f9555527654a97d5e9e1fb220a758cb44c8a398bbe7b9acc47842e",
+    "successes": 3
+  },
+  "comparison_id": "custom-json-vs-native-functions-v0.8.0-dev1.1",
+  "interpretation_boundary": "This is a paired development-set protocol comparison, not locked generalisation evidence. Format-contract failures are separated from test-gated repair failures.",
+  "paired_task_ids": [
+    "boltons-empty-multireplace",
+    "httpie-host-header-offline",
+    "humanize-negative-fraction",
+    "more-itertools-falsey-validator",
+    "tqdm-sizeless-bool"
+  ],
+  "schema_version": 1,
+  "split": "known_development_tasks"
+}

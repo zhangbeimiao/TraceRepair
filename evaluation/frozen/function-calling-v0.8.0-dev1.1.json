@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "evidence_type": "known_development_set_function_calling",
+  "agent_version": "0.8.0-dev1.1",
+  "benchmark_id": "function-calling-v0.8.0-dev1.1",
+  "model": "qwen3.8-flash",
+  "protocol": "pass@1",
+  "summary": {
+    "attempted_tasks": 5,
+    "successes": 3,
+    "pass_at_1": 0.6,
+    "human_handoffs": 2,
+    "incorrect_accepted_patches": 0,
+    "format_contract_failures": 0,
+    "average_completion_tokens": 489.6,
+    "p50_wall_seconds": 14.906,
+    "p95_wall_seconds": 51.234
+  },
+  "integrity": {
+    "manifest_sha256": "7c830c36b1df456cdbf0d97666cec71c5b0617402e6867acaffc91547a79b764",
+    "manifest_lock_sha256": "019bc3f090fe293897c1242edb0c9f035aa8eff3975e48f4503d0e2693008d7e",
+    "report_sha256": "d9b13bec28f9555527654a97d5e9e1fb220a758cb44c8a398bbe7b9acc47842e",
+    "attempts_sha256": "bac80d4fdb8d2a99054fc4a56098ef675c9b98582db6022c1aceef036c333d6c",
+    "terminal_record_sha256": "dd372b6cf68d7d331ddce4e1265d3cc239676ce51ec8a0260ff94cf6b13f5251",
+    "protocol_manifest_sha256": "1c2cf6f03167c5e09a43f069c1e4c145784e22e7854449311d2789b6cab31b46",
+    "prompt_security_sha256": "afa1e856d793484b714c7f155254c1128120dd81e077d2611b4d429e0d57aa36",
+    "protocol_comparison_sha256": "a2b9d3e53cce76f59fabdfcbbe11c9486de12c682a7ed2aa77460d2dcde15f0b"
+  },
+  "claim_boundary": "Five known development tasks validate the Function Calling protocol revision; they do not establish broad or locked repair accuracy.",
+  "rerun_policy": "Do not rerun this task set under agent 0.8.0-dev1.1. Any policy or retrieval change requires a new version."
+}

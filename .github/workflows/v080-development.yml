@@ -85,7 +85,7 @@ jobs:
           name: tracerepair-v080-development-${{ github.run_id }}
           path: |
             evaluation/results/function-calling-v0.8.0-dev1.1/
-            evaluation/results/code-retrieval-v0.8.0-dev2/
+            evaluation/results/code-retrieval-v0.8.0-dev2.1/
             data/model-agent.sqlite3
             data/retrieval/
           if-no-files-found: ignore

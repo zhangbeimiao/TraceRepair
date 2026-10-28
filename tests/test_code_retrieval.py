@@ -27,6 +27,18 @@ class _EmbeddingResponse:
         return self.payload
 
 
+class CountingEmbeddingProvider(HashEmbeddingProvider):
+    model_id = "counting-hash-v1"
+
+    def __init__(self, dimensions: int = 64) -> None:
+        super().__init__(dimensions)
+        self.calls = 0
+
+    def embed(self, texts):
+        self.calls += 1
+        return super().embed(texts)
+
+
 def make_repository(tmp_path: Path) -> Path:
     repository = tmp_path / "repository"
     source = repository / "src" / "sample"
@@ -72,8 +84,12 @@ def test_ast_fts_and_embedding_index_are_reproducible(tmp_path: Path) -> None:
         hybrid = index.hybrid_search(
             "configuration boolean false", embedding_provider=provider, limit=5
         )
+        file_hybrid = index.hybrid_file_search(
+            "configuration boolean false", embedding_provider=provider, limit=5
+        )
         assert lexical[0].chunk.path == "src/sample/config.py"
         assert any(hit.chunk.path == "src/sample/config.py" for hit in hybrid)
+        assert len({hit.chunk.path for hit in file_hybrid}) == len(file_hybrid)
         metrics = retrieval_metrics(hybrid, {"src/sample/config.py"})
         assert metrics["file_recall_at_5"] == 1.0
         assert metrics["mrr"] > 0
@@ -91,6 +107,26 @@ def test_ast_fts_and_embedding_index_are_reproducible(tmp_path: Path) -> None:
             repository, allowed_roots=("src/sample",), embedding_provider=provider
         )
         assert rebuilt.repository_sha256 == first_fingerprint
+
+
+def test_unchanged_index_reuses_cached_embeddings(tmp_path: Path) -> None:
+    repository = make_repository(tmp_path)
+    provider = CountingEmbeddingProvider()
+    database = Path("D:/AI-Agent-Intern/TraceRepair/.tmp") / (
+        f"cache-{abs(hash(str(tmp_path.resolve())))}.sqlite3"
+    )
+    with CodeIndex(database) as index:
+        first = index.build(
+            repository, allowed_roots=("src/sample",), embedding_provider=provider
+        )
+        calls_after_first_build = provider.calls
+        second = index.build(
+            repository, allowed_roots=("src/sample",), embedding_provider=provider
+        )
+
+    assert calls_after_first_build > 0
+    assert provider.calls == calls_after_first_build
+    assert second == first
 
 
 def test_index_rejects_unsafe_roots_and_c_drive_database(tmp_path: Path) -> None:
