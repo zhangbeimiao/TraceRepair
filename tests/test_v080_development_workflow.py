@@ -16,6 +16,7 @@ def test_v080_online_workflow_is_manual_and_development_only() -> None:
     assert "--split all" not in text
     assert "function-calling-v0.8.0-dev1.1.json" in text
     assert "langgraph-blind" not in text
+    assert "evaluate_retrieval_gate.py --allow-failed-gate" in text
 
 
 def test_v080_online_workflow_uses_secrets_without_echoing_values() -> None:
