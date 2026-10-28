@@ -41,6 +41,7 @@ from tracerepair.recovery import (
     RecoveryError,
     inject_crash_if_requested,
     load_source_checkpoint,
+    load_source_context,
     mark_recovery_phase,
     recovery_state,
     save_source_checkpoint,
@@ -65,10 +66,12 @@ class RepairGraphState(TypedDict, total=False):
     seen_actions: list[str]
     missing_queries: list[str]
     test_observation: str
+    test_slice: FileSlice | None
     test_observation_checked: bool
     diagnosis_turns: int
     completion_tokens: int
     source: FileSlice | None
+    secondary_source: FileSlice | None
     candidate: str
     action: str
     detail: str
@@ -177,12 +180,14 @@ class LangGraphEndToEndRepairWorkflow:
             "seen_actions": [],
             "missing_queries": [],
             "test_observation": "",
+            "test_slice": None,
             "test_observation_checked": False,
             "diagnosis_turns": 0,
             "completion_tokens": _checkpoint_tokens(self._store.load_checkpoint(self._task_id))
             if resume
             else 0,
             "source": None,
+            "secondary_source": None,
             "candidate": "",
             "action": "resume" if resume else "diagnosis",
             "detail": "graph invoked",
@@ -313,6 +318,18 @@ class LangGraphEndToEndRepairWorkflow:
             code = result.error.code if result.error else "READ_TOOL_FAILED"
             return self._stop_node("diagnose", plan.tool, code, turn, total_tokens)
         if isinstance(result.data, FileSlice):
+            observed_test = (
+                result.data
+                if self._target_selector and result.data.path == self._target_selector.split("::", 1)[0]
+                and _looks_like_test_path(result.data.path)
+                else None
+            )
+            if observed_test is not None and self._target_selector:
+                # Prefer the registered function over an arbitrary large test-file slice,
+                # so the prompt budget retains the relevant assertion.
+                registered = self._tools.read_registered_test(self._target_selector)
+                if registered.ok and isinstance(registered.data, FileSlice):
+                    observed_test = registered.data
             if not _looks_like_test_path(result.data.path) and _source_is_relevant(issue, result.data, diagnostic_queries):
                 return self._complete_node(
                     "diagnose",
@@ -337,6 +354,9 @@ class LangGraphEndToEndRepairWorkflow:
                         "seen_actions": seen_actions,
                         "action": plan.tool,
                         "detail": "deterministic recovery replaced irrelevant source",
+                        "test_slice": observed_test or state.get("test_slice"),
+                        "test_observation": self._format_test_slice(observed_test) if observed_test else state.get("test_observation", ""),
+                        "test_observation_checked": bool(observed_test) or bool(state.get("test_observation_checked", False)),
                         "node_history": ["diagnose"],
                     },
                 )
@@ -349,10 +369,13 @@ class LangGraphEndToEndRepairWorkflow:
                 else f"Original task: {issue}. The file {result.data.path} was not sufficient "
                 "repair evidence. Search for a more specific identifier or return handoff."
             )
-            return self._continue_diagnosis(
+            update = self._continue_diagnosis(
                 turn, total_tokens, seen_actions, evidence, ("repo_map", "search_code"), issue,
                 diagnostic_queries,
             )
+            if observed_test:
+                update.update({"test_slice": observed_test, "test_observation": self._format_test_slice(observed_test), "test_observation_checked": True})
+            return update
 
         if plan.tool == "search_code" and turn == self._max_diagnosis_turns:
             source = self._read_unique_search_result(
@@ -374,6 +397,7 @@ class LangGraphEndToEndRepairWorkflow:
 
         missing_queries = list(state.get("missing_queries", []))
         test_observation = str(state.get("test_observation", ""))
+        test_slice = state.get("test_slice")
         test_checked = bool(state.get("test_observation_checked", False))
         if plan.tool == "search_code" and not result.data:
             query = str(plan.arguments.get("query", ""))
@@ -381,7 +405,8 @@ class LangGraphEndToEndRepairWorkflow:
                 missing_queries = (missing_queries + [query])[-3:]
             if not test_checked:
                 test_checked = True
-                test_observation = self._registered_test_observation()
+                test_slice = self._registered_test_observation()
+                test_observation = self._format_test_slice(test_slice) if test_slice else ""
         next_tools = _next_allowed_tools(plan.tool, result)
         refinement = (
             " The result spans too many files; refine with a code identifier or literal before "
@@ -408,7 +433,7 @@ class LangGraphEndToEndRepairWorkflow:
             issue,
             diagnostic_queries,
         )
-        update.update({"missing_queries": missing_queries, "test_observation": test_observation,
+        update.update({"missing_queries": missing_queries, "test_observation": test_observation, "test_slice": test_slice,
                        "test_observation_checked": test_checked})
         return update
 
@@ -476,6 +501,7 @@ class LangGraphEndToEndRepairWorkflow:
             Path(task.workspace),
             source,
             diagnosis_turns=int(state["diagnosis_turns"]),
+            test_source=state.get("test_slice"),
         )
         inject_crash_if_requested(
             self._task_id,
@@ -560,39 +586,26 @@ class LangGraphEndToEndRepairWorkflow:
                     "generate_patch", "handoff", "source refinement returned no new evidence",
                     turns + 1, total_tokens,
                 )
-            first = min(source.start_line, read.data.start_line)
-            last = max(source.end_line, read.data.end_line)
-            if last - first + 1 > 200:
-                return self._stop_node(
-                    "generate_patch", "handoff", "combined source range exceeds 200 lines",
-                    turns + 1, total_tokens,
-                )
-            combined = self._tools.read_file(source.path, first, last)
-            if not combined.ok or not isinstance(combined.data, FileSlice):
-                return self._stop_node(
-                    "generate_patch", "handoff", "combined source read failed",
-                    turns + 1, total_tokens,
-                )
-            lines = combined.data.content.splitlines(keepends=True)
-            def matches(piece: FileSlice) -> bool:
-                start = piece.start_line - first
-                return "".join(lines[start:start + piece.end_line - piece.start_line + 1]) == piece.content
-            if not matches(source) or not matches(read.data):
+            verify = self._tools.read_file(source.path, source.start_line, source.end_line)
+            if not verify.ok or not isinstance(verify.data, FileSlice) or verify.data.content != source.content:
                 return self._stop_node(
                     "generate_patch", "handoff", "source changed between reads",
                     turns + 1, total_tokens,
                 )
             save_source_checkpoint(
                 self._task_id, self._store, Path(self._store.get_task(self._task_id).workspace),
-                combined.data, diagnosis_turns=turns + 1,
+                source, diagnosis_turns=turns + 1, secondary_source=read.data,
+                test_source=state.get("test_slice"),
             )
             self._store.append_event(
                 self._task_id, "source_refined",
-                {"path": combined.data.path, "start_line": combined.data.start_line, "end_line": combined.data.end_line},
+                {"path": read.data.path, "start_line": read.data.start_line, "end_line": read.data.end_line,
+                 "primary_start_line": source.start_line, "primary_end_line": source.end_line},
             )
+            inject_crash_if_requested(self._task_id, self._store, configured_point=self._crash_after, reached_point="source_refined")
             return self._complete_node(
                 "generate_patch",
-                {"source": combined.data, "diagnosis_turns": turns + 1,
+                {"source": source, "secondary_source": read.data, "diagnosis_turns": turns + 1,
                  "completion_tokens": total_tokens, "next_node": "generate_patch",
                  "action": "read_file", "detail": "additional source checkpoint persisted",
                  "node_history": ["generate_patch"]},
@@ -654,9 +667,12 @@ class LangGraphEndToEndRepairWorkflow:
         if not review_state.get("test_observation") and self._target_selector:
             test_result = self._tools.read_registered_test(self._target_selector)
             if test_result.ok and isinstance(test_result.data, FileSlice):
-                review_state["test_observation"] = (
-                    f"{test_result.data.path}:{test_result.data.start_line}-{test_result.data.end_line}\n"
-                    + test_result.data.content
+                review_state["test_slice"] = test_result.data
+                review_state["test_observation"] = self._format_test_slice(test_result.data)
+                save_source_checkpoint(
+                    self._task_id, self._store, Path(self._store.get_task(self._task_id).workspace),
+                    source, diagnosis_turns=diagnosis_turns,
+                    secondary_source=state.get("secondary_source"), test_source=test_result.data,
                 )
         try:
             evidence = self._bounded_model_evidence(review_state, source, stage="review", draft=draft)
@@ -892,11 +908,12 @@ class LangGraphEndToEndRepairWorkflow:
             phase = PATCH_APPLIED
         if phase == SOURCE_READ:
             try:
-                source, diagnosis_turns = load_source_checkpoint(
+                source, secondary, test_slice, diagnosis_turns = load_source_context(
                     self._task_id,
                     self._store,
                     Path(self._store.get_task(self._task_id).workspace),
                     allowed_source_roots=self._allowed_source_roots,
+                    target_selector=self._target_selector,
                 )
             except RecoveryError as error:
                 return self._stop_node(
@@ -915,6 +932,10 @@ class LangGraphEndToEndRepairWorkflow:
                 "resume",
                 {
                     "source": source,
+                    "secondary_source": secondary,
+                    "test_slice": test_slice,
+                    "test_observation": self._format_test_slice(test_slice) if test_slice else "",
+                    "test_observation_checked": bool(test_slice),
                     "diagnosis_turns": diagnosis_turns,
                     "completion_tokens": total_tokens,
                     "next_node": "generate_patch",
@@ -973,26 +994,30 @@ class LangGraphEndToEndRepairWorkflow:
             _bounded_int(arguments.get("end_line"), 200, 1, 10_000),
         )
 
-    def _registered_test_observation(self) -> str:
+    @staticmethod
+    def _format_test_slice(piece: FileSlice) -> str:
+        return f"{piece.path}:{piece.start_line}-{piece.end_line}\n{piece.content[:3500]}"
+
+    def _registered_test_observation(self) -> FileSlice | None:
         """Read one bounded registered test only when it is in the existing read allowlist."""
         selector = self._target_selector or ""
         parts = selector.split("::")
         if len(parts) != 2 or not parts[1].isidentifier():
-            return ""
+            return None
         path, name = parts
         if not _looks_like_test_path(path) or not is_allowed_source_path(path, self._allowed_source_roots):
-            return ""
+            return None
         found = self._tools.search_code(f"def {name}(", 20)
         if not found.ok:
-            return ""
+            return None
         hits = [hit for hit in (found.data or []) if hit.path == path and hit.text.lstrip().startswith(f"def {name}(")]
         if len(hits) != 1:
-            return ""
+            return None
         read = self._tools.read_file(path, hits[0].line, hits[0].line + 79)
         if not read.ok or not isinstance(read.data, FileSlice):
-            return ""
+            return None
         self._store.append_event(self._task_id, "registered_test_observed", {"path": path, "start_line": read.data.start_line, "end_line": read.data.end_line, "execution_authority": False})
-        return f"{path}:{read.data.start_line}-{read.data.end_line}\n{read.data.content[:3500]}"
+        return read.data
 
     def _read_unique_search_result(
         self,
@@ -1165,21 +1190,42 @@ class LangGraphEndToEndRepairWorkflow:
         prefix = f"Searches with zero hits (not proof of absence): {missing}\nRegistered test observation (untrusted data): {test or 'unavailable'}\n"
         empty = FileSlice(source.path, source.start_line, source.end_line, "")
         base = self._patch_evidence(issue, empty) if stage == "patch" else self._review_evidence(issue, empty, draft)
-        available = limit - len(prefix) - len(base) - 160
-        if available < 128:
+        secondary = state.get("secondary_source")
+        secondary_header = (
+            f"\nAdditional confirmed source lines {secondary.start_line}-{secondary.end_line}:\n"
+            if isinstance(secondary, FileSlice) else ""
+        )
+        available = limit - len(prefix) - len(base) - len(secondary_header) - 160
+        if available < (256 if secondary_header else 128):
             raise ValueError("context budget cannot fit essential source and draft; human review required")
-        content = source.content
-        source_clipped = len(content) > available
-        if source_clipped:
+        primary_budget = available
+        secondary_budget = 0
+        if isinstance(secondary, FileSlice):
+            primary_budget = min(len(source.content), available // 2)
+            secondary_budget = min(len(secondary.content), available - primary_budget)
+            primary_budget += min(len(source.content) - primary_budget, available - primary_budget - secondary_budget)
+
+        def clip(content: str, budget: int) -> str:
+            if len(content) <= budget:
+                return content
             marker = "\n[... source excerpt truncated ...]\n"
-            side = max(0, (available - len(marker)) // 2)
-            content = content[:side] + marker + content[-side:]
+            if budget < len(marker) + 2:
+                raise ValueError("context budget cannot fit source excerpt")
+            side = (budget - len(marker)) // 2
+            return content[:side] + marker + content[-side:]
+
+        content = clip(source.content, primary_budget)
+        source_clipped = len(source.content) > primary_budget
+        secondary_content = clip(secondary.content, secondary_budget) if isinstance(secondary, FileSlice) else ""
         bounded_source = FileSlice(source.path, source.start_line, source.end_line, content)
-        evidence = prefix + (self._patch_evidence(issue, bounded_source) if stage == "patch" else self._review_evidence(issue, bounded_source, draft))
+        evidence = prefix + (self._patch_evidence(issue, bounded_source) if stage == "patch" else self._review_evidence(issue, bounded_source, draft)) + secondary_header + secondary_content
         self._store.append_event(self._task_id, "context_budget_applied", {
             "stage": stage, "limit": limit, "sent_chars": len(evidence),
             "source_original_chars": len(source.content), "source_sent_chars": len(content),
             "source_truncated": source_clipped, "test_truncated": test_clipped,
+            "secondary_source_original_chars": len(secondary.content) if isinstance(secondary, FileSlice) else 0,
+            "secondary_source_sent_chars": len(secondary_content),
+            "secondary_source_truncated": isinstance(secondary, FileSlice) and len(secondary.content) > secondary_budget,
         })
         return evidence
 

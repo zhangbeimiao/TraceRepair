@@ -21,7 +21,7 @@ def test_project_version_matches_package_metadata() -> None:
 
 
 def test_development_agent_does_not_relabel_frozen_historical_evidence() -> None:
-    assert AGENT_VERSION == "0.8.3-dev1"
+    assert AGENT_VERSION == "0.8.4-dev1"
     assert MAX_COMPLETION_TOKENS == 800
     frozen = json.loads(
         (ROOT / "evaluation/frozen/historical-python-v1.0.0.json").read_text(

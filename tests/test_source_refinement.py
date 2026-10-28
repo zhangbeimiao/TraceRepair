@@ -11,7 +11,7 @@ from tracerepair.model_planner import PlannerConfig
 from tracerepair.models import Task, TaskStatus
 from tracerepair.patch_apply import PatchApplier
 from tracerepair.read_tools import ReadOnlyRepository
-from tracerepair.recovery import load_source_checkpoint
+from tracerepair.recovery import load_source_checkpoint, load_source_context, RecoveryError, InjectedCrash
 from tracerepair.read_tools import FileSlice
 from tracerepair.store import TraceStore
 from tracerepair.test_runner import RestrictedTestRunner
@@ -55,8 +55,9 @@ def test_refinement_is_one_bounded_read_then_handoff(tmp_path):
     reads = [e.payload["arguments"] for e in events if e.event_type == "tool_started" and e.payload["tool"] == "read_file"]
     assert len(reads) == 3 and reads[-1]["start_line"] == 1
     assert store.load_checkpoint("refine")["source_refinement_used"] is True
-    restored, turns = load_source_checkpoint("refine", store, Path(store.get_task("refine").workspace))
-    assert (restored.path, restored.start_line, restored.end_line, turns) == (path, 1, 15, 3)
+    restored, secondary, _, turns = load_source_context("refine", store, Path(store.get_task("refine").workspace))
+    assert (restored.path, restored.start_line, restored.end_line, turns) == (path, 1, 8, 3)
+    assert (secondary.start_line, secondary.end_line) == (4, 15)
     assert any(e.event_type == "source_refined" for e in events)
     assert "normalized = value.strip().lower()" in transport.payloads[-1]["messages"][1]["content"]
     assert {t["function"]["name"] for t in transport.payloads[2]["tools"]} == {"read_file", "propose_patch", "handoff"}
@@ -139,8 +140,9 @@ def test_disjoint_refinement_preserves_both_ranges_and_checkpoint(tmp_path):
     assert result.task_status is TaskStatus.NEEDS_HUMAN
     evidence = transport.payloads[-1]["messages"][1]["content"]
     assert "# line 1" in evidence and "important original source" in evidence
-    restored, _ = load_source_checkpoint("refine", store, workspace)
-    assert (restored.start_line, restored.end_line) == (1, 130)
+    restored, secondary, _, _ = load_source_context("refine", store, workspace)
+    assert (restored.start_line, restored.end_line) == (80, 130)
+    assert (secondary.start_line, secondary.end_line) == (1, 50)
     assert "important original source" in restored.content
     store.close()
 
@@ -159,7 +161,7 @@ def test_context_budget_records_clipping_and_keeps_test_and_draft(tmp_path):
     store.close()
 
 
-def test_separated_ranges_over_200_lines_handoff_without_patch(tmp_path):
+def test_separated_ranges_over_200_lines_remain_independently_bounded(tmp_path):
     store, graph, transport, path = runtime(
         tmp_path, {"path": "src/eventrelay/config.py", "start_line": 300, "end_line": 350}
     )
@@ -172,12 +174,19 @@ def test_separated_ranges_over_200_lines_handoff_without_patch(tmp_path):
         ("search_code", {"query": "read_bool", "max_hits": 20}),
         ("read_file", {"path": path, "start_line": 80, "end_line": 130}),
         ("read_file", {"path": path, "start_line": 300, "end_line": 350}),
+        ("handoff", {"reason": "offline"}),
     ])
     result = graph.run("read_bool false", diagnostic_queries=("read_bool",))
     assert result.task_status is TaskStatus.NEEDS_HUMAN
-    assert result.detail == "combined source range exceeds 200 lines"
-    restored, _ = load_source_checkpoint("refine", store, workspace)
+    assert result.detail == "offline"
+    restored, secondary, _, _ = load_source_context("refine", store, workspace)
     assert (restored.start_line, restored.end_line) == (80, 130)
+    assert (secondary.start_line, secondary.end_line) == (300, 350)
+    assert "# line 300" in transport.payloads[-1]["messages"][1]["content"]
+    lines[309] = "# changed after checkpoint\n"
+    (workspace / path).write_text("".join(lines), encoding="utf-8", newline="\n")
+    with pytest.raises(RecoveryError):
+        load_source_context("refine", store, workspace)
     assert not any(e.event_type == "tool_started" and e.payload["tool"] == "apply_patch" for e in store.list_events("refine"))
     store.close()
 
@@ -212,4 +221,71 @@ def test_review_receives_registered_test_outside_source_allowlist(tmp_path):
     events = store.list_events("refine")
     assert any(e.event_type == "tool_finished" and e.payload["tool"] == "read_registered_test" and e.payload["ok"] for e in events)
     assert not any(e.event_type == "tool_started" and e.payload["tool"] == "apply_patch" for e in events)
+    restored, _, test_slice, _ = load_source_context("refine", store, Path(store.get_task("refine").workspace), target_selector=graph._target_selector)
+    assert restored.path == path and "test_case_05_parses_false_as_false" in test_slice.content
+    test_path = Path(store.get_task("refine").workspace) / test_slice.path
+    test_path.write_text(test_path.read_text(encoding="utf-8").replace("def test_case_05_parses_false_as_false", "def test_case_05_changed"), encoding="utf-8")
+    with pytest.raises(RecoveryError, match="test_source workspace content changed"):
+        load_source_context("refine", store, Path(store.get_task("refine").workspace), target_selector=graph._target_selector)
+    store.close()
+
+
+@pytest.mark.parametrize("mutate", [False, True])
+def test_refinement_crash_resume_checks_both_slices(tmp_path, mutate):
+    store, graph, transport, path = runtime(tmp_path, {"path": "src/eventrelay/config.py", "start_line": 300, "end_line": 350})
+    workspace = Path(store.get_task("refine").workspace)
+    lines = [f"# line {i}\n" for i in range(1, 401)]
+    lines[89] = "def read_bool():\n"
+    lines[90] = "    return False\n"
+    (workspace / path).write_text("".join(lines), encoding="utf-8", newline="\n")
+    transport.calls = iter([
+        ("search_code", {"query": "read_bool", "max_hits": 20}),
+        ("read_file", {"path": path, "start_line": 80, "end_line": 130}),
+        ("read_file", {"path": path, "start_line": 300, "end_line": 350}),
+        ("handoff", {"reason": "resumed with both slices"}),
+    ])
+    graph._crash_after = "source_refined"
+    with pytest.raises(InjectedCrash):
+        graph.run("read_bool false", diagnostic_queries=("read_bool",))
+    if mutate:
+        lines[309] = "# modified\n"
+        (workspace / path).write_text("".join(lines), encoding="utf-8", newline="\n")
+    store.transition("refine", TaskStatus.READY, "resume")
+    store.transition("refine", TaskStatus.RUNNING, "resume")
+    graph._crash_after = None
+    before = len(transport.payloads)
+    result = graph.run("read_bool false", resume=True)
+    assert result.task_status is TaskStatus.NEEDS_HUMAN
+    if mutate:
+        assert "secondary_source workspace content changed" in result.detail
+        assert len(transport.payloads) == before
+    else:
+        assert result.detail == "resumed with both slices"
+        evidence = transport.payloads[-1]["messages"][1]["content"]
+        assert "def read_bool" in evidence and "# line 300" in evidence
+    store.close()
+
+
+def test_diagnosis_test_read_survives_source_checkpoint_and_resume(tmp_path):
+    store, _, transport, _ = runtime(tmp_path, {})
+    workspace = Path(store.get_task("refine").workspace)
+    selector = "tests/test_repair_targets.py::test_case_05_parses_false_as_false"
+    transport.calls = iter([
+        ("search_code", {"query": "test_case_05_parses_false_as_false", "max_hits": 20}),
+        ("read_file", {"path": "tests/test_repair_targets.py", "start_line": 1, "end_line": 200}),
+        ("handoff", {"reason": "offline"}),
+    ])
+    planner = NativeFunctionPlanner(transport, PlannerConfig(max_completion_tokens=100, max_calls_per_task=5, max_total_completion_tokens=500))
+    tools = InstrumentedTools("refine", store, ReadOnlyRepository(workspace, allowed_roots=("src/eventrelay", "tests")), RestrictedTestRunner(workspace), PatchApplier(workspace))
+    graph = LangGraphEndToEndRepairWorkflow("refine", store, planner, tools, target_selector=selector, crash_after="source_read")
+    with pytest.raises(InjectedCrash):
+        graph.run("read_bool false", diagnostic_queries=("read_bool",))
+    _, _, test_slice, _ = load_source_context("refine", store, workspace, allowed_source_roots=("src/eventrelay",), target_selector=selector)
+    assert "test_case_05_parses_false_as_false" in test_slice.content
+    store.transition("refine", TaskStatus.READY, "resume")
+    store.transition("refine", TaskStatus.RUNNING, "resume")
+    graph._crash_after = None
+    result = graph.run("read_bool false", resume=True)
+    assert result.task_status is TaskStatus.NEEDS_HUMAN
+    assert "test_case_05_parses_false_as_false" in transport.payloads[-1]["messages"][1]["content"]
     store.close()

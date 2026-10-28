@@ -1,0 +1,18 @@
+{
+  "agent_version": "0.8.4-dev1",
+  "parent_agent_version": "0.8.3-dev1",
+  "status": "development_only",
+  "model": "qwen3.8-flash",
+  "architecture": "langgraph_end_to_end",
+  "durable_state": "sqlite_only",
+  "max_diagnosis_turns": 3,
+  "max_model_calls": 5,
+  "max_completion_tokens_per_call": 800,
+  "max_total_completion_tokens": 3072,
+  "max_context_chars": 9000,
+  "source_refinement": {"max_model_requested_reads": 1, "same_confirmed_file_only": true, "max_lines_per_slice": 200, "max_slices": 2, "verify_each_slice_on_resume": true},
+  "review_evidence": {"registered_test_only": true, "test_excerpt_max_chars": 1200, "verify_on_resume": true, "untrusted_text_escaped": true},
+  "context_budget": {"source_clipping_is_recorded": true, "test_clipping_is_recorded": true, "draft_never_silently_truncated": true},
+  "development_benchmark": "multi-slice-v0.8.4-dev1",
+  "claim_boundary": "Known development cases only; no new locked result is claimed."
+}

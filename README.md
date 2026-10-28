@@ -40,6 +40,8 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 
 后续已知开发集保留了三轮原始结果：`0.8.1-dev1` **2/3**、`0.8.2-dev1` **0/3**、`0.8.3-dev1` **2/3**。它们均使用相同的三个已观察任务，每题每版一次，样本太小且模型存在随机性，不能据此声称性能提升。各轮保留成功和失败、日志、报告及哈希链：[`0.8.1`](evaluation/results/source-refinement-v0.8.1-dev1/DEVELOPMENT_FINDINGS.md)、[`0.8.2`](evaluation/results/missing-symbol-v0.8.2-dev1/DEVELOPMENT_FINDINGS.md)、[`0.8.3`](evaluation/results/context-preservation-v0.8.3-dev1/DEVELOPMENT_FINDINGS.md)。
 
+开发中的 `0.8.4-dev1` 将初始源码片段与同文件的一次补读分别保存，每段仍受 200 行上限约束；恢复时分别校验工作区内容，已读取的目标测试证据也纳入恢复校验。模型上下文裁剪会记录，不改变补丁及测试门禁。新的 [`开发评测`](evaluation/benchmarks/multi-slice-v0.8.4-dev1.json) 已准备，**模型评测尚未运行，没有新成功率**；旧结果保持不变。
+
 配置好百炼环境变量后，可用 `powershell -ExecutionPolicy Bypass -File scripts\run_v080_development.ps1` 一次完成 Function Calling 探针、五题开发集、协议对比和语义检索评测；该入口不包含 locked 任务。检索门禁未达到提升标准时会保存 `keep_rag_disabled` 负面证据并正常结束，只有报告损坏或配置不一致才作为基础设施错误失败。也可以在 GitHub Actions 中手动触发 `TraceRepair v0.8 Development Evaluation`：它只读取仓库 Secrets、上传完整开发证据，并且没有引用任何 locked manifest。
 
 当前公开稳定基线为 `0.6.0`（评测运行时 `0.6.0-dev4`），当前 LangGraph 冻结候选为 `0.7.0-dev2`。稳定基线在五个来自不同开源仓库历史提交的 Bug 上，严格 `pass@1` 结果为 **3/5**：开发集 `2/3`，配置冻结后的锁定集 `1/2`，锁定任务每题只运行一次。两个失败候选都被目标测试拦截并转人工，**错误接受补丁数为 0**。样本量仍小，因此这里只证明受控闭环、一次性锁定迁移和安全停止能力，不宣称任意仓库修复准确率。
