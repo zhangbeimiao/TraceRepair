@@ -21,7 +21,7 @@ def test_project_version_matches_package_metadata() -> None:
 
 
 def test_development_agent_does_not_relabel_frozen_historical_evidence() -> None:
-    assert AGENT_VERSION == "0.8.4-dev1"
+    assert AGENT_VERSION == "0.8.5-dev1"
     assert MAX_COMPLETION_TOKENS == 800
     frozen = json.loads(
         (ROOT / "evaluation/frozen/historical-python-v1.0.0.json").read_text(
@@ -99,7 +99,8 @@ def test_development_agent_does_not_relabel_frozen_historical_evidence() -> None
     assert langgraph_dev1["planner"]["max_calls_per_task"] == 4
     assert langgraph_dev1["planner"]["max_total_completion_tokens"] == 2048
     assert native_development["planner"]["max_completion_tokens"] == MAX_COMPLETION_TOKENS
-    assert native_development["planner"]["max_calls_per_task"] == MAX_MODEL_CALLS == 5
+    assert native_development["planner"]["max_calls_per_task"] == 5
+    assert MAX_MODEL_CALLS == 6
     assert (
         native_development["planner"]["max_total_completion_tokens"]
         == MAX_TOTAL_COMPLETION_TOKENS

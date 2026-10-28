@@ -540,7 +540,6 @@ class LangGraphEndToEndRepairWorkflow:
         can_refine = (
             isinstance(self._planner, NativeFunctionPlanner)
             and not checkpoint.get("source_refinement_used", False)
-            and turns < self._max_diagnosis_turns
         )
         try:
             evidence = self._bounded_model_evidence(state, source, stage="patch")
@@ -579,22 +578,22 @@ class LangGraphEndToEndRepairWorkflow:
             if not read.ok or not isinstance(read.data, FileSlice):
                 code = read.error.code if read.error else "READ_TOOL_FAILED"
                 return self._stop_node(
-                    "generate_patch", "handoff", code, turns + 1, total_tokens
+                    "generate_patch", "handoff", code, turns, total_tokens
                 )
             if read.data.content == source.content:
                 return self._stop_node(
                     "generate_patch", "handoff", "source refinement returned no new evidence",
-                    turns + 1, total_tokens,
+                    turns, total_tokens,
                 )
             verify = self._tools.read_file(source.path, source.start_line, source.end_line)
             if not verify.ok or not isinstance(verify.data, FileSlice) or verify.data.content != source.content:
                 return self._stop_node(
                     "generate_patch", "handoff", "source changed between reads",
-                    turns + 1, total_tokens,
+                    turns, total_tokens,
                 )
             save_source_checkpoint(
                 self._task_id, self._store, Path(self._store.get_task(self._task_id).workspace),
-                source, diagnosis_turns=turns + 1, secondary_source=read.data,
+                source, diagnosis_turns=turns, secondary_source=read.data,
                 test_source=state.get("test_slice"),
             )
             self._store.append_event(
@@ -605,7 +604,7 @@ class LangGraphEndToEndRepairWorkflow:
             inject_crash_if_requested(self._task_id, self._store, configured_point=self._crash_after, reached_point="source_refined")
             return self._complete_node(
                 "generate_patch",
-                {"source": source, "secondary_source": read.data, "diagnosis_turns": turns + 1,
+                {"source": source, "secondary_source": read.data, "diagnosis_turns": turns,
                  "completion_tokens": total_tokens, "next_node": "generate_patch",
                  "action": "read_file", "detail": "additional source checkpoint persisted",
                  "node_history": ["generate_patch"]},

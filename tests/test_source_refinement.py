@@ -56,7 +56,7 @@ def test_refinement_is_one_bounded_read_then_handoff(tmp_path):
     assert len(reads) == 3 and reads[-1]["start_line"] == 1
     assert store.load_checkpoint("refine")["source_refinement_used"] is True
     restored, secondary, _, turns = load_source_context("refine", store, Path(store.get_task("refine").workspace))
-    assert (restored.path, restored.start_line, restored.end_line, turns) == (path, 1, 8, 3)
+    assert (restored.path, restored.start_line, restored.end_line, turns) == (path, 1, 8, 2)
     assert (secondary.start_line, secondary.end_line) == (4, 15)
     assert any(e.event_type == "source_refined" for e in events)
     assert "normalized = value.strip().lower()" in transport.payloads[-1]["messages"][1]["content"]
@@ -158,6 +158,30 @@ def test_context_budget_records_clipping_and_keeps_test_and_draft(tmp_path):
     assert "assert result == 3" in evidence and "DIFF MARKER" in evidence
     event = [e for e in store.list_events("refine") if e.event_type == "context_budget_applied"][-1]
     assert event.payload["source_truncated"] is True
+    store.close()
+
+
+def test_one_refinement_remains_available_after_three_diagnosis_turns(tmp_path):
+    store, graph, transport, path = runtime(tmp_path, {"path": "src/eventrelay/config.py", "start_line": 1, "end_line": 8})
+    transport.calls = iter([
+        ("search_code", {"query": "nonexistent_a", "max_hits": 20}),
+        ("search_code", {"query": "nonexistent_b", "max_hits": 20}),
+        ("search_code", {"query": "read_bool", "max_hits": 20}),
+        ("read_file", {"path": path, "start_line": 1, "end_line": 1}),
+        ("handoff", {"reason": "offline"}),
+    ])
+    # The fallback typically reads the whole tiny fixture; use a larger fixture so
+    # the requested range is genuinely outside its bounded source window.
+    workspace = Path(store.get_task("refine").workspace)
+    lines = [f"# line {i}\n" for i in range(1, 401)]
+    lines[299] = "def read_bool():\n"
+    lines[300] = "    return False\n"
+    (workspace / path).write_text("".join(lines), encoding="utf-8", newline="\n")
+    result = graph.run("read_bool false", diagnostic_queries=("read_bool",))
+    assert result.task_status is TaskStatus.NEEDS_HUMAN and result.detail == "offline"
+    assert result.diagnosis_turns == 3
+    assert store.load_checkpoint("refine")["source_refinement_used"] is True
+    assert "# line 1" in transport.payloads[-1]["messages"][1]["content"]
     store.close()
 
 
