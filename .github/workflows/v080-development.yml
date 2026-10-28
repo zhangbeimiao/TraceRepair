@@ -45,6 +45,9 @@ jobs:
           test -n "$DASHSCOPE_API_KEY"
           test -n "$TRACEREPAIR_BAILIAN_BASE_URL"
 
+      - name: Verify deterministic prompt security evidence
+        run: python scripts/evaluate_prompt_security.py --verify
+
       - name: Probe native Function Calling
         env:
           DASHSCOPE_API_KEY: ${{ secrets.DASHSCOPE_API_KEY }}
@@ -71,6 +74,9 @@ jobs:
           DASHSCOPE_API_KEY: ${{ secrets.DASHSCOPE_API_KEY }}
           TRACEREPAIR_BAILIAN_BASE_URL: ${{ secrets.TRACEREPAIR_BAILIAN_BASE_URL }}
         run: python scripts/evaluate_retrieval.py --embedding bailian
+
+      - name: Enforce the semantic retrieval activation gate
+        run: python scripts/evaluate_retrieval_gate.py
 
       - name: Upload complete development evidence
         if: always()

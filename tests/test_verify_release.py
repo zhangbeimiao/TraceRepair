@@ -36,6 +36,8 @@ def make_release_tree(root: Path) -> None:
         "evaluation/results/code-retrieval-v0.8.0-dev2/none.json.sha256",
         "evaluation/results/code-retrieval-v0.8.0-dev2/hash.json",
         "evaluation/results/code-retrieval-v0.8.0-dev2/hash.json.sha256",
+        "evaluation/results/prompt-security-v0.8.0-dev1/report.json",
+        "evaluation/results/prompt-security-v0.8.0-dev1/report.json.sha256",
         "evaluation/frozen/agent-v0.5.0.json",
         "evaluation/frozen/agent-v0.6.0.json",
         "evaluation/frozen/agent-v0.7.0-dev2.json",

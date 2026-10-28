@@ -79,6 +79,8 @@ REQUIRED_FILES = {
     Path("evaluation/results/code-retrieval-v0.8.0-dev2/none.json.sha256"),
     Path("evaluation/results/code-retrieval-v0.8.0-dev2/hash.json"),
     Path("evaluation/results/code-retrieval-v0.8.0-dev2/hash.json.sha256"),
+    Path("evaluation/results/prompt-security-v0.8.0-dev1/report.json"),
+    Path("evaluation/results/prompt-security-v0.8.0-dev1/report.json.sha256"),
     Path("evaluation/frozen/agent-v0.5.0.json"),
     Path("evaluation/frozen/agent-v0.6.0.json"),
     Path("evaluation/frozen/agent-v0.7.0-dev2.json"),

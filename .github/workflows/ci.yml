@@ -53,6 +53,9 @@ jobs:
       - name: Verify native function protocol manifest
         run: python scripts/freeze_protocol_manifest.py --verify
 
+      - name: Verify prompt and function-call containment evidence
+        run: python scripts/evaluate_prompt_security.py --verify
+
       - name: Run test suite
         run: |
           mkdir -p .tmp
