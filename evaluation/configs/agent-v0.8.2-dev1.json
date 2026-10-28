@@ -1,0 +1,26 @@
+{
+  "agent_version": "0.8.2-dev1",
+  "parent_agent_version": "0.8.1-dev1",
+  "status": "development_only",
+  "model": "qwen3.8-flash",
+  "architecture": "langgraph_end_to_end",
+  "durable_state": "sqlite_only",
+  "max_diagnosis_turns": 3,
+  "max_model_calls": 5,
+  "max_completion_tokens_per_call": 800,
+  "max_total_completion_tokens": 3072,
+  "diagnosis_prompt_id": "diagnosis-missing-symbol-v0.8.2-dev1",
+  "diagnosis_prompt_sha256": "029f7a4b8b81366388425522a36adcfdbfac41ffe9dfd792cbc0ffeb0d2bde31",
+  "missing_symbol_diagnosis": {
+    "max_remembered_zero_hit_queries": 3,
+    "zero_hits_are_not_proof_of_absence": true,
+    "test_observation_attempts": 1,
+    "registered_target_only": true,
+    "existing_read_allowlist_required": true,
+    "max_test_read_lines": 80,
+    "max_test_evidence_chars": 3500,
+    "nested_test_patches_denied": true
+  },
+  "development_benchmark": "missing-symbol-v0.8.2-dev1",
+  "claim_boundary": "Known development tasks only; no new locked result is claimed."
+}

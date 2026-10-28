@@ -75,13 +75,15 @@ class RestrictedTestRunner:
         self._timeout_seconds = timeout_seconds
         self._output_limit = output_limit
 
-    def run_tests(self, selector: str) -> TestRunResult:
-        allowed = (
+    def is_registered_target(self, selector: str) -> bool:
+        return (
             selector in self._allowed_targets
             if self._allowed_targets is not None
             else bool(_TARGET_SELECTOR.fullmatch(selector))
         )
-        if not allowed:
+
+    def run_tests(self, selector: str) -> TestRunResult:
+        if not self.is_registered_target(selector):
             return TestRunResult(
                 ok=False,
                 selector=selector,

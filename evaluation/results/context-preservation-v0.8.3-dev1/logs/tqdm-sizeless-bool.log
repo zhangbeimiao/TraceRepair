@@ -1,0 +1,8 @@
+End-to-end repair run completed.
+Agent version: 0.8.3-dev1; task: repo-tqdm-sizeless-bool (tqdm-sizeless-bool)
+Diagnosis turns: 2/3
+Model usage: calls=2/5, output_tokens=158/3072
+Verification action: handoff
+Final task status: needs_human
+Detail: combined source range exceeds 200 lines
+Trace database: data/model-agent.sqlite3 (task model-agent-repo-tqdm-sizeless-bool-a75d66cf)

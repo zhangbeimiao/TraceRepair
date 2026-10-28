@@ -101,8 +101,8 @@ def test_native_functions_and_rag_complete_the_existing_test_gated_graph(tmp_pat
     ]
     assert len(model_events) == 3
     assert [event.payload["stage"] for event in model_events] == [
-        "diagnosis",
-        "patch_generation",
+        "diagnosis_v082",
+        "patch_context",
         "patch_review",
     ]
     assert all(event.payload["native_function_calling"] is True for event in model_events)

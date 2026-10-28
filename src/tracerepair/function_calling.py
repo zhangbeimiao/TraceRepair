@@ -92,6 +92,10 @@ class NativeFunctionPlanner:
         self._transport = transport
         self._config = config or PlannerConfig()
 
+    @property
+    def max_context_chars(self) -> int:
+        return self._config.max_context_chars
+
     def suggest(
         self,
         task_id: str,
@@ -115,8 +119,10 @@ class NativeFunctionPlanner:
         if not permitted <= READ_ONLY_FUNCTIONS:
             raise ValueError("allowed_tools must be a subset of the read-only function allowlist")
         resolved_stage = stage or ("patch_generation" if allow_patch and not permitted else "diagnosis")
+        if allow_patch and permitted and (resolved_stage != "patch_context" or permitted != {"read_file"}):
+            raise ValueError("only patch_context may advertise the read_file function alongside a patch")
         prompt = get_prompt(resolved_stage)
-        advertised = sorted(permitted) if not allow_patch else ["propose_patch"]
+        advertised = sorted(permitted) + (["propose_patch"] if allow_patch else [])
         advertised.append("handoff")
         tools = [FUNCTION_SCHEMAS[name] for name in advertised]
         schema_sha256 = _canonical_sha256(tools)
@@ -139,6 +145,7 @@ class NativeFunctionPlanner:
                 response,
                 permitted=permitted,
                 allow_patch=allow_patch,
+                allow_patch_read=resolved_stage == "patch_context",
             )
             if completion_tokens > self._config.max_completion_tokens:
                 raise PlannerError("model response exceeded completion token limit")
@@ -196,6 +203,7 @@ class NativeFunctionPlanner:
         *,
         permitted: set[str],
         allow_patch: bool,
+        allow_patch_read: bool = False,
     ) -> tuple[ModelPlan, dict[str, str]]:
         try:
             choices = response["choices"]
@@ -232,7 +240,7 @@ class NativeFunctionPlanner:
             raise PlannerError("model proposed a function outside the current stage")
         if name == "propose_patch" and not allow_patch:
             raise PlannerError("model proposed a patch outside the patch stage")
-        if name in permitted and allow_patch:
+        if name in permitted and allow_patch and not (allow_patch_read and name == "read_file"):
             raise PlannerError("read-only functions are not allowed in the patch stage")
 
         reason = _safe_reason(arguments.get("reason"), fallback=f"model selected {name}")

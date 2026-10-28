@@ -30,6 +30,13 @@ def test_policy_rejects_test_and_traversal_paths() -> None:
     assert "PATH_DENIED" in PatchPolicy().validate(traversal_diff).errors
 
 
+def test_policy_rejects_tests_nested_under_a_source_root() -> None:
+    policy = PatchPolicy(allowed_roots=("tqdm",))
+    for path in ("tqdm/tests/tests_tqdm.py", "tqdm/test_helpers.py", "tqdm/helpers_test.py"):
+        diff = SAFE_DIFF.replace("src/eventrelay/config.py", path)
+        assert "PATH_DENIED" in policy.validate(diff).errors
+
+
 def test_policy_rejects_excessive_change_volume() -> None:
     additions = "\n".join(f"+line {index}" for index in range(4))
     diff = SAFE_DIFF + additions

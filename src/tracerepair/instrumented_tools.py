@@ -54,6 +54,31 @@ class InstrumentedTools:
         self._finish(call_id, "read_file", result, self._read_summary(result))
         return result
 
+    def read_registered_test(self, selector: str) -> ReadOnlyResult[FileSlice]:
+        """Observe only the runner's registered test function, never execute it."""
+        call_id = self._start("read_registered_test", {"selector": selector})
+        parts = selector.split("::")
+        if not self._test_runner.is_registered_target(selector) or len(parts) != 2 or not parts[1].isidentifier():
+            result = ReadOnlyResult.failure("TEST_SELECTOR_DENIED", "target is not a registered test function")
+        else:
+            path, name = parts
+            workspace = Path(self._store.get_task(self._task_id).workspace).resolve()
+            target = (workspace / path).resolve()
+            if (not target.is_relative_to(workspace) or not target.is_file()
+                or target.relative_to(workspace).as_posix() != path):
+                result = ReadOnlyResult.failure("TEST_FILE_DENIED", "registered test path is unavailable")
+            else:
+                relative = target.relative_to(workspace).as_posix()
+                repository = ReadOnlyRepository(workspace, allowed_roots=(relative,), max_read_lines=80)
+                matches = repository.search_code(f"def {name}(", 20)
+                hits = [hit for hit in (matches.data or []) if hit.path == relative and hit.text.lstrip().startswith(f"def {name}(")]
+                if len(hits) != 1:
+                    result = ReadOnlyResult.failure("TEST_FUNCTION_UNAVAILABLE", "registered test function is not unique")
+                else:
+                    result = repository.read_file(relative, hits[0].line, hits[0].line + 79)
+        self._finish(call_id, "read_registered_test", result, self._read_summary(result))
+        return result
+
     def run_tests(self, selector: str) -> TestRunResult:
         call_id = self._start("run_tests", {"selector": selector})
         result = self._test_runner.run_tests(selector)

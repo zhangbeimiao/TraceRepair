@@ -13,3 +13,9 @@
 *.ps1 text eol=crlf
 evaluation/results/function-rag-locked-v0.8.0/attempts.jsonl -text
 evaluation/results/function-rag-locked-v0.8.0/logs/*.log -text
+evaluation/results/source-refinement-v0.8.1-dev1/attempts.jsonl -text
+evaluation/results/source-refinement-v0.8.1-dev1/logs/*.log -text
+evaluation/results/missing-symbol-v0.8.2-dev1/attempts.jsonl -text
+evaluation/results/missing-symbol-v0.8.2-dev1/logs/*.log -text
+evaluation/results/context-preservation-v0.8.3-dev1/attempts.jsonl -text
+evaluation/results/context-preservation-v0.8.3-dev1/logs/*.log -text

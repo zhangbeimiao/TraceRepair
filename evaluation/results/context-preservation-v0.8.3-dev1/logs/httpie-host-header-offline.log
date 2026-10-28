@@ -1,0 +1,8 @@
+End-to-end repair run completed.
+Agent version: 0.8.3-dev1; task: repo-httpie-host-header-offline (httpie-host-header-offline)
+Diagnosis turns: 1/3
+Model usage: calls=3/5, output_tokens=619/3072
+Verification action: run_regression
+Final task status: awaiting_review
+Detail: all tests passed
+Trace database: data/model-agent.sqlite3 (task model-agent-repo-httpie-host-header-offline-f67f5466)

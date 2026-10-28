@@ -1,0 +1,8 @@
+End-to-end repair run completed.
+Agent version: 0.8.2-dev1; task: repo-tqdm-sizeless-bool (tqdm-sizeless-bool)
+Diagnosis turns: 3/3
+Model usage: calls=4/5, output_tokens=219/3072
+Verification action: handoff
+Final task status: needs_human
+Detail: The confirmed slice of tqdm/_tqdm.py contains no __bool__ definition (searches returned zero hits), so I cannot copy exact removed/context lines for the required edit; evidence is insufficient to propose a minimal correct diff.
+Trace database: data/model-agent.sqlite3 (task model-agent-repo-tqdm-sizeless-bool-05581897)

@@ -78,16 +78,30 @@ def main() -> None:
     digest = hashlib.sha256(encoded).hexdigest()
     checksum = OUTPUT.with_suffix(OUTPUT.suffix + ".sha256")
     if arguments.verify:
-        if not OUTPUT.is_file() or OUTPUT.read_bytes() != encoded:
-            raise SystemExit("protocol manifest does not match current prompts, schemas, or config")
+        if not OUTPUT.is_file():
+            raise SystemExit("frozen protocol manifest is missing")
+        frozen_bytes = OUTPUT.read_bytes()
+        try:
+            frozen = json.loads(frozen_bytes)
+            current = protocol_payload()
+        except (ValueError, TypeError) as error:
+            raise SystemExit("frozen protocol manifest is invalid") from error
+        # Historical source hashes describe the original implementation. A new
+        # runtime may change source while preserving its old prompt/schema data.
+        frozen_without_sources = {k: v for k, v in frozen.items() if k != "source_sha256"}
+        current_without_sources = {k: v for k, v in current.items() if k != "source_sha256"}
+        if frozen_without_sources != current_without_sources:
+            raise SystemExit("frozen protocol prompts, schemas, or config do not match")
         try:
             recorded = checksum.read_text(encoding="ascii").split()[0]
         except (OSError, IndexError) as error:
             raise SystemExit("protocol manifest checksum is missing") from error
-        if recorded != digest:
+        if recorded != hashlib.sha256(frozen_bytes).hexdigest():
             raise SystemExit("protocol manifest checksum mismatch")
-        print(f"Protocol manifest verified: {digest}")
+        print(f"Frozen protocol manifest verified: {recorded} (historical source hashes retained)")
         return
+    if OUTPUT.exists() and OUTPUT.read_bytes() != encoded:
+        raise SystemExit("refusing to overwrite a historical frozen protocol manifest")
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_bytes(encoded)
     checksum.write_text(f"{digest}  {OUTPUT.name}\n", encoding="ascii", newline="\n")

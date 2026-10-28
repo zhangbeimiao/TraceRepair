@@ -1,0 +1,24 @@
+{
+  "agent_version": "0.8.1-dev1",
+  "parent_agent_version": "0.8.0",
+  "status": "development_only",
+  "model": "qwen3.8-flash",
+  "architecture": "langgraph_end_to_end",
+  "durable_state": "sqlite_only",
+  "max_diagnosis_turns": 3,
+  "max_model_calls": 5,
+  "max_completion_tokens_per_call": 800,
+  "max_total_completion_tokens": 3072,
+  "patch_context_prompt_id": "patch-native-context-v0.8.1-dev1",
+  "patch_context_prompt_sha256": "a5cb84dd254a261fb53871c121870c5bccc3cfd047dbd9e74f8838dd4fe44fa1",
+  "source_refinement": {
+    "max_reads": 1,
+    "same_confirmed_file_only": true,
+    "must_add_new_range": true,
+    "max_lines_per_read": 200,
+    "counts_as_diagnosis_turn": true,
+    "recorded_in_sqlite": true
+  },
+  "development_benchmark": "source-refinement-v0.8.1-dev1",
+  "claim_boundary": "Development configuration only; no new locked result is claimed."
+}

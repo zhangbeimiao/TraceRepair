@@ -1,0 +1,61 @@
+{
+  "benchmark": {
+    "agent_version": "0.8.3-dev1",
+    "benchmark_id": "context-preservation-v0.8.3-dev1",
+    "completion_cny_per_million_tokens": 0.0,
+    "manifest_sha256": "44344f62de4a69c98e874111aad7825ba6c63b26de58ae0763f2e92d94e0aeac",
+    "model": "qwen3.8-flash",
+    "protocol": "pass@1",
+    "retrieval": {
+      "chunker_version": "ast-symbol-v1",
+      "embedding_dimensions": 256,
+      "embedding_model": "qwen3.7-text-embedding-flash",
+      "mode": "hybrid",
+      "rrf_k": 60,
+      "top_k": 5
+    },
+    "schema_version": 1,
+    "tasks": [
+      {
+        "repository_sha256": "a5d7f99508ab41c574078475c1f7dfff11e4766eb2f09c3ec45a8a1c13d9f8b7",
+        "source": {
+          "buggy_commit": "f0d241211d6752f8da032218044f884437d809cb",
+          "fixed_commit": "d4e3c9a4c57217afdd245f75969f9cb51542a111",
+          "issue_url": "https://github.com/hynek/structlog/pull/272",
+          "repository_url": "https://github.com/hynek/structlog"
+        },
+        "split": "development",
+        "task_config": "structlog-missing-event.json",
+        "task_config_sha256": "2d8b91fcae469a0c26d95fed4e5a96d632a8a6b7a47a46369ee99a606b5378c4",
+        "task_id": "structlog-missing-event"
+      },
+      {
+        "repository_sha256": "030cd38f607eb99327d9a383dd5639944cec1bebbd0e3cdda590ec39d387fd92",
+        "source": {
+          "buggy_commit": "c2599e3cd6087429f48bae34347ec5d2473c8392",
+          "fixed_commit": "73962a47026dd980ac0758820efc9c41cbf938e0",
+          "issue_url": null,
+          "repository_url": "https://github.com/tqdm/tqdm"
+        },
+        "split": "development",
+        "task_config": "tqdm-sizeless-bool.json",
+        "task_config_sha256": "5c6c72a46126d06a463bb825125a3030ef199853d8344aac3386905078f39d41",
+        "task_id": "tqdm-sizeless-bool"
+      },
+      {
+        "repository_sha256": "40b403248592f6d362acc2b1a313996175fe31adfe279c03b3832dd137184c06",
+        "source": {
+          "buggy_commit": "8c892edd4fe700a7ca5cc733dcb4817831d253e2",
+          "fixed_commit": "040d981f00c3f6830b2d0db3daf3c64c080e96e3",
+          "issue_url": null,
+          "repository_url": "https://github.com/httpie/cli"
+        },
+        "split": "development",
+        "task_config": "httpie-host-header-offline.json",
+        "task_config_sha256": "586bf51d883f7ea5a846e80e99e7280bc0e8436cd875d4d808103386274c8f80",
+        "task_id": "httpie-host-header-offline"
+      }
+    ]
+  },
+  "locked_at": "2026-10-28T16:07:11.966445+00:00"
+}

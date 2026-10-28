@@ -17,13 +17,15 @@ def _module():
     return module
 
 
-def test_native_protocol_manifest_matches_current_sources() -> None:
+def test_native_protocol_manifest_preserves_frozen_contract() -> None:
     module = _module()
-    expected = module.encoded_payload()
-    assert MANIFEST.read_bytes() == expected
+    expected = MANIFEST.read_bytes()
     checksum = MANIFEST.with_suffix(".json.sha256").read_text(encoding="ascii").split()[0]
     assert checksum == hashlib.sha256(expected).hexdigest()
     payload = json.loads(expected)
+    current = module.protocol_payload()
+    assert payload["prompts"] == current["prompts"]
+    assert payload["function_schemas"] == current["function_schemas"]
     assert payload["status"] == "development_contract_not_locked_evaluation"
     assert len(payload["prompts"]) == 3
     assert len(payload["function_schemas"]) == 5

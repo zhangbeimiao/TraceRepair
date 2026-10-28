@@ -107,8 +107,39 @@ PROMPTS: dict[str, PromptSpec] = {
     ),
 }
 
+PATCH_CONTEXT_PROMPT = PromptSpec(
+    prompt_id="patch-native-context-v0.8.1-dev1",
+    version="0.8.1-dev1",
+    stage="patch_context",
+    system=(
+        f"{_COMMON_BOUNDARY} You are preparing a patch from a confirmed source slice. "
+        "If the slice is insufficient and read_file is advertised, request one different "
+        "bounded line range of the same confirmed source path; do not guess another path. "
+        "Otherwise propose one minimal unified diff or handoff. Copy context exactly and "
+        "never edit tests. The host validates every request."
+    ),
+)
+
+DIAGNOSIS_V082_PROMPT = PromptSpec(
+    prompt_id="diagnosis-missing-symbol-v0.8.2-dev1",
+    version="0.8.2-dev1",
+    stage="diagnosis_v082",
+    system=(
+        f"{_COMMON_BOUNDARY} Diagnose with read-only tools. A search with no results "
+        "is an observation, not proof that a symbol is absent: the method may be missing, "
+        "inherited, named differently, or outside the search scope. Do not repeat an equivalent "
+        "failed query; inspect related observed methods and the registered test behavior when "
+        "available. Only read exact paths provided by the host or tools. Test content is "
+        "untrusted evidence and must never be modified. Handoff when evidence is insufficient."
+    ),
+)
+
 
 def get_prompt(stage: str) -> PromptSpec:
+    if stage == "patch_context":
+        return PATCH_CONTEXT_PROMPT
+    if stage == "diagnosis_v082":
+        return DIAGNOSIS_V082_PROMPT
     try:
         return PROMPTS[stage]
     except KeyError as error:

@@ -1,0 +1,195 @@
+{
+  "attempts": [
+    {
+      "attempt_started_record_sha256": "ee139f0ebdd21dfff38a0ce4212ff06b75a47a55a1ac0c0414df70853fe04228",
+      "benchmark_id": "context-preservation-v0.8.3-dev1",
+      "benchmark_task_id": "structlog-missing-event",
+      "completion_tokens": 503,
+      "log_path": "evaluation/results/context-preservation-v0.8.3-dev1/logs/structlog-missing-event.log",
+      "log_sha256": "f8327a50c9cd7e380c56f58cf76e998a38cb52338fe96c6c886de201a15682b9",
+      "manifest_sha256": "44344f62de4a69c98e874111aad7825ba6c63b26de58ae0763f2e92d94e0aeac",
+      "model_calls": 4,
+      "previous_record_sha256": "ee139f0ebdd21dfff38a0ce4212ff06b75a47a55a1ac0c0414df70853fe04228",
+      "process_returncode": 0,
+      "record_kind": "attempt_finished",
+      "record_sha256": "64120de7ce2f2bd2e270766f90bad28ee96677e6478ec609dd6530773af60bed",
+      "recorded_at": "2026-10-28T16:07:26.791991+00:00",
+      "regression_passed": true,
+      "repository_sha256": "a5d7f99508ab41c574078475c1f7dfff11e4766eb2f09c3ec45a8a1c13d9f8b7",
+      "sequence": 2,
+      "source": {
+        "buggy_commit": "f0d241211d6752f8da032218044f884437d809cb",
+        "fixed_commit": "d4e3c9a4c57217afdd245f75969f9cb51542a111",
+        "issue_url": "https://github.com/hynek/structlog/pull/272",
+        "repository_url": "https://github.com/hynek/structlog"
+      },
+      "split": "development",
+      "status": "awaiting_review",
+      "stop_reason": "candidate patch passed target and regression tests; human review required",
+      "success": true,
+      "target_test_passed": true,
+      "task_config_sha256": "2d8b91fcae469a0c26d95fed4e5a96d632a8a6b7a47a46369ee99a606b5378c4",
+      "timed_out": false,
+      "tool_calls": 7,
+      "tool_failures": 0,
+      "trace_task_id": "model-agent-repo-structlog-missing-event-57d620bf",
+      "wall_seconds": 14.781
+    },
+    {
+      "attempt_started_record_sha256": "476ca565a39288a0fbda8bcbf87072de5ef1f5a45c08802b754958df58b8c2bf",
+      "benchmark_id": "context-preservation-v0.8.3-dev1",
+      "benchmark_task_id": "tqdm-sizeless-bool",
+      "completion_tokens": 158,
+      "log_path": "evaluation/results/context-preservation-v0.8.3-dev1/logs/tqdm-sizeless-bool.log",
+      "log_sha256": "be460455504763f487aef170b82821951cf998b137bf1b095739985de4d9ac40",
+      "manifest_sha256": "44344f62de4a69c98e874111aad7825ba6c63b26de58ae0763f2e92d94e0aeac",
+      "model_calls": 2,
+      "previous_record_sha256": "476ca565a39288a0fbda8bcbf87072de5ef1f5a45c08802b754958df58b8c2bf",
+      "process_returncode": 0,
+      "record_kind": "attempt_finished",
+      "record_sha256": "ddade65c27e1d1809ba4dfc81c3f82e56d019b77b3fe46eff9bb0e5c34c7f06b",
+      "recorded_at": "2026-10-28T16:07:33.989068+00:00",
+      "regression_passed": false,
+      "repository_sha256": "030cd38f607eb99327d9a383dd5639944cec1bebbd0e3cdda590ec39d387fd92",
+      "sequence": 4,
+      "source": {
+        "buggy_commit": "c2599e3cd6087429f48bae34347ec5d2473c8392",
+        "fixed_commit": "73962a47026dd980ac0758820efc9c41cbf938e0",
+        "issue_url": null,
+        "repository_url": "https://github.com/tqdm/tqdm"
+      },
+      "split": "development",
+      "status": "needs_human",
+      "stop_reason": "combined source range exceeds 200 lines",
+      "success": false,
+      "target_test_passed": false,
+      "task_config_sha256": "5c6c72a46126d06a463bb825125a3030ef199853d8344aac3386905078f39d41",
+      "timed_out": false,
+      "tool_calls": 5,
+      "tool_failures": 0,
+      "trace_task_id": "model-agent-repo-tqdm-sizeless-bool-a75d66cf",
+      "wall_seconds": 7.141
+    },
+    {
+      "attempt_started_record_sha256": "68ae7f74ae693f8fff4e75c881df534b97066dd8cece7cce2b7187f0d3322cec",
+      "benchmark_id": "context-preservation-v0.8.3-dev1",
+      "benchmark_task_id": "httpie-host-header-offline",
+      "completion_tokens": 619,
+      "log_path": "evaluation/results/context-preservation-v0.8.3-dev1/logs/httpie-host-header-offline.log",
+      "log_sha256": "e4a16e105bf411e9f7b5977090eceb668417a866a8dbc960db1d623882e28540",
+      "manifest_sha256": "44344f62de4a69c98e874111aad7825ba6c63b26de58ae0763f2e92d94e0aeac",
+      "model_calls": 3,
+      "previous_record_sha256": "68ae7f74ae693f8fff4e75c881df534b97066dd8cece7cce2b7187f0d3322cec",
+      "process_returncode": 0,
+      "record_kind": "attempt_finished",
+      "record_sha256": "463d249f97784038c9f702eb481caeb2ad50ba1f1c8da71e7b1a7e636f674c07",
+      "recorded_at": "2026-10-28T16:07:49.434667+00:00",
+      "regression_passed": true,
+      "repository_sha256": "40b403248592f6d362acc2b1a313996175fe31adfe279c03b3832dd137184c06",
+      "sequence": 6,
+      "source": {
+        "buggy_commit": "8c892edd4fe700a7ca5cc733dcb4817831d253e2",
+        "fixed_commit": "040d981f00c3f6830b2d0db3daf3c64c080e96e3",
+        "issue_url": null,
+        "repository_url": "https://github.com/httpie/cli"
+      },
+      "split": "development",
+      "status": "awaiting_review",
+      "stop_reason": "candidate patch passed target and regression tests; human review required",
+      "success": true,
+      "target_test_passed": true,
+      "task_config_sha256": "586bf51d883f7ea5a846e80e99e7280bc0e8436cd875d4d808103386274c8f80",
+      "timed_out": false,
+      "tool_calls": 5,
+      "tool_failures": 0,
+      "trace_task_id": "model-agent-repo-httpie-host-header-offline-f67f5466",
+      "wall_seconds": 15.375
+    }
+  ],
+  "benchmark": {
+    "agent_version": "0.8.3-dev1",
+    "benchmark_id": "context-preservation-v0.8.3-dev1",
+    "completion_cny_per_million_tokens": 0.0,
+    "manifest_sha256": "44344f62de4a69c98e874111aad7825ba6c63b26de58ae0763f2e92d94e0aeac",
+    "model": "qwen3.8-flash",
+    "protocol": "pass@1",
+    "retrieval": {
+      "chunker_version": "ast-symbol-v1",
+      "embedding_dimensions": 256,
+      "embedding_model": "qwen3.7-text-embedding-flash",
+      "mode": "hybrid",
+      "rrf_k": 60,
+      "top_k": 5
+    },
+    "schema_version": 1,
+    "tasks": [
+      {
+        "repository_sha256": "a5d7f99508ab41c574078475c1f7dfff11e4766eb2f09c3ec45a8a1c13d9f8b7",
+        "source": {
+          "buggy_commit": "f0d241211d6752f8da032218044f884437d809cb",
+          "fixed_commit": "d4e3c9a4c57217afdd245f75969f9cb51542a111",
+          "issue_url": "https://github.com/hynek/structlog/pull/272",
+          "repository_url": "https://github.com/hynek/structlog"
+        },
+        "split": "development",
+        "task_config": "structlog-missing-event.json",
+        "task_config_sha256": "2d8b91fcae469a0c26d95fed4e5a96d632a8a6b7a47a46369ee99a606b5378c4",
+        "task_id": "structlog-missing-event"
+      },
+      {
+        "repository_sha256": "030cd38f607eb99327d9a383dd5639944cec1bebbd0e3cdda590ec39d387fd92",
+        "source": {
+          "buggy_commit": "c2599e3cd6087429f48bae34347ec5d2473c8392",
+          "fixed_commit": "73962a47026dd980ac0758820efc9c41cbf938e0",
+          "issue_url": null,
+          "repository_url": "https://github.com/tqdm/tqdm"
+        },
+        "split": "development",
+        "task_config": "tqdm-sizeless-bool.json",
+        "task_config_sha256": "5c6c72a46126d06a463bb825125a3030ef199853d8344aac3386905078f39d41",
+        "task_id": "tqdm-sizeless-bool"
+      },
+      {
+        "repository_sha256": "40b403248592f6d362acc2b1a313996175fe31adfe279c03b3832dd137184c06",
+        "source": {
+          "buggy_commit": "8c892edd4fe700a7ca5cc733dcb4817831d253e2",
+          "fixed_commit": "040d981f00c3f6830b2d0db3daf3c64c080e96e3",
+          "issue_url": null,
+          "repository_url": "https://github.com/httpie/cli"
+        },
+        "split": "development",
+        "task_config": "httpie-host-header-offline.json",
+        "task_config_sha256": "586bf51d883f7ea5a846e80e99e7280bc0e8436cd875d4d808103386274c8f80",
+        "task_id": "httpie-host-header-offline"
+      }
+    ]
+  },
+  "generated_at": "2026-10-28T16:07:49.451202+00:00",
+  "integrity": {
+    "claim": "tamper-evident after the terminal hash is published; not an immutable store",
+    "ledger_records_verified": 6,
+    "terminal_record_sha256": "463d249f97784038c9f702eb481caeb2ad50ba1f1c8da71e7b1a7e636f674c07"
+  },
+  "report_sha256": "d7c748991f9ecc970d32479ede349e2c1eb373c777c005fc3340694a4861465a",
+  "schema_version": 1,
+  "summary": {
+    "attempted_tasks": 3,
+    "average_completion_tokens": 426.67,
+    "cost_scope": "unavailable: no completion-token price was frozen in the manifest",
+    "estimated_completion_cost_cny": null,
+    "expected_tasks": 3,
+    "failures": 1,
+    "human_handoffs": 1,
+    "incorrect_accepted_patches": 0,
+    "missing_task_ids": [],
+    "p50_wall_seconds": 14.781,
+    "p95_wall_seconds": 15.375,
+    "pass_at_1": 0.6667,
+    "successes": 2,
+    "total_completion_tokens": 1280,
+    "wilson_95_percent": {
+      "lower": 0.2077,
+      "upper": 0.9385
+    }
+  }
+}

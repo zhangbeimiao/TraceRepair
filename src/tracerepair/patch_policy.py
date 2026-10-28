@@ -83,9 +83,13 @@ class PatchPolicy:
 
     def _is_allowed_path(self, raw_path: str) -> bool:
         path = PurePosixPath(raw_path)
+        parts = tuple(part.casefold() for part in path.parts)
         return (
             not path.is_absolute()
             and ".." not in path.parts
             and path.suffix == ".py"
+            and not any(part in {"test", "tests"} for part in parts[:-1])
+            and not path.name.casefold().startswith("test_")
+            and not path.name.casefold().endswith("_test.py")
             and any(path == root or root in path.parents for root in self._allowed_roots)
         )

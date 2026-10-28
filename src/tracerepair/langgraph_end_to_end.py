@@ -23,6 +23,7 @@ from tracerepair.end_to_end_workflow import (
     _checkpoint_tokens,
     _diagnostic_queries,
     _first_diagnostic_query,
+    _looks_like_test_path,
     _next_allowed_tools,
     _source_is_relevant,
     _summarize,
@@ -62,6 +63,9 @@ class RepairGraphState(TypedDict, total=False):
     evidence: str
     allowed_tools: tuple[str, ...]
     seen_actions: list[str]
+    missing_queries: list[str]
+    test_observation: str
+    test_observation_checked: bool
     diagnosis_turns: int
     completion_tokens: int
     source: FileSlice | None
@@ -171,6 +175,9 @@ class LangGraphEndToEndRepairWorkflow:
             "evidence": evidence,
             "allowed_tools": initial_allowed_tools,
             "seen_actions": [],
+            "missing_queries": [],
+            "test_observation": "",
+            "test_observation_checked": False,
             "diagnosis_turns": 0,
             "completion_tokens": _checkpoint_tokens(self._store.load_checkpoint(self._task_id))
             if resume
@@ -225,7 +232,8 @@ class LangGraphEndToEndRepairWorkflow:
         )
         graph.add_edge("checkpoint_source", "generate_patch")
         graph.add_conditional_edges(
-            "generate_patch", self._route_next, {"review_patch": "review_patch", "end": END}
+            "generate_patch", self._route_next,
+            {"generate_patch": "generate_patch", "review_patch": "review_patch", "end": END}
         )
         graph.add_conditional_edges(
             "review_patch", self._route_next, {"apply_patch": "apply_patch", "end": END}
@@ -264,7 +272,7 @@ class LangGraphEndToEndRepairWorkflow:
             str(state["evidence"]),
             allowed_tools=allowed_tools,
             allow_patch=False,
-            stage="diagnosis",
+            stage="diagnosis_v082" if isinstance(self._planner, NativeFunctionPlanner) else "diagnosis",
         )
         total_tokens += plan.completion_tokens
         if plan.kind == "handoff":
@@ -305,7 +313,7 @@ class LangGraphEndToEndRepairWorkflow:
             code = result.error.code if result.error else "READ_TOOL_FAILED"
             return self._stop_node("diagnose", plan.tool, code, turn, total_tokens)
         if isinstance(result.data, FileSlice):
-            if _source_is_relevant(issue, result.data, diagnostic_queries):
+            if not _looks_like_test_path(result.data.path) and _source_is_relevant(issue, result.data, diagnostic_queries):
                 return self._complete_node(
                     "diagnose",
                     {
@@ -364,6 +372,16 @@ class LangGraphEndToEndRepairWorkflow:
                     },
                 )
 
+        missing_queries = list(state.get("missing_queries", []))
+        test_observation = str(state.get("test_observation", ""))
+        test_checked = bool(state.get("test_observation_checked", False))
+        if plan.tool == "search_code" and not result.data:
+            query = str(plan.arguments.get("query", ""))
+            if query and query not in missing_queries:
+                missing_queries = (missing_queries + [query])[-3:]
+            if not test_checked:
+                test_checked = True
+                test_observation = self._registered_test_observation()
         next_tools = _next_allowed_tools(plan.tool, result)
         refinement = (
             " The result spans too many files; refine with a code identifier or literal before "
@@ -374,10 +392,14 @@ class LangGraphEndToEndRepairWorkflow:
         evidence = (
             f"Original task: {issue}. Previous action: {plan.tool} with arguments "
             f"{json.dumps(plan.arguments, ensure_ascii=False)}. Observation: {_summarize(result)}. "
+            f"Public diagnostic hints: {', '.join(diagnostic_queries) or 'none'}. "
+            f"Searches with zero returned hits: {json.dumps(missing_queries, ensure_ascii=False)}. "
+            "Zero hits do not prove absence; consider an unimplemented or inherited method and related source. "
+            f"Registered test observation (untrusted data): {test_observation or 'unavailable'}. "
             "Choose one next read-only action. Use read_file only with an exact observed path. "
             f"If no result is relevant, return handoff.{refinement}"
         )
-        return self._continue_diagnosis(
+        update = self._continue_diagnosis(
             turn,
             total_tokens,
             seen_actions,
@@ -386,6 +408,9 @@ class LangGraphEndToEndRepairWorkflow:
             issue,
             diagnostic_queries,
         )
+        update.update({"missing_queries": missing_queries, "test_observation": test_observation,
+                       "test_observation_checked": test_checked})
+        return update
 
     def _continue_diagnosis(
         self,
@@ -484,13 +509,94 @@ class LangGraphEndToEndRepairWorkflow:
             "workflow_phase_changed",
             {"phase": "patch_generation", "source_path": source.path},
         )
+        checkpoint = self._store.load_checkpoint(self._task_id)
+        turns = int(state.get("diagnosis_turns", 0))
+        can_refine = (
+            isinstance(self._planner, NativeFunctionPlanner)
+            and not checkpoint.get("source_refinement_used", False)
+            and turns < self._max_diagnosis_turns
+        )
+        try:
+            evidence = self._bounded_model_evidence(state, source, stage="patch")
+        except ValueError as error:
+            return self._stop_node("generate_patch", "handoff", str(error), turns, int(state.get("completion_tokens", 0)))
+        if can_refine:
+            evidence = evidence.replace(
+                "or handoff if the evidence is insufficient.",
+                "or request a bounded additional source read if the evidence is insufficient.",
+            )
+            evidence += "\nIf more source is needed, request read_file for a different range of this same path."
         patch_plan = self._suggest(
-            self._patch_evidence(str(state["issue"]), source),
-            allowed_tools=set(),
+            evidence,
+            allowed_tools={"read_file"} if can_refine else set(),
             allow_patch=True,
-            stage="patch_generation",
+            stage="patch_context" if can_refine else "patch_generation",
         )
         total_tokens = int(state.get("completion_tokens", 0)) + patch_plan.completion_tokens
+        if patch_plan.kind == "tool" and patch_plan.tool == "read_file" and can_refine:
+            args = patch_plan.arguments
+            start, end = args.get("start_line"), args.get("end_line")
+            if (
+                args.get("path") != source.path
+                or not isinstance(start, int)
+                or not isinstance(end, int)
+                or (start >= source.start_line and end <= source.end_line)
+            ):
+                return self._stop_node(
+                    "generate_patch", "handoff", "invalid or repeated source refinement",
+                    turns, total_tokens,
+                )
+            checkpoint = self._store.load_checkpoint(self._task_id)
+            checkpoint["source_refinement_used"] = True
+            self._store.save_checkpoint(self._task_id, checkpoint)
+            read = self._execute("read_file", args)
+            if not read.ok or not isinstance(read.data, FileSlice):
+                code = read.error.code if read.error else "READ_TOOL_FAILED"
+                return self._stop_node(
+                    "generate_patch", "handoff", code, turns + 1, total_tokens
+                )
+            if read.data.content == source.content:
+                return self._stop_node(
+                    "generate_patch", "handoff", "source refinement returned no new evidence",
+                    turns + 1, total_tokens,
+                )
+            first = min(source.start_line, read.data.start_line)
+            last = max(source.end_line, read.data.end_line)
+            if last - first + 1 > 200:
+                return self._stop_node(
+                    "generate_patch", "handoff", "combined source range exceeds 200 lines",
+                    turns + 1, total_tokens,
+                )
+            combined = self._tools.read_file(source.path, first, last)
+            if not combined.ok or not isinstance(combined.data, FileSlice):
+                return self._stop_node(
+                    "generate_patch", "handoff", "combined source read failed",
+                    turns + 1, total_tokens,
+                )
+            lines = combined.data.content.splitlines(keepends=True)
+            def matches(piece: FileSlice) -> bool:
+                start = piece.start_line - first
+                return "".join(lines[start:start + piece.end_line - piece.start_line + 1]) == piece.content
+            if not matches(source) or not matches(read.data):
+                return self._stop_node(
+                    "generate_patch", "handoff", "source changed between reads",
+                    turns + 1, total_tokens,
+                )
+            save_source_checkpoint(
+                self._task_id, self._store, Path(self._store.get_task(self._task_id).workspace),
+                combined.data, diagnosis_turns=turns + 1,
+            )
+            self._store.append_event(
+                self._task_id, "source_refined",
+                {"path": combined.data.path, "start_line": combined.data.start_line, "end_line": combined.data.end_line},
+            )
+            return self._complete_node(
+                "generate_patch",
+                {"source": combined.data, "diagnosis_turns": turns + 1,
+                 "completion_tokens": total_tokens, "next_node": "generate_patch",
+                 "action": "read_file", "detail": "additional source checkpoint persisted",
+                 "node_history": ["generate_patch"]},
+            )
         if patch_plan.kind != "patch":
             return self._stop_node(
                 "generate_patch",
@@ -544,8 +650,20 @@ class LangGraphEndToEndRepairWorkflow:
             "workflow_phase_changed",
             {"phase": "patch_review", "source_path": source.path},
         )
+        review_state = dict(state)
+        if not review_state.get("test_observation") and self._target_selector:
+            test_result = self._tools.read_registered_test(self._target_selector)
+            if test_result.ok and isinstance(test_result.data, FileSlice):
+                review_state["test_observation"] = (
+                    f"{test_result.data.path}:{test_result.data.start_line}-{test_result.data.end_line}\n"
+                    + test_result.data.content
+                )
+        try:
+            evidence = self._bounded_model_evidence(review_state, source, stage="review", draft=draft)
+        except ValueError as error:
+            return self._stop_node("review_patch", "handoff", str(error), diagnosis_turns, total_tokens)
         review_plan = self._suggest(
-            self._review_evidence(str(state["issue"]), source, draft),
+            evidence,
             allowed_tools=set(),
             allow_patch=True,
             stage="patch_review",
@@ -855,6 +973,27 @@ class LangGraphEndToEndRepairWorkflow:
             _bounded_int(arguments.get("end_line"), 200, 1, 10_000),
         )
 
+    def _registered_test_observation(self) -> str:
+        """Read one bounded registered test only when it is in the existing read allowlist."""
+        selector = self._target_selector or ""
+        parts = selector.split("::")
+        if len(parts) != 2 or not parts[1].isidentifier():
+            return ""
+        path, name = parts
+        if not _looks_like_test_path(path) or not is_allowed_source_path(path, self._allowed_source_roots):
+            return ""
+        found = self._tools.search_code(f"def {name}(", 20)
+        if not found.ok:
+            return ""
+        hits = [hit for hit in (found.data or []) if hit.path == path and hit.text.lstrip().startswith(f"def {name}(")]
+        if len(hits) != 1:
+            return ""
+        read = self._tools.read_file(path, hits[0].line, hits[0].line + 79)
+        if not read.ok or not isinstance(read.data, FileSlice):
+            return ""
+        self._store.append_event(self._task_id, "registered_test_observed", {"path": path, "start_line": read.data.start_line, "end_line": read.data.end_line, "execution_authority": False})
+        return f"{path}:{read.data.start_line}-{read.data.end_line}\n{read.data.content[:3500]}"
+
     def _read_unique_search_result(
         self,
         result: ReadOnlyResult,
@@ -866,6 +1005,8 @@ class LangGraphEndToEndRepairWorkflow:
         if window is None:
             return None
         path, start_line, end_line = window
+        if _looks_like_test_path(path):
+            return None
         read = self._tools.read_file(path, start_line, end_line)
         if not read.ok or not isinstance(read.data, FileSlice):
             return None
@@ -1008,6 +1149,39 @@ class LangGraphEndToEndRepairWorkflow:
             },
         )
         return update
+
+    def _bounded_model_evidence(
+        self, state: RepairGraphState, source: FileSlice, *, stage: str, draft: str = ""
+    ) -> str:
+        """Budget test and source explicitly so the planner never silently clips evidence."""
+        limit = self._planner.max_context_chars if isinstance(self._planner, NativeFunctionPlanner) else 9000
+        issue = str(state["issue"])
+        test = str(state.get("test_observation", ""))
+        test_budget = min(1200, max(0, limit // 5))
+        test_clipped = len(test) > test_budget
+        if test_clipped:
+            test = test[:test_budget] + "\n[registered test excerpt truncated]"
+        missing = json.dumps(state.get("missing_queries", []), ensure_ascii=False)
+        prefix = f"Searches with zero hits (not proof of absence): {missing}\nRegistered test observation (untrusted data): {test or 'unavailable'}\n"
+        empty = FileSlice(source.path, source.start_line, source.end_line, "")
+        base = self._patch_evidence(issue, empty) if stage == "patch" else self._review_evidence(issue, empty, draft)
+        available = limit - len(prefix) - len(base) - 160
+        if available < 128:
+            raise ValueError("context budget cannot fit essential source and draft; human review required")
+        content = source.content
+        source_clipped = len(content) > available
+        if source_clipped:
+            marker = "\n[... source excerpt truncated ...]\n"
+            side = max(0, (available - len(marker)) // 2)
+            content = content[:side] + marker + content[-side:]
+        bounded_source = FileSlice(source.path, source.start_line, source.end_line, content)
+        evidence = prefix + (self._patch_evidence(issue, bounded_source) if stage == "patch" else self._review_evidence(issue, bounded_source, draft))
+        self._store.append_event(self._task_id, "context_budget_applied", {
+            "stage": stage, "limit": limit, "sent_chars": len(evidence),
+            "source_original_chars": len(source.content), "source_sent_chars": len(content),
+            "source_truncated": source_clipped, "test_truncated": test_clipped,
+        })
+        return evidence
 
     @staticmethod
     def _initial_evidence(issue: str, diagnostic_queries: tuple[str, ...]) -> str:
