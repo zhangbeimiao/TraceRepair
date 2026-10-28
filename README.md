@@ -29,7 +29,7 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 
 > **0.8 开发分支（尚未替代冻结结果）**：当前代码正在加入原生 Function Calling、Prompt Registry 和可选 Code RAG。三个阶段 Prompt 与五个工具 Schema 均有版本和 SHA-256，模型只拥有提议权；AST Chunk、SQLite FTS5、Embedding 与 RRF 只提供未受信任的只读候选。离线检索评测中 FTS5 的 Recall@1/3/5 为 `0.60/0.80/1.00`、MRR 为 `0.75`；本地 hash 向量反而降低到 `0.40/0.80/1.00`、MRR `0.5833`，因此没有伪装成语义提升，也未启用。完整实现边界、运行顺序与 `0.8.0` 发布门槛见 [`docs/v0.8-function-calling-rag.md`](docs/v0.8-function-calling-rag.md)。公开可信主结论仍是下方 `0.7.0-dev2` 的六仓库一次性盲测。
 
-配置好百炼环境变量后，可用 `powershell -ExecutionPolicy Bypass -File scripts\run_v080_development.ps1` 一次完成 Function Calling 探针、五题开发集、协议对比和语义检索评测；该入口不包含 locked 任务。
+配置好百炼环境变量后，可用 `powershell -ExecutionPolicy Bypass -File scripts\run_v080_development.ps1` 一次完成 Function Calling 探针、五题开发集、协议对比和语义检索评测；该入口不包含 locked 任务。也可以在 GitHub Actions 中手动触发 `TraceRepair v0.8 Development Evaluation`：它只读取仓库 Secrets、上传完整开发证据，并且没有引用任何 locked manifest。
 
 当前公开稳定基线为 `0.6.0`（评测运行时 `0.6.0-dev4`），当前 LangGraph 冻结候选为 `0.7.0-dev2`。稳定基线在五个来自不同开源仓库历史提交的 Bug 上，严格 `pass@1` 结果为 **3/5**：开发集 `2/3`，配置冻结后的锁定集 `1/2`，锁定任务每题只运行一次。两个失败候选都被目标测试拦截并转人工，**错误接受补丁数为 0**。样本量仍小，因此这里只证明受控闭环、一次性锁定迁移和安全停止能力，不宣称任意仓库修复准确率。
 
