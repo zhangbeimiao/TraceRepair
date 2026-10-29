@@ -41,7 +41,7 @@ TraceRepair 是一个面向受信任小型 Python 仓库的受控代码修复 Ag
 后续已知开发集保留了三轮原始结果：`0.8.1-dev1` **2/3**、`0.8.2-dev1` **0/3**、`0.8.3-dev1` **2/3**。它们均使用相同的三个已观察任务，每题每版一次，样本太小且模型存在随机性，不能据此声称性能提升。各轮保留成功和失败、日志、报告及哈希链：[`0.8.1`](evaluation/results/source-refinement-v0.8.1-dev1/DEVELOPMENT_FINDINGS.md)、[`0.8.2`](evaluation/results/missing-symbol-v0.8.2-dev1/DEVELOPMENT_FINDINGS.md)、[`0.8.3`](evaluation/results/context-preservation-v0.8.3-dev1/DEVELOPMENT_FINDINGS.md)。
 
 `0.8.4-dev1` 将初始源码片段与同文件的一次补读分别保存，每段仍受 200 行上限约束；恢复时分别校验工作区内容，已读取的目标测试证据也纳入恢复校验。模型上下文裁剪会记录，不改变补丁及测试门禁。[`开发评测配置`](evaluation/benchmarks/multi-slice-v0.8.4-dev1.json) 和旧结果保持不变。
-`0.8.4-dev1` 随后在三个已知开发任务上得到 **2/3**：tqdm 的 Trace 显示三轮诊断用尽后不可补读，且源码和测试证据均被截断；详见[原始开发证据](evaluation/results/multi-slice-v0.8.4-dev1/DEVELOPMENT_FINDINGS.md)。下一开发版 `0.8.5-dev1` 为补读设立独立的一次预算，并将模型调用上限从 5 提至 6；它尚未取得新的模型评测结果。以上开发集不能作为盲测或泛化结论。
+`0.8.4-dev1` 随后在三个已知开发任务上得到 **2/3**：tqdm 的 Trace 显示三轮诊断用尽后不可补读，且源码和测试证据均被截断；详见[原始开发证据](evaluation/results/multi-slice-v0.8.4-dev1/DEVELOPMENT_FINDINGS.md)。下一开发版 `0.8.5-dev1` 为补读设立独立的一次预算，并将模型调用上限从 5 提至 6；在相同开发任务上的一次运行结果为 **1/3**，两例安全转人工，详见[开发证据](evaluation/results/refinement-budget-v0.8.5-dev1/DEVELOPMENT_FINDINGS.md)。以上小样本开发集不能作为盲测或泛化结论。
 
 配置好百炼环境变量后，可用 `powershell -ExecutionPolicy Bypass -File scripts\run_v080_development.ps1` 一次完成 Function Calling 探针、五题开发集、协议对比和语义检索评测；该入口不包含 locked 任务。检索门禁未达到提升标准时会保存 `keep_rag_disabled` 负面证据并正常结束，只有报告损坏或配置不一致才作为基础设施错误失败。也可以在 GitHub Actions 中手动触发 `TraceRepair v0.8 Development Evaluation`：它只读取仓库 Secrets、上传完整开发证据，并且没有引用任何 locked manifest。
 

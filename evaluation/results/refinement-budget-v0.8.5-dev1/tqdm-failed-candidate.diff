@@ -1,0 +1,14 @@
+--- a/tqdm/_tqdm.py
++++ b/tqdm/_tqdm.py
+@@ -940,6 +940,12 @@
+              else len(self.iterable) if hasattr(self.iterable, "__len__")
+              else getattr(self, "total", None))
+ 
++    def __bool__(self):
++        try:
++            return bool(len(self))
++        except TypeError:
++            return True
++
+     def __enter__(self):
+         return self

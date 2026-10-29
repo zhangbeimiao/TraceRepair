@@ -1,0 +1,8 @@
+End-to-end repair run completed.
+Agent version: 0.8.5-dev1; task: repo-tqdm-sizeless-bool (tqdm-sizeless-bool)
+Diagnosis turns: 3/3
+Model usage: calls=5/6, output_tokens=653/3072
+Verification action: run_tests
+Final task status: needs_human
+Detail: TEST_FAILED
+Trace database: data/model-agent.sqlite3 (task model-agent-repo-tqdm-sizeless-bool-68a748de)

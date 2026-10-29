@@ -14,6 +14,7 @@ __pycache__/
 *.log
 !evaluation/results/langgraph-blind-v0.7.0-dev2/logs/*.log
 !evaluation/results/multi-slice-v0.8.4-dev1/logs/*.log
+!evaluation/results/refinement-budget-v0.8.5-dev1/logs/*.log
 data/
 traces/
 workspaces/

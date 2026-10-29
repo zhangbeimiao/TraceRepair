@@ -22,3 +22,7 @@ evaluation/results/context-preservation-v0.8.3-dev1/logs/*.log -text
 evaluation/results/multi-slice-v0.8.4-dev1/attempts.jsonl -text
 evaluation/results/multi-slice-v0.8.4-dev1/logs/*.log -text
 evaluation/results/multi-slice-v0.8.4-dev1/report.json -text
+evaluation/results/refinement-budget-v0.8.5-dev1/attempts.jsonl -text
+evaluation/results/refinement-budget-v0.8.5-dev1/logs/*.log -text
+evaluation/results/refinement-budget-v0.8.5-dev1/report.json -text
+evaluation/results/refinement-budget-v0.8.5-dev1/tqdm-failed-candidate.diff -text
