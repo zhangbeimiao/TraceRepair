@@ -1,0 +1,106 @@
+{
+  "description": "Current-agent evidence on three previously observed development bugs; not locked and not a generalization claim.",
+  "integrity": {
+    "agent_freeze_sha256": "80692c1a28c5194de826a1c3060be1618dea15d5ecb9bdf2e03c259b6a9ec3c6",
+    "suite_manifest_sha256": "914add7a20f25ac3743dc819dc332ae454212b7e0a8ad54ba5bb44e2b86b5c98"
+  },
+  "limitations": [
+    "Evidence replay makes no provider request and does not rerun a locked task.",
+    "Missing latency, cost, or Diff fields remain null rather than inferred.",
+    "Observed-run success rate is not an independent-bug accuracy estimate.",
+    "A provider model identifier is frozen, but no provider weight digest was available."
+  ],
+  "protocol": "frozen_development_evidence_replay",
+  "records": [
+    {
+      "agent_version": "0.8.5-dev1",
+      "completion_tokens": 197,
+      "component": "refinement_budget_development",
+      "diff": null,
+      "diff_evidence": "not_preserved_in_source_evidence",
+      "diff_sha256": null,
+      "independent_bug_id": "refinement_budget_development:structlog-missing-event",
+      "model_calls": 3,
+      "needs_human": true,
+      "regression_passed": false,
+      "run_index": 1,
+      "status": "needs_human",
+      "stop_reason": "The target test file tests/test_tracerepair_missing_event.py is not registered/observable and the source slice omits the exact `event_dict.pop(\"event\")` line number, so I cannot confirm the intended missing-event rendering contract (e.g. empty string vs. a sentinel) or produce an exact diff with verified context lines.",
+      "success": false,
+      "target_test_passed": false,
+      "task_id": "model-agent-repo-structlog-missing-event-01b15037",
+      "tool_calls": 3,
+      "wall_seconds": 7.234
+    },
+    {
+      "agent_version": "0.8.5-dev1",
+      "completion_tokens": 653,
+      "component": "refinement_budget_development",
+      "diff": "--- a/tqdm/_tqdm.py\n+++ b/tqdm/_tqdm.py\n@@ -940,6 +940,12 @@\n              else len(self.iterable) if hasattr(self.iterable, \"__len__\")\n              else getattr(self, \"total\", None))\n \n+    def __bool__(self):\n+        try:\n+            return bool(len(self))\n+        except TypeError:\n+            return True\n+\n     def __enter__(self):\n         return self",
+      "diff_evidence": "preserved",
+      "diff_sha256": "3043352048a9031868cf899a1f87a385bb86bb90d90dfe2b4e5253b5d484ac62",
+      "independent_bug_id": "refinement_budget_development:tqdm-sizeless-bool",
+      "model_calls": 5,
+      "needs_human": true,
+      "regression_passed": false,
+      "run_index": 2,
+      "status": "needs_human",
+      "stop_reason": "candidate patch failed target test: TEST_FAILED",
+      "success": false,
+      "target_test_passed": false,
+      "task_id": "model-agent-repo-tqdm-sizeless-bool-68a748de",
+      "tool_calls": 8,
+      "wall_seconds": 13.641
+    },
+    {
+      "agent_version": "0.8.5-dev1",
+      "completion_tokens": 722,
+      "component": "refinement_budget_development",
+      "diff": null,
+      "diff_evidence": "not_preserved_in_source_evidence",
+      "diff_sha256": null,
+      "independent_bug_id": "refinement_budget_development:httpie-host-header-offline",
+      "model_calls": 3,
+      "needs_human": false,
+      "regression_passed": true,
+      "run_index": 3,
+      "status": "awaiting_review",
+      "stop_reason": "candidate patch passed target and regression tests; human review required",
+      "success": true,
+      "target_test_passed": true,
+      "task_id": "model-agent-repo-httpie-host-header-offline-4fb8bf6a",
+      "tool_calls": 5,
+      "wall_seconds": 14.438
+    }
+  ],
+  "requested_agent_version": "0.8.5-dev1",
+  "schema_version": 1,
+  "sources": [
+    {
+      "availability": "repository_available",
+      "component": "refinement_budget_development",
+      "path": "evaluation/results/refinement-budget-v0.8.5-dev1/report.json",
+      "sha256": "4d7b4ff00e48e266adb4d8f76e2972a0da69843bda5c9a9e9b0a9fac38a6c6d6",
+      "task_config": null,
+      "task_config_sha256": null
+    }
+  ],
+  "suite_id": "current_v1",
+  "summary": {
+    "average_completion_tokens": 524,
+    "average_model_calls": 3.67,
+    "average_wall_seconds": 11.771,
+    "cost_scope": "source reports; completion-only where available",
+    "estimated_cost": null,
+    "failure_reason_distribution": {
+      "The target test file tests/test_tracerepair_missing_event.py is not registered/observable and the source slice omits the exact `event_dict.pop(\"event\")` line number, so I cannot confirm the intended missing-event rendering contract (e.g. empty string vs. a sentinel) or produce an exact diff with verified context lines.": 1,
+      "candidate patch failed target test: TEST_FAILED": 1
+    },
+    "independent_bugs": 3,
+    "needs_human": 2,
+    "observed_run_success_rate": 0.3333,
+    "observed_runs": 3,
+    "repeated_runs": 0,
+    "successes": 1
+  }
+}

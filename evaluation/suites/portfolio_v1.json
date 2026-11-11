@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "suite_id": "portfolio_v1",
+  "protocol": "frozen_evidence_replay",
+  "agent_version": "mixed-historical",
+  "description": "Legacy EventRelay, public repository repeat-stability, and held-out repository evidence. This is not a current-agent accuracy claim.",
+  "components": [
+    {"id": "eventrelay_development", "kind": "frozen_runs", "path": "evaluation/frozen/devset-v0.4.0-dev1.json", "task_config": "evaluation/cases.json", "bug_namespace": "eventrelay", "bug_id_field": "case_id", "evidence_scope": "four EventRelay development bugs, two runs each"},
+    {"id": "eventrelay_locked", "kind": "frozen_runs", "path": "evaluation/frozen/testset-v0.4.0-dev1.json", "task_config": "evaluation/cases.json", "bug_namespace": "eventrelay", "bug_id_field": "case_id", "evidence_scope": "five EventRelay locked bugs, one run each"},
+    {"id": "public_repository_repeat", "kind": "frozen_runs", "path": "evaluation/frozen/repository-mini-repo-discount-v0.6.1.json", "task_config": "examples/tasks/mini-repo.json", "constant_bug_id": "mini-repo-discount", "evidence_scope": "one public bug repeated five times for stability"},
+    {"id": "heldout_repository_one_shot", "kind": "frozen_single_run", "path": "evaluation/frozen/locked-repository-v0.6.1.json", "task_config": null, "constant_bug_id": "heldout-repository-balance", "availability": "evidence_only_private_configuration", "evidence_scope": "one held-out trusted repository, one attempt"}
+  ]
+}

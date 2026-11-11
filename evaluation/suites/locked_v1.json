@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "suite_id": "locked_v1",
+  "protocol": "frozen_locked_pass_at_1_evidence_replay",
+  "agent_version": "0.8.0",
+  "agent_freeze": "evaluation/frozen/agent-v0.8.0.json",
+  "description": "Three new repositories, one locked attempt per independent historical bug; no retry or post-reveal policy change.",
+  "components": [
+    {
+      "id": "function_rag_locked",
+      "kind": "benchmark_report",
+      "path": "evaluation/results/function-rag-locked-v0.8.0/report.json",
+      "manifest": "evaluation/benchmarks/function-rag-locked-v0.8.0.json",
+      "bug_id_field": "benchmark_task_id"
+    }
+  ]
+}

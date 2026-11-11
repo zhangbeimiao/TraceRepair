@@ -1,0 +1,105 @@
+{
+  "description": "Three new repositories, one locked attempt per independent historical bug; no retry or post-reveal policy change.",
+  "integrity": {
+    "agent_freeze_sha256": "a27683b5f51dfe2818745436b8a7bf6799bdfabb81564001387466ee45893aa4",
+    "suite_manifest_sha256": "b09bae9ca386a15be9ec00c60ff2fb1986128faf27ed403e78e6c88d6ed89945"
+  },
+  "limitations": [
+    "Evidence replay makes no provider request and does not rerun a locked task.",
+    "Missing latency, cost, or Diff fields remain null rather than inferred.",
+    "Observed-run success rate is not an independent-bug accuracy estimate.",
+    "A provider model identifier is frozen, but no provider weight digest was available."
+  ],
+  "protocol": "frozen_locked_pass_at_1_evidence_replay",
+  "records": [
+    {
+      "agent_version": "0.8.0",
+      "completion_tokens": 454,
+      "component": "function_rag_locked",
+      "diff": null,
+      "diff_evidence": "not_preserved_in_source_evidence",
+      "diff_sha256": null,
+      "independent_bug_id": "function_rag_locked:jaraco-text-headless-camel",
+      "model_calls": 3,
+      "needs_human": false,
+      "regression_passed": true,
+      "run_index": 1,
+      "status": "awaiting_review",
+      "stop_reason": "candidate patch passed target and regression tests; human review required",
+      "success": true,
+      "target_test_passed": true,
+      "task_id": "model-agent-repo-jaraco-text-headless-camel-bae5858f",
+      "tool_calls": 4,
+      "wall_seconds": 13.047
+    },
+    {
+      "agent_version": "0.8.0",
+      "completion_tokens": 657,
+      "component": "function_rag_locked",
+      "diff": null,
+      "diff_evidence": "not_preserved_in_source_evidence",
+      "diff_sha256": null,
+      "independent_bug_id": "function_rag_locked:sortedcontainers-empty-extend",
+      "model_calls": 4,
+      "needs_human": false,
+      "regression_passed": true,
+      "run_index": 2,
+      "status": "awaiting_review",
+      "stop_reason": "candidate patch passed target and regression tests; human review required",
+      "success": true,
+      "target_test_passed": true,
+      "task_id": "model-agent-repo-sortedcontainers-empty-extend-37bf76f1",
+      "tool_calls": 5,
+      "wall_seconds": 21.157
+    },
+    {
+      "agent_version": "0.8.0",
+      "completion_tokens": 132,
+      "component": "function_rag_locked",
+      "diff": null,
+      "diff_evidence": "not_preserved_in_source_evidence",
+      "diff_sha256": null,
+      "independent_bug_id": "function_rag_locked:structlog-missing-event",
+      "model_calls": 2,
+      "needs_human": true,
+      "regression_passed": false,
+      "run_index": 3,
+      "status": "needs_human",
+      "stop_reason": "The provided slice of src/structlog/dev.py (lines 80-190) ends before ConsoleRenderer.__call__, so the code that reads event_dict[\"event\"] and raises KeyError is not visible; I cannot produce an exact, minimal diff without altering unseen behavior.",
+      "success": false,
+      "target_test_passed": false,
+      "task_id": "model-agent-repo-structlog-missing-event-21275200",
+      "tool_calls": 1,
+      "wall_seconds": 10.578
+    }
+  ],
+  "requested_agent_version": "0.8.0",
+  "schema_version": 1,
+  "sources": [
+    {
+      "availability": "repository_available",
+      "component": "function_rag_locked",
+      "path": "evaluation/results/function-rag-locked-v0.8.0/report.json",
+      "sha256": "e032d5966f4bee4f692bdbe8aa18c9f7151acadce2781537052f7dfb5540811d",
+      "task_config": null,
+      "task_config_sha256": null
+    }
+  ],
+  "suite_id": "locked_v1",
+  "summary": {
+    "average_completion_tokens": 414.33,
+    "average_model_calls": 3,
+    "average_wall_seconds": 14.927,
+    "cost_scope": "source reports; completion-only where available",
+    "estimated_cost": null,
+    "failure_reason_distribution": {
+      "The provided slice of src/structlog/dev.py (lines 80-190) ends before ConsoleRenderer.__call__, so the code that reads event_dict[\"event\"] and raises KeyError is not visible; I cannot produce an exact, minimal diff without altering unseen behavior.": 1
+    },
+    "independent_bugs": 3,
+    "needs_human": 1,
+    "observed_run_success_rate": 0.6667,
+    "observed_runs": 3,
+    "repeated_runs": 0,
+    "successes": 2
+  }
+}

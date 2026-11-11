@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "suite_id": "current_v1",
+  "protocol": "frozen_development_evidence_replay",
+  "agent_version": "0.8.5-dev1",
+  "agent_freeze": "evaluation/frozen/agent-v0.8.5-dev1.json",
+  "description": "Current-agent evidence on three previously observed development bugs; not locked and not a generalization claim.",
+  "components": [
+    {"id": "refinement_budget_development", "kind": "benchmark_report", "path": "evaluation/results/refinement-budget-v0.8.5-dev1/report.json", "manifest": "evaluation/benchmarks/refinement-budget-v0.8.5-dev1.json", "bug_id_field": "benchmark_task_id", "diffs": {"tqdm-sizeless-bool": "evaluation/results/refinement-budget-v0.8.5-dev1/tqdm-failed-candidate.diff"}}
+  ]
+}

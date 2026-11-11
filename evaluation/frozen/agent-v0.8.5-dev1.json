@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "agent_version": "0.8.5-dev1",
+  "status": "frozen_development_baseline",
+  "implementation_commit": "ed0d6682db93e9e6f6138c8b3a9c6fc133117b3c",
+  "model": "qwen3.8-flash",
+  "model_resolution": "provider_model_identifier_only; no immutable provider weight digest was available",
+  "configuration": {"path": "evaluation/configs/agent-v0.8.5-dev1.json", "sha256": "5abb0fac2822867ee2dbca8bba554b81a022bcc68e08fbc86976f903a04b8cec"},
+  "budgets": {"max_diagnosis_turns": 3, "max_model_calls": 6, "max_completion_tokens_per_call": 800, "max_total_completion_tokens": 3072, "max_context_chars": 9000, "max_source_refinement_reads": 1, "max_source_slices": 2, "max_lines_per_source_slice": 200},
+  "prompts": [
+    {"stage": "diagnosis", "id": "diagnosis-native-tools-v1", "version": "1.0.0", "sha256": "4e1bb5b4903754ecd60cb0f71c13dc3fb570b372ff873c496d35f890c65c2398"},
+    {"stage": "diagnosis_v082", "id": "diagnosis-missing-symbol-v0.8.2-dev1", "version": "0.8.2-dev1", "sha256": "029f7a4b8b81366388425522a36adcfdbfac41ffe9dfd792cbc0ffeb0d2bde31"},
+    {"stage": "patch_context", "id": "patch-native-context-v0.8.1-dev1", "version": "0.8.1-dev1", "sha256": "a5cb84dd254a261fb53871c121870c5bccc3cfd047dbd9e74f8838dd4fe44fa1"},
+    {"stage": "patch_generation", "id": "patch-native-tools-v1.1", "version": "1.1.0", "sha256": "66f10ecfc98881c52164d797f52e4b9220d662af59ff85e7abbe007b5bd25697"},
+    {"stage": "patch_review", "id": "review-native-tools-v1.1", "version": "1.1.0", "sha256": "32042bcd4d63c3764069e4f3c66dd277d8139c2cfd3808618fa570e5f317668d"}
+  ],
+  "tool_policy": {
+    "model_functions": ["repo_map", "search_code", "read_file", "propose_patch", "handoff"],
+    "arbitrary_shell": false, "direct_file_write": false, "test_edit": false, "automatic_merge": false,
+    "target_test_required": true, "regression_required": true, "human_review_required": true,
+    "function_schema_sha256": {"repo_map": "3429455342f84158cba97106a780ab2ed3f20ad50095d0d61ce77489bb7f959a", "search_code": "1a0d980e2ef8303651eeff15d3d1c1deaec319e85d01c21086925a7d75f6b141", "read_file": "2695038dc708c0c76ed552e80d3c8f850c14e248608524e1d1e0c7cd23951b", "propose_patch": "2fcf85d8f89dbdbade7a0ddcc6c2558973b79e5bdd9951d0c7e342bad451a79c", "handoff": "65a73cb87dbb0fefa7ea5d5a9af6a3a9116102dfac4de66545de7d6caf797f63"}
+  },
+  "repository_commits": {"structlog-missing-event": "f0d241211d6752f8da032218044f884437d809cb", "tqdm-sizeless-bool": "c2599e3cd6087429f48bae34347ec5d2473c8392", "httpie-host-header-offline": "8c892edd4fe700a7ca5cc733dcb4817831d253e2"},
+  "evidence": {"suite": "current_v1", "benchmark": "refinement-budget-v0.8.5-dev1", "attempts": 3, "independent_bugs": 3, "successes": 1, "needs_human": 2, "locked": false}
+}

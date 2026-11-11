@@ -18,5 +18,6 @@ __pycache__/
 data/
 traces/
 workspaces/
+runs/
 *.sqlite3
 .env
