@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from evaluation.fault_injection import load_suite, render_markdown
+from evaluation.fault_injection import default_output_path, load_suite, render_markdown
 
 
 def test_recovery_suite_has_unique_safe_scenarios() -> None:
@@ -16,6 +16,12 @@ def test_recovery_suite_has_unique_safe_scenarios() -> None:
 def test_unknown_suite_is_rejected() -> None:
     with pytest.raises(ValueError, match="unknown"):
         load_suite("does-not-exist")
+
+
+def test_default_replay_directory_is_ignored_runs_directory() -> None:
+    output = default_output_path("recovery_v1")
+    assert output.parent.name == "runs"
+    assert output.name == "fault-recovery_v1.json"
 
 
 def test_markdown_keeps_failure_and_claim_boundary() -> None:

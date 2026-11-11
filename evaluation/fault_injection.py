@@ -183,6 +183,12 @@ def write_report(report: dict[str, Any], output: Path) -> None:
     )
 
 
+def default_output_path(suite_id: str) -> Path:
+    """Return an ignored replay path so frozen evidence is never overwritten."""
+
+    return ROOT / "runs" / f"fault-{suite_id}.json"
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--suite", default="recovery_v1")
@@ -196,7 +202,10 @@ def main() -> None:
             print(f"- {item['id']}: {item['selector']}")
         return
     report = run_suite(args.suite)
-    output = args.output or ROOT / "evaluation" / "baselines" / f"fault-{args.suite}.json"
+    # A normal replay must never overwrite checked-in frozen evidence because
+    # measured durations and captured output hashes can legitimately change.
+    # Maintainers may still pass --output explicitly when freezing a new suite.
+    output = args.output or default_output_path(args.suite)
     write_report(report, output)
     summary = report["summary"]
     print(f"Fault-injection report written: {output.relative_to(ROOT)}")

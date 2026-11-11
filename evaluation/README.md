@@ -42,5 +42,6 @@ python -m evaluation.fault_injection --suite recovery_v1
 
 The suite makes zero provider requests. It covers crashes after durable source,
 patch, and target-test checkpoints; integrity conflicts; a stale phase marker;
-and the patch, target-test, regression, and human-review gates. JSON, Markdown,
-and SHA-256 evidence are written under `evaluation/baselines/`.
+and the patch, target-test, regression, and human-review gates. Normal replays
+write JSON, Markdown, and SHA-256 evidence under ignored `runs/`; checked-in
+`evaluation/baselines/` evidence is changed only with an explicit `--output`.
