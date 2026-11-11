@@ -18,7 +18,7 @@ from tracerepair.model_planner import ModelPlanner, PlannerConfig
 from tracerepair.models import Task, TaskStatus
 from tracerepair.patch_apply import PatchApplier
 from tracerepair.read_tools import ReadOnlyRepository
-from tracerepair.recovery import InjectedCrash, PATCH_APPLIED, SOURCE_READ
+from tracerepair.recovery import InjectedCrash, PATCH_APPLIED, SOURCE_READ, TARGET_PASSED
 from tracerepair.store import TraceStore
 from tracerepair.test_runner import RestrictedTestRunner
 from tracerepair.version import AGENT_VERSION
@@ -74,7 +74,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--crash-after",
-        choices=(SOURCE_READ, PATCH_APPLIED),
+        choices=(SOURCE_READ, PATCH_APPLIED, TARGET_PASSED),
         default=PATCH_APPLIED,
     )
     args = parser.parse_args()
@@ -97,7 +97,9 @@ def main() -> None:
     )
     store.transition(task_id, TaskStatus.READY, "recovery demo workspace created")
     store.transition(task_id, TaskStatus.RUNNING, "recovery demo phase one started")
-    first_responses = [SEARCH, READ] + ([PATCH] if args.crash_after == PATCH_APPLIED else [])
+    first_responses = [SEARCH, READ] + (
+        [PATCH] if args.crash_after in {PATCH_APPLIED, TARGET_PASSED} else []
+    )
     first_transport = ScriptedTransport(first_responses)
     first = _workflow(task_id, store, workspace, first_transport, args.crash_after)
     try:

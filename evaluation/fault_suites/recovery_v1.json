@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "suite_id": "recovery_v1",
+  "description": "Offline crash-recovery and deterministic state-machine invariant evidence.",
+  "provider_requests": 0,
+  "scenarios": [
+    {
+      "id": "crash_after_source_read",
+      "selector": "tests/test_checkpoint_recovery.py::test_resume_after_source_read_does_not_repeat_diagnosis_tools",
+      "category": "crash_recovery",
+      "invariants": ["verified source checkpoint resumes without repeating search or read", "only the not-yet-completed model patch decision is requested"]
+    },
+    {
+      "id": "crash_after_patch_applied",
+      "selector": "tests/test_checkpoint_recovery.py::test_resume_after_patch_skips_model_and_patch_application",
+      "category": "crash_recovery",
+      "invariants": ["resume performs zero model calls", "patch is applied at most once", "target and regression gates still execute"]
+    },
+    {
+      "id": "crash_after_target_passed",
+      "selector": "tests/test_checkpoint_recovery.py::test_resume_after_target_passed_skips_model_patch_and_target_test",
+      "category": "crash_recovery",
+      "invariants": ["resume performs zero model calls", "patch and target test are not repeated", "regression remains mandatory before awaiting_review"]
+    },
+    {
+      "id": "patched_workspace_tampered",
+      "selector": "tests/test_checkpoint_recovery.py::test_resume_rejects_tampered_patched_workspace_before_tests",
+      "category": "integrity_conflict",
+      "invariants": ["workspace hash conflict transitions to needs_human", "model and tests are not started after the conflict"]
+    },
+    {
+      "id": "source_artifact_tampered",
+      "selector": "tests/test_checkpoint_recovery.py::test_resume_rejects_tampered_source_artifact_before_model_call",
+      "category": "integrity_conflict",
+      "invariants": ["source artifact hash conflict transitions to needs_human", "model and patch application are not started"]
+    },
+    {
+      "id": "patch_committed_before_phase_marker",
+      "selector": "tests/test_checkpoint_recovery.py::test_resume_reconciles_patch_result_committed_before_phase_marker",
+      "category": "write_ordering",
+      "invariants": ["durable tool result is reconciled with a stale phase marker", "patch is not applied twice"]
+    },
+    {
+      "id": "policy_rejection_blocks_tests",
+      "selector": "tests/test_repair_workflow.py::test_rejected_candidate_returns_to_needs_human_without_test_run",
+      "category": "state_machine_invariant",
+      "invariants": ["a policy-rejected patch cannot start target or regression tests"]
+    },
+    {
+      "id": "target_failure_blocks_regression",
+      "selector": "tests/test_repair_workflow.py::test_failed_target_does_not_start_regression",
+      "category": "state_machine_invariant",
+      "invariants": ["a failed target test cannot start regression"]
+    },
+    {
+      "id": "regression_failure_blocks_review",
+      "selector": "tests/test_repair_workflow.py::test_regression_failure_returns_to_needs_human",
+      "category": "state_machine_invariant",
+      "invariants": ["a failed regression cannot enter awaiting_review"]
+    },
+    {
+      "id": "all_gates_required_for_review",
+      "selector": "tests/test_repair_workflow.py::test_valid_candidate_moves_to_awaiting_review",
+      "category": "state_machine_invariant",
+      "invariants": ["awaiting_review requires accepted patch, passing target, and passing regression"]
+    }
+  ]
+}

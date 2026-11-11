@@ -1,0 +1,193 @@
+{
+  "claim_boundary": "These deterministic tests demonstrate the listed recovery and transition invariants for the exercised crash windows; they are not a proof against arbitrary hardware, filesystem, SQLite, or operating-system failures.",
+  "description": "Offline crash-recovery and deterministic state-machine invariant evidence.",
+  "execution": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "provider_requests": 0,
+    "python": "3.11.9"
+  },
+  "integrity": {
+    "source_sha256": {
+      "checkpoint_tests": "ff9177587d2b5a60e574007e780f4525146ecf539253b6aec7341539a4aa8030",
+      "invariant_tests": "f7fd5dea5cf9e88204b443c347fa27010f591af4d699a07ea5f607f2abbfceaa",
+      "recovery": "65e61757fc9019a6db0109997e54cb92657b885180ff4bddc4aee49914574658",
+      "workflow": "3f75023ebd961919ae0855a30b22ebc9bbb7870d95bfc0271017a6b8a6bb23c5"
+    },
+    "suite_manifest_sha256": "170d5545b24d99d2198528bf24bbcf68fb7353bd90757a8c172e992aa9cce693"
+  },
+  "results": [
+    {
+      "category": "crash_recovery",
+      "duration_seconds": 3.72,
+      "exit_code": 0,
+      "id": "crash_after_source_read",
+      "invariants": [
+        "verified source checkpoint resumes without repeating search or read",
+        "only the not-yet-completed model patch decision is requested"
+      ],
+      "passed": true,
+      "selector": "tests/test_checkpoint_recovery.py::test_resume_after_source_read_does_not_repeat_diagnosis_tools",
+      "stderr_sha256": "d3c6aeabf699bb0cb31b87d5c035e3323d84643884360c94ad0f118eb159a865",
+      "stderr_tail": "[2026-11-12 02:24:09,274] WARNING in core: flasgger is not installed; serving the static landing page at / and skipping the Swagger UI and /spec.json.\r\n",
+      "stdout_sha256": "cf36a0406e39e8ee4a1c155969f43aca2496e0675006bbe48bcfd4d8e6bb0f8b",
+      "stdout_tail": ".                                                                        [100%]\r\n1 passed in 2.18s\r\n"
+    },
+    {
+      "category": "crash_recovery",
+      "duration_seconds": 3.385,
+      "exit_code": 0,
+      "id": "crash_after_patch_applied",
+      "invariants": [
+        "resume performs zero model calls",
+        "patch is applied at most once",
+        "target and regression gates still execute"
+      ],
+      "passed": true,
+      "selector": "tests/test_checkpoint_recovery.py::test_resume_after_patch_skips_model_and_patch_application",
+      "stderr_sha256": "96b6cf6ff1d9fa080b9adca04400fe54083fdf42489163e71d272afdb1172fe7",
+      "stderr_tail": "[2026-11-12 02:24:12,992] WARNING in core: flasgger is not installed; serving the static landing page at / and skipping the Swagger UI and /spec.json.\r\n",
+      "stdout_sha256": "301cf4af4f9c18e10de6461cdc409741b90a31d0da677b28fd3cd3cbe798b999",
+      "stdout_tail": ".                                                                        [100%]\r\n1 passed in 1.84s\r\n"
+    },
+    {
+      "category": "crash_recovery",
+      "duration_seconds": 3.599,
+      "exit_code": 0,
+      "id": "crash_after_target_passed",
+      "invariants": [
+        "resume performs zero model calls",
+        "patch and target test are not repeated",
+        "regression remains mandatory before awaiting_review"
+      ],
+      "passed": true,
+      "selector": "tests/test_checkpoint_recovery.py::test_resume_after_target_passed_skips_model_patch_and_target_test",
+      "stderr_sha256": "26d1255a74b3cc06b303667ee9513cbcc2809afbd6ee7db6dc3caf5403b05c35",
+      "stderr_tail": "[2026-11-12 02:24:16,549] WARNING in core: flasgger is not installed; serving the static landing page at / and skipping the Swagger UI and /spec.json.\r\n",
+      "stdout_sha256": "6cd8abe9314b897e38acb4df55fe2291a8a9f959c5884636965c7215e889a591",
+      "stdout_tail": ".                                                                        [100%]\r\n1 passed in 1.89s\r\n"
+    },
+    {
+      "category": "integrity_conflict",
+      "duration_seconds": 2.268,
+      "exit_code": 0,
+      "id": "patched_workspace_tampered",
+      "invariants": [
+        "workspace hash conflict transitions to needs_human",
+        "model and tests are not started after the conflict"
+      ],
+      "passed": true,
+      "selector": "tests/test_checkpoint_recovery.py::test_resume_rejects_tampered_patched_workspace_before_tests",
+      "stderr_sha256": "9815871c42bf26a40fad70126f2a49842398b673c9f32dc9aa6651d5f2606bbe",
+      "stderr_tail": "[2026-11-12 02:24:20,007] WARNING in core: flasgger is not installed; serving the static landing page at / and skipping the Swagger UI and /spec.json.\r\n",
+      "stdout_sha256": "353949a8236178d20ef1829924baa88a4dbca28c29768e1d1d47c6e1199d3468",
+      "stdout_tail": ".                                                                        [100%]\r\n1 passed in 0.69s\r\n"
+    },
+    {
+      "category": "integrity_conflict",
+      "duration_seconds": 2.22,
+      "exit_code": 0,
+      "id": "source_artifact_tampered",
+      "invariants": [
+        "source artifact hash conflict transitions to needs_human",
+        "model and patch application are not started"
+      ],
+      "passed": true,
+      "selector": "tests/test_checkpoint_recovery.py::test_resume_rejects_tampered_source_artifact_before_model_call",
+      "stderr_sha256": "6dbd8d7ebd8a6a76214ea2ab6c02332cc01fcfd0b48622a64cc789727fb7338b",
+      "stderr_tail": "[2026-11-12 02:24:22,408] WARNING in core: flasgger is not installed; serving the static landing page at / and skipping the Swagger UI and /spec.json.\r\n",
+      "stdout_sha256": "1da4baa98f8941800891d25b659cae96fd55558c102ebc824cf6e49a2f3841ff",
+      "stdout_tail": ".                                                                        [100%]\r\n1 passed in 0.52s\r\n"
+    },
+    {
+      "category": "write_ordering",
+      "duration_seconds": 4.27,
+      "exit_code": 0,
+      "id": "patch_committed_before_phase_marker",
+      "invariants": [
+        "durable tool result is reconciled with a stale phase marker",
+        "patch is not applied twice"
+      ],
+      "passed": true,
+      "selector": "tests/test_checkpoint_recovery.py::test_resume_reconciles_patch_result_committed_before_phase_marker",
+      "stderr_sha256": "2a5bfd12dfd4ff6b414877d48f44769e11136f3df7fc3c5f4f3a8448972a5002",
+      "stderr_tail": "[2026-11-12 02:24:24,442] WARNING in core: flasgger is not installed; serving the static landing page at / and skipping the Swagger UI and /spec.json.\r\n",
+      "stdout_sha256": "3c657cf5f314e479b74e3c23654bebe7e23d632793502124dcd175c230f91b73",
+      "stdout_tail": ".                                                                        [100%]\r\n1 passed in 2.71s\r\n"
+    },
+    {
+      "category": "state_machine_invariant",
+      "duration_seconds": 2.03,
+      "exit_code": 0,
+      "id": "policy_rejection_blocks_tests",
+      "invariants": [
+        "a policy-rejected patch cannot start target or regression tests"
+      ],
+      "passed": true,
+      "selector": "tests/test_repair_workflow.py::test_rejected_candidate_returns_to_needs_human_without_test_run",
+      "stderr_sha256": "f017047eae17e39347232c4a387156c5d46dfb5d2fd35452cb35954f9c4f2808",
+      "stderr_tail": "[2026-11-12 02:24:28,844] WARNING in core: flasgger is not installed; serving the static landing page at / and skipping the Swagger UI and /spec.json.\r\n",
+      "stdout_sha256": "4b901e9fb121489422c56c94f4112a34c14f497e2e01c9caa23941fe690489cf",
+      "stdout_tail": ".                                                                        [100%]\r\n1 passed in 0.37s\r\n"
+    },
+    {
+      "category": "state_machine_invariant",
+      "duration_seconds": 2.612,
+      "exit_code": 0,
+      "id": "target_failure_blocks_regression",
+      "invariants": [
+        "a failed target test cannot start regression"
+      ],
+      "passed": true,
+      "selector": "tests/test_repair_workflow.py::test_failed_target_does_not_start_regression",
+      "stderr_sha256": "7ce5b17cc47187e1d799ead3415a1293330d4439fb20aad170dcc4a1a22ef53a",
+      "stderr_tail": "[2026-11-12 02:24:30,779] WARNING in core: flasgger is not installed; serving the static landing page at / and skipping the Swagger UI and /spec.json.\r\n",
+      "stdout_sha256": "d9772edda7360f9f73d31364226977873d026d3207b4a10d521c6fefefb29c2c",
+      "stdout_tail": ".                                                                        [100%]\r\n1 passed in 1.06s\r\n"
+    },
+    {
+      "category": "state_machine_invariant",
+      "duration_seconds": 3.37,
+      "exit_code": 0,
+      "id": "regression_failure_blocks_review",
+      "invariants": [
+        "a failed regression cannot enter awaiting_review"
+      ],
+      "passed": true,
+      "selector": "tests/test_repair_workflow.py::test_regression_failure_returns_to_needs_human",
+      "stderr_sha256": "fa5194d048a3d5baa37b9b422688dbbfb2fa6bf032cbb1e35773676b3fae2960",
+      "stderr_tail": "[2026-11-12 02:24:33,551] WARNING in core: flasgger is not installed; serving the static landing page at / and skipping the Swagger UI and /spec.json.\r\n",
+      "stdout_sha256": "9dd2ff9977854ee09bd761aa8bdae7ad864005a43bcffd3b30129e66b543223d",
+      "stdout_tail": ".                                                                        [100%]\r\n1 passed in 1.65s\r\n"
+    },
+    {
+      "category": "state_machine_invariant",
+      "duration_seconds": 3.312,
+      "exit_code": 0,
+      "id": "all_gates_required_for_review",
+      "invariants": [
+        "awaiting_review requires accepted patch, passing target, and passing regression"
+      ],
+      "passed": true,
+      "selector": "tests/test_repair_workflow.py::test_valid_candidate_moves_to_awaiting_review",
+      "stderr_sha256": "aee069d4c5e9a9fa30446a89e9162470c5ee159d29a4a1593efe26a52e5ef16d",
+      "stderr_tail": "[2026-11-12 02:24:36,751] WARNING in core: flasgger is not installed; serving the static landing page at / and skipping the Swagger UI and /spec.json.\r\n",
+      "stdout_sha256": "01f2959f1d421009479f996ce1a9b99fceb37f03a935174ccb8d5914f914db41",
+      "stdout_tail": ".                                                                        [100%]\r\n1 passed in 1.76s\r\n"
+    }
+  ],
+  "schema_version": 1,
+  "suite_id": "recovery_v1",
+  "summary": {
+    "categories": {
+      "crash_recovery": 3,
+      "integrity_conflict": 2,
+      "state_machine_invariant": 4,
+      "write_ordering": 1
+    },
+    "failed": 0,
+    "pass_rate": 1.0,
+    "passed": 10,
+    "scenarios": 10,
+    "total_duration_seconds": 30.786
+  }
+}

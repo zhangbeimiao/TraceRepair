@@ -209,6 +209,12 @@ class CandidateRepairWorkflow:
                 )
                 return WorkflowStep("run_tests", TaskStatus.NEEDS_HUMAN, result.error_code or "failed")
             mark_recovery_phase(self._task_id, self._store, TARGET_PASSED)
+            inject_crash_if_requested(
+                self._task_id,
+                self._store,
+                configured_point=self._crash_after,
+                reached_point=TARGET_PASSED,
+            )
         elif target.get("ok") is True:
             self._store.append_event(
                 self._task_id,

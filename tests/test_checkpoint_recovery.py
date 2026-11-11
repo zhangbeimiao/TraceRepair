@@ -10,7 +10,7 @@ from tracerepair.model_planner import ModelPlanner, PlannerConfig
 from tracerepair.models import Task, TaskStatus
 from tracerepair.patch_apply import PatchApplier
 from tracerepair.read_tools import ReadOnlyRepository
-from tracerepair.recovery import InjectedCrash, PATCH_APPLIED, SOURCE_READ
+from tracerepair.recovery import InjectedCrash, PATCH_APPLIED, SOURCE_READ, TARGET_PASSED
 from tracerepair.store import TraceStore
 from tracerepair.test_runner import RestrictedTestRunner
 
@@ -193,6 +193,46 @@ def test_resume_after_patch_skips_model_and_patch_application(tmp_path: Path) ->
         if event.event_type == "recovery_step_skipped"
     ]
     assert any(item.get("tool") == "apply_patch" for item in skipped)
+    store.close()
+
+
+def test_resume_after_target_passed_skips_model_patch_and_target_test(tmp_path: Path) -> None:
+    database, workspace = _create_task(tmp_path)
+    first_transport = SequenceTransport([SEARCH, READ, PATCH])
+    store, workflow = _workflow(
+        database, workspace, first_transport, crash_after=TARGET_PASSED
+    )
+
+    with pytest.raises(InjectedCrash, match=TARGET_PASSED):
+        workflow.run("config value false must parse as False")
+
+    assert store.load_checkpoint("agent-05")["recovery"]["phase"] == TARGET_PASSED
+    assert _started_tools(store) == ["search_code", "read_file", "apply_patch", "run_tests"]
+    store.close()
+
+    denied = DeniedTransport()
+    store = TraceStore(database)
+    _resume_task(store)
+    store.close()
+    store, workflow = _workflow(database, workspace, denied)
+    result = workflow.run("config value false must parse as False", resume=True)
+
+    assert result.task_status is TaskStatus.AWAITING_REVIEW
+    assert denied.calls == 0
+    assert _started_tools(store) == [
+        "search_code",
+        "read_file",
+        "apply_patch",
+        "run_tests",
+        "run_regression",
+    ]
+    skipped = [
+        event.payload
+        for event in store.list_events("agent-05")
+        if event.event_type == "recovery_step_skipped"
+    ]
+    assert any(item.get("tool") == "apply_patch" for item in skipped)
+    assert any(item.get("tool") == "run_tests" for item in skipped)
     store.close()
 
 

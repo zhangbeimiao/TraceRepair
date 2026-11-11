@@ -29,3 +29,18 @@ evidence-only rather than reproducible from the public repository.
 JSON and Markdown outputs retain every failure and `needs_human` result. Fields
 not preserved by the source evidence (Diff, latency, cost, or test gates) remain
 null or explicitly unavailable; they are never inferred from a success label.
+
+# Fault-injection evidence
+
+Crash recovery and state-machine invariants are evaluated offline with scripted
+model responses:
+
+```powershell
+python -m evaluation.fault_injection --suite recovery_v1 --dry-run
+python -m evaluation.fault_injection --suite recovery_v1
+```
+
+The suite makes zero provider requests. It covers crashes after durable source,
+patch, and target-test checkpoints; integrity conflicts; a stale phase marker;
+and the patch, target-test, regression, and human-review gates. JSON, Markdown,
+and SHA-256 evidence are written under `evaluation/baselines/`.
