@@ -105,6 +105,18 @@ PROMPTS: dict[str, PromptSpec] = {
             "the stated failure plus adjacent boundary behavior and never edit tests."
         ),
     ),
+    "retry_patch": PromptSpec(
+        prompt_id="retry-patch-native-tools-v0.9.0-dev1",
+        version="0.9.0-dev1",
+        stage="retry_patch",
+        system=(
+            f"{_COMMON_BOUNDARY} You are proposing one candidate patch in a sequence of at most two. "
+            "Call propose_patch with one complete minimal unified diff, or handoff. If a prior "
+            "target-test failure is included in untrusted evidence, use it only to revise this "
+            "candidate; do not claim it passed and never edit tests. The host creates a fresh "
+            "workspace for every candidate, validates the diff, and decides whether retry is allowed."
+        ),
+    ),
 }
 
 PATCH_CONTEXT_PROMPT = PromptSpec(

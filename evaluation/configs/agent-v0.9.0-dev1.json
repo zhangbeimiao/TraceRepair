@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "agent_version": "0.9.0-dev1",
+  "status": "development_only",
+  "base_runtime": "0.8.5-dev1",
+  "retry_policy": {
+    "max_candidate_attempts": 2,
+    "retry_from_clean_snapshot": true,
+    "retryable_target_failures": [
+      "assertion_failure",
+      "candidate_syntax_error"
+    ],
+    "non_retryable_failures": [
+      "patch_policy_denied",
+      "patch_context_mismatch",
+      "checkpoint_or_workspace_hash_conflict",
+      "test_timeout",
+      "environment_error",
+      "test_file_modification",
+      "regression_failure",
+      "second_candidate_target_failure"
+    ],
+    "review_gate": "target_and_regression_must_pass_then_human_review"
+  },
+  "claim_boundary": "This is a development configuration. It has not been evaluated on a locked task and must not be compared with frozen one-shot pass@1 evidence."
+}
